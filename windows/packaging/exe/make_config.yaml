@@ -1,0 +1,9 @@
+app_id: 123524AE-1D22-4E6B-A5A1-E691A3763B95
+publisher: Belier
+publisher_url: https://github.com/belier-cn/certimate_flutter
+display_name: Certimate
+install_dir_name: "{autopf}\\Certimate"
+create_desktop_icon: true
+locales:
+  - en
+  - zh

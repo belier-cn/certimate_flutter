@@ -1,0 +1,21 @@
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  plugins:
+    - custom_lint
+  exclude:
+    - build/**
+    - lib/generated/**
+    - lib/**.g.dart
+    - lib/**.freezed.dart
+  errors:
+    # https://github.com/rrousselGit/freezed/blob/master/packages/freezed/README.md#disabling-invalid_annotation_target-warning-and-warning-in-generates-files
+    invalid_annotation_target: ignore
+
+linter:
+  # https://dart.dev/tools/linter-rules#rules
+  rules:
+    - prefer_const_constructors
+    - always_use_package_imports
+    - prefer_final_locals
+    - prefer_final_in_for_each
+    - prefer_double_quotes

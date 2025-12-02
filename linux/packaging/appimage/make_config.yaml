@@ -1,0 +1,16 @@
+display_name: Certimate
+
+icon: linux/packaging/logo.png
+
+keywords:
+  - certimate
+  - certificate
+
+generic_name: Certimate
+
+categories:
+  - Utility
+
+startup_notify: true
+
+include: []

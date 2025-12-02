@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- https://developer.android.com/privacy-and-security/security-config?hl=zh-cn -->
+    <base-config>
+        <trust-anchors>
+            <!-- https://letsencrypt.org/zh-cn/docs/certificate-compatibility -->
+            <certificates src="@raw/isrgrootx1" />
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

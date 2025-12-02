@@ -1,0 +1,54 @@
+<div align="center">
+
+<img width="102" height="102" src="docs/logo.png" />
+
+<h1>Certimate Flutter</h1>
+
+[![License: AGPL](https://img.shields.io/badge/License-AGPL-purple.svg)](https://opensource.org/license/agpl-v3)
+[![Release](https://img.shields.io/github/v/release/belier-cn/certimate_flutter?sort=semver&label=Release)](https://github.com/belier-cn/certimate_flutter/releases)
+![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20MacOS%20%7C%20Windows%20%7C%20Linux-green.svg)
+![Certimate](https://img.shields.io/badge/Certimate-0.4%2B-F97318.svg)
+![Flutter](https://img.shields.io/badge/Flutter-3.38%2B-02569B.svg)
+
+本项目是 [Certimate](https://github.com/certimate-go/certimate) 的跨平台客户端，可便捷地管理多个 Certimate 服务。
+
+</div>
+
+## ✨ 功能简介
+
+- 支持同时接入多个 certimate 服务
+- 内置自动刷新 token 机制，无需频繁手动登录
+- 密码存储于系统安全区域，保障账户安全
+- 提供应用锁定功能，进一步提升隐私安全
+- 支持多语言国际化，使用更便捷
+- 支持暗黑模式，夜间使用更舒适
+- 提供多套丰富主题，个性化定制界面
+- 可自由切换 Material 与 Cupertino 双风格 UI
+
+> Linux 平台暂未支持 WebView，目前无法访问网页。
+
+## ⭐ 运行界面
+
+| iOS                                                          | Android                                                          | Desktop                                                          |
+|--------------------------------------------------------------|------------------------------------------------------------------|------------------------------------------------------------------|
+| <img height="350"  src="docs/screenshot/home_ios.png" />     | <img height="350"  src="docs/screenshot/home_android.png" />     | <img height="350"  src="docs/screenshot/home_desktop.png" />     |
+| <img height="350"  src="docs/screenshot/server_ios.png" />   | <img height="350"  src="docs/screenshot/server_android.png" />   | <img height="350"  src="docs/screenshot/server_desktop.png" />   |
+| <img height="350"  src="docs/screenshot/settings_ios.png" /> | <img height="350"  src="docs/screenshot/settings_android.png" /> | <img height="350"  src="docs/screenshot/settings_desktop.png" /> |
+
+## ⏬ 下载地址
+
+可以通过右侧 [Releases](https://github.com/belier-cn/certimate_flutter/releases) 进行下载或拉取代码到本地进行编译
+
+## 🤝 参与贡献
+
+- 欢迎提交 Issue / PR 或参与协作开发。
+- 有任何功能建议或 bug，可以直接在 [Issues](https://github.com/belier-cn/certimate_flutter/issues) 提交。
+
+## ⛔ 免责声明
+
+本项目遵循 [AGPL-3.0 License](https://opensource.org/license/agpl-v3) 开源协议，应用完全免费，请在官方渠道下载使用。
+
+- 项目开发者对因使用本软件所产生的任何数据丢失、信息泄露、服务中断或其他直接、间接损失不承担任何责任。
+- 用户需自行负责账号与证书等敏感信息的安全配置与保管。
+- 对于因本项目代码或其依赖库可能存在的漏洞所导致的风险，开发者不承担任何法律责任。
+- 请在使用和发布前，仔细阅读项目源码和相关文档，自行评估风险并承担使用本项目的一切后果。
