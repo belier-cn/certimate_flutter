@@ -16,7 +16,6 @@ class ServerPersistencePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = context.s;
     final provider = serverPersistenceProvider(serverId);
-    final notifier = ref.read(provider.notifier);
     final inputFormatters = [const IntegerInputFormatter()];
     final validator = FormBuilderValidators.compose([
       FormBuilderValidators.required(),
@@ -29,6 +28,7 @@ class ServerPersistencePage extends HookConsumerWidget {
           title: Text(s.persistence.titleCase),
           provider: provider,
           itemBuilder: (context, data, index) {
+            final notifier = ref.read(provider.notifier);
             return FormBuilder(
               key: notifier.formKey,
               child: PlatformFormBuilderSection(

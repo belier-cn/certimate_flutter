@@ -15,13 +15,13 @@ class ServerAccountPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = context.s;
     final provider = serverAccountProvider(serverId);
-    final notifier = ref.read(serverAccountProvider(serverId).notifier);
     return BasePage(
       child: Scaffold(
         body: RefreshBody<ServerAccountData>(
           title: Text(s.account.titleCase),
           provider: provider,
           itemBuilder: (context, data, index) {
+            final notifier = ref.read(serverAccountProvider(serverId).notifier);
             return FormBuilder(
               key: notifier.formKey,
               child: PlatformFormBuilderSection(

@@ -16,7 +16,6 @@ class ServerEditPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = context.s;
     final provider = serverEditProvider(serverId);
-    final notifier = ref.read(provider.notifier);
     return BasePage(
       child: Scaffold(
         body: RefreshBody<SubmitRefreshData<ServerModel?>>(
@@ -24,6 +23,7 @@ class ServerEditPage extends HookConsumerWidget {
           provider: provider,
           itemBuilder: (context, data, index) {
             final item = data.value;
+            final notifier = ref.read(provider.notifier);
             return FormBuilder(
               key: notifier.formKey,
               child: PlatformFormBuilderSection(

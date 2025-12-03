@@ -15,13 +15,15 @@ class ServerPasswordPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = context.s;
     final provider = serverPasswordProvider(serverId);
-    final notifier = ref.read(serverPasswordProvider(serverId).notifier);
     return BasePage(
       child: Scaffold(
         body: RefreshBody<OnlySubmitRefreshData>(
           title: Text(s.password.titleCase),
           provider: provider,
           itemBuilder: (context, data, index) {
+            final notifier = ref.read(
+              serverPasswordProvider(serverId).notifier,
+            );
             return FormBuilder(
               key: notifier.formKey,
               child: PlatformFormBuilderSection(
