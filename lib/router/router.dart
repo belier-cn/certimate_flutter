@@ -10,9 +10,9 @@ import "package:riverpod_annotation/riverpod_annotation.dart";
 
 part "router.g.dart";
 
-RouteObserver routeObserver = RouteObserver();
+final RouteObserver routeObserver = RouteObserver();
 
-@riverpod
+@Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   final router = GoRouter(
     debugLogDiagnostics: true,
