@@ -44,16 +44,6 @@ jobs:
         with:
           flutter-version: 3.38.3
           channel: "stable"
-      - if: ${{ matrix.type == 'windows' }}
-        name: Install Inno Setup
-        shell: pwsh
-        run: |
-          choco install innosetup
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
-      - id: version
-        name: Get build version
-        shell: bash
-        run: echo "version=${GITHUB_REF_NAME#v}" >>$GITHUB_OUTPUT
       - name: Install dependencies
         run: |
           dart pub global activate fastforge
@@ -64,7 +54,7 @@ jobs:
         name: Build android
         run: |
           echo -n "$KEYSTORE_BASE64" | openssl base64 -d -A > android/app/certimate.jks
-          fastforge package --platform android --targets apk --artifact-name certimate-${{ steps.version.outputs.version }}.apk
+          fastforge package --platform android --targets apk --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.apk
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
@@ -75,25 +65,27 @@ jobs:
         run: |
           wget -O fastforge "https://github.com/belier-cn/fastforge/releases/download/v0.6.7-beta.1/fastforge-v0.6.7-beta.1-macos-arm64"
           chmod +x fastforge
-          ./fastforge package --platform ios --targets ipa --flutter-build-args no-codesign --artifact-name certimate-${{ steps.version.outputs.version }}.ipa
+          ./fastforge package --platform ios --targets ipa --flutter-build-args no-codesign --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.ipa
       - if: ${{ matrix.type == 'macos' }}
         name: Build macos
         run: |
           npm install -g appdmg
-          fastforge package --platform macos --targets dmg --artifact-name certimate-${{ steps.version.outputs.version }}.dmg
+          fastforge package --platform macos --targets dmg --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.dmg
       - if: ${{ matrix.type == 'windows' }}
         name: Build windows
         run: |
-          fastforge package --platform windows --targets exe --artifact-name certimate-${{ steps.version.outputs.version }}.exe
+          choco upgrade innosetup
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
+          fastforge package --platform windows --targets exe --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.exe
       - if: ${{ matrix.type == 'linux' }}
         name: Build linux
         run: |
           wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
           chmod +x appimagetool
-          mv appimagetool /usr/local/bin/
+          sudo mv appimagetool /usr/local/bin/
           sudo apt-get update
           sudo apt install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libfuse2 locate
-          fastforge package --platform linux --targets appimage --artifact-name certimate-${{ steps.version.outputs.version }}.appimage
+          fastforge package --platform linux --targets appimage --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.appimage
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.type }}
