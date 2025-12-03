@@ -1,5 +1,8 @@
 platform :osx, '10.15'
 
+# 忽略三方依赖的所有警告
+inhibit_all_warnings!
+
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
@@ -38,11 +41,8 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
-    # 忽略 ambiguous-macro 警告
     target.build_configurations.each do |config|
-      config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
-      config.build_settings['OTHER_CFLAGS'] << '-Wno-ambiguous-macro'
-      config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
+      config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
     end
   end
 end
