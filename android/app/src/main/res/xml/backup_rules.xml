@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><!-- https://github.com/juliansteenbakker/flutter_secure_storage/issues/43#issuecomment-471642126 -->
+<full-backup-content>
+    <exclude
+        domain="sharedpref"
+        path="FlutterSecureStorage" />
+</full-backup-content>
