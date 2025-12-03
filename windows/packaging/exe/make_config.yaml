@@ -3,6 +3,7 @@ publisher: Belier
 publisher_url: https://github.com/belier-cn/certimate_flutter
 display_name: Certimate
 install_dir_name: "{autopf}\\Certimate"
+setup_icon_file: windows\runner\resources\app_icon.ico
 create_desktop_icon: true
 locales:
   - en
