@@ -58,7 +58,10 @@ class AccessesPage extends HookConsumerWidget {
                 onTap: (_) => toAddPage(context, "notification"),
               ),
             ],
-            icon: ActionButton(well: false, child: AppBarIconButton(context.appIcons.add)),
+            icon: ActionButton(
+              well: false,
+              child: AppBarIconButton(context.appIcons.add),
+            ),
           ),
           refreshController: refreshController,
           scrollController: scrollController,

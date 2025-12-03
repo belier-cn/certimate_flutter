@@ -139,7 +139,6 @@ class AppIcons {
   IconData get close =>
       isMaterial(context) ? Icons.close : CupertinoIcons.clear;
 
-
   IconData get share =>
       isMaterial(context) ? TablerIcons.share_2 : CupertinoIcons.share;
 }

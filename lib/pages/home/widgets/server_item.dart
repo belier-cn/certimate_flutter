@@ -8,7 +8,11 @@ class ServerItemWidget extends StatelessWidget {
 
   final bool selected;
 
-  const ServerItemWidget({super.key, required this.data, this.selected = false});
+  const ServerItemWidget({
+    super.key,
+    required this.data,
+    this.selected = false,
+  });
 
   @override
   Widget build(BuildContext context) {

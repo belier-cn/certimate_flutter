@@ -57,7 +57,7 @@ class ServerWebViewPage extends HookConsumerWidget {
       initialUserScripts: [
         UserScript(
           source:
-            """
+              """
             localStorage.setItem("certimate-ui-lang", "$language");
             localStorage.setItem("certimate-ui-theme", "${theme.brightness.name}");
             localStorage.setItem("pocketbase_auth", JSON.stringify({ "token": "${server.value?.token ?? ""}" }));

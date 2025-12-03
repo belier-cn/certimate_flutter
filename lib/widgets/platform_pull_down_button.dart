@@ -91,7 +91,6 @@ class PlatformPullDownButton extends StatelessWidget {
   Widget _materialPullDownButton(BuildContext context) {
     final theme = Theme.of(context);
     return PopupMenuButton<PullDownOption>(
-
       onSelected: (option) {
         option.onTap?.call(option);
       },
