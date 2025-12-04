@@ -1,6 +1,7 @@
 #include <flutter/dart_project.h>
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
+#include <shlobj.h>
 
 #include "flutter_window.h"
 #include "utils.h"
@@ -11,6 +12,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
     CreateAndAttachConsole();
+  }
+
+  PWSTR roamingPath = nullptr;
+  HRESULT hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &roamingPath);
+  if (SUCCEEDED(hr) && roamingPath) {
+    // 获取 C:\Users\<User>\AppData\Roaming
+    std::wstring userDataFolder(roamingPath);
+    userDataFolder += L"\\Certimate\\WebView2";
+    // 创建目录
+    ::SHCreateDirectoryEx(NULL, userDataFolder.c_str(), NULL);
+    // 设置 WEBVIEW2_USER_DATA_FOLDER 环境变量
+    ::SetEnvironmentVariableW(L"WEBVIEW2_USER_DATA_FOLDER", userDataFolder.c_str());
+  }
+  if (roamingPath) {
+    ::CoTaskMemFree(roamingPath);
   }
 
   // Initialize COM, so that it is available for use in the library and/or
