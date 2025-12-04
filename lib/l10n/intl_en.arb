@@ -36,6 +36,7 @@
   "disableBackgroundLockTip": "Please verify your identity to disable background lock.",
   "lockedTip": "The app is locked. Tap the unlock button to proceed.",
   "exitTip": "Tap again to exit the app",
+  "desktopExitTip": "Are you sure to exit this program?",
   "pleaseEnter": "please enter {field}",
   "certificates": "certificates",
   "workflows": "workflows",

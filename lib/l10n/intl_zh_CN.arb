@@ -33,6 +33,7 @@
   "disableBackgroundLockTip": "请验证您的身份以关闭后台锁定功能。",
   "lockedTip": "当前应用已锁定，点击解锁按钮进行解锁。",
   "exitTip": "再按一次退出应用",
+  "desktopExitTip": "确定关闭该应用？",
   "pleaseEnter": "请输入{field}",
   "certificates": "证书",
   "workflows": "工作流",

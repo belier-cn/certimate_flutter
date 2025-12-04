@@ -1,9 +1,12 @@
 import "dart:io";
 
+import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
+import "package:certimate/generated/l10n.dart";
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
+import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:go_router/go_router.dart";
 import "package:window_manager/window_manager.dart";
 
@@ -87,11 +90,13 @@ class _DesktopButtons extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isFullScreen = useRef(false);
     final theme = context.theme;
     final hoverColor = theme.brightness == Brightness.dark
         ? theme.colorScheme.surfaceBright
         : const Color(0xFFE5E5E5);
+    final s = S.of(context);
+    final closeIconHover = useValueNotifier(false);
+    final isFullScreen = useValueNotifier(false);
     return SizedBox(
       height: 28,
       width: 80,
@@ -104,9 +109,33 @@ class _DesktopButtons extends HookWidget {
                 width: 26,
                 height: 26,
                 child: InkWell(
-                  onTap: () => windowManager.close(),
+                  onTap: () async {
+                    final res = await showOkCancelAlertDialog(
+                      context: context,
+                      title: s.tip.capitalCase,
+                      message: s.desktopExitTip,
+                      defaultType: OkCancelAlertDefaultType.cancel,
+                      isDestructiveAction: true,
+                    );
+                    if (res == OkCancelResult.ok) {
+                      windowManager.close();
+                    }
+                  },
                   hoverColor: const Color(0xFFE81122),
-                  child: const Icon(Icons.close, size: 18),
+                  onHover: (hover) {
+                    closeIconHover.value = hover;
+                  },
+                  child: theme.brightness == Brightness.light
+                      ? ValueListenableBuilder(
+                          valueListenable: closeIconHover,
+                          builder: (_, hover, _) {
+                            return Icon(
+                              TablerIcons.x,
+                              color: hover ? Colors.white : null,
+                            );
+                          },
+                        )
+                      : const Icon(TablerIcons.x),
                 ),
               ),
             ),
@@ -120,7 +149,14 @@ class _DesktopButtons extends HookWidget {
                     isFullScreen.value = !isFullScreen.value;
                   },
                   hoverColor: hoverColor,
-                  child: const Icon(Icons.square_outlined),
+                  child: ValueListenableBuilder(
+                    valueListenable: isFullScreen,
+                    builder: (_, fullScreen, _) {
+                      return fullScreen
+                          ? const Icon(TablerIcons.layers_subtract)
+                          : const Icon(TablerIcons.crop_1_1);
+                    },
+                  ),
                 ),
               ),
             ),
@@ -129,9 +165,9 @@ class _DesktopButtons extends HookWidget {
                 width: 26,
                 height: 26,
                 child: InkWell(
-                  onTap: () => windowManager.hide(),
+                  onTap: () => windowManager.minimize(),
                   hoverColor: hoverColor,
-                  child: const Icon(Icons.horizontal_rule),
+                  child: const Icon(TablerIcons.minus),
                 ),
               ),
             ),
