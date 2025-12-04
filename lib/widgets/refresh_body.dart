@@ -257,6 +257,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
             ...data.maybeWhen(
               error: (err, _) => [
                 SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Center(
                     child: Padding(
                       padding: appTheme.bodyPadding,
@@ -272,6 +273,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                 if (firstLoading) {
                   return [
                     const SliverFillRemaining(
+                      hasScrollBody: false,
                       child: Center(child: PlatformCircularIndicator()),
                     ),
                   ];
@@ -329,6 +331,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                       ),
                     ),
                     SliverFillRemaining(
+                      hasScrollBody: false,
                       child: Padding(
                         padding: appTheme.bodyPadding,
                         child: const EmptyWidget(),
@@ -341,6 +344,9 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                     padding: appTheme.bodyPadding.copyWith(
                       top: searchController != null
                           ? appTheme.bodyPadding.left / 2
+                          : appTheme.bodyPadding.left,
+                      bottom: mediaQuery.padding.bottom > 0
+                          ? mediaQuery.padding.bottom
                           : appTheme.bodyPadding.left,
                     ),
                     sliver: SliverList.builder(
@@ -368,13 +374,6 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                   ),
                 ];
               },
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: mediaQuery.padding.bottom > 0
-                    ? mediaQuery.padding.bottom
-                    : appTheme.bodyPadding.left,
-              ),
             ),
           ],
         );
