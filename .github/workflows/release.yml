@@ -44,6 +44,13 @@ jobs:
         with:
           flutter-version: 3.38.3
           channel: "stable"
+      - name: Patch flutter cupertino nav_bar.dart
+        shell: bash
+        run: |
+          echo "Flutter root: $FLUTTER_ROOT"
+          target="$FLUTTER_ROOT/packages/flutter/lib/src/cupertino/nav_bar.dart"
+          echo "Patching $target"
+          curl -fsSL "https://github.com/belier-cn/certimate_flutter/releases/download/v0.0.1/cupertino_nav_bar_3.38.3.dart" -o "$target"
       - name: Install dependencies
         run: |
           dart pub global activate fastforge
@@ -74,7 +81,7 @@ jobs:
       - if: ${{ matrix.type == 'windows' }}
         name: Build windows
         run: |
-          choco upgrade innosetup
+          choco upgrade innosetup --no-progress
           Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
           fastforge package --platform windows --targets exe --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.exe
       - if: ${{ matrix.type == 'linux' }}
