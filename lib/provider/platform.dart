@@ -1,4 +1,5 @@
-import "package:collection/collection.dart";
+import "dart:io";
+
 import "package:flutter/material.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
 import "package:sp_util/sp_util.dart";
@@ -12,8 +13,12 @@ class TargetPlatformNotifier extends _$TargetPlatformNotifier {
   @override
   TargetPlatform? build() {
     final themeValue = SpUtil.getString(cacheKey, defValue: "");
-    return TargetPlatform.values.firstWhereOrNull(
+    return TargetPlatform.values.firstWhere(
       (theme) => theme.name == themeValue,
+      // 兼容 adaptive_dialog style 的判断
+      orElse: () => Platform.isIOS || Platform.isMacOS
+          ? TargetPlatform.iOS
+          : TargetPlatform.android,
     );
   }
 
