@@ -19,7 +19,7 @@ jobs:
         type: [ android, ios, macos, windows, linux ]
         include:
           - type: android
-            os: macos-latest
+            os: ubuntu-latest
           - type: ios
             os: macos-latest
           - type: macos
