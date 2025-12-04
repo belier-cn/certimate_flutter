@@ -12,6 +12,7 @@ import "package:certimate/provider/theme.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
@@ -160,14 +161,22 @@ class SettingsPage extends ConsumerWidget {
                       SettingsTile.navigation(
                         leading: const Icon(TablerIcons.share_2),
                         title: Text(s.share.capitalCase),
-                        onPressed: (_) {
-                          SharePlus.instance.share(
-                            ShareParams(
-                              uri: Uri.parse(
-                                "https://github.com/belier-cn/certimate_flutter",
-                              ),
-                            ),
-                          );
+                        onPressed: (_) async {
+                          final url =
+                              "https://github.com/belier-cn/certimate_flutter";
+                          if (useShareDevice) {
+                            SharePlus.instance.share(
+                              ShareParams(uri: Uri.parse(url)),
+                            );
+                          } else {
+                            await Clipboard.setData(ClipboardData(text: url));
+                            if (context.mounted) {
+                              final _ = showOkAlertDialog(
+                                context: context,
+                                message: context.s.copied,
+                              );
+                            }
+                          }
                         },
                       ),
                       SettingsTile.navigation(

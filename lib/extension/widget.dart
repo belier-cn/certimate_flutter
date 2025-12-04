@@ -11,6 +11,8 @@ bool get isDesktopDevice =>
 
 bool get isPhoneDevice => Platform.isIOS || Platform.isAndroid;
 
+bool get useShareDevice => isPhoneDevice || Platform.isMacOS;
+
 extension NoneIconExt on IconData {
   IconData none(bool none) =>
       none ? const IconData(0x0020, fontFamily: "MaterialIcons") : this;

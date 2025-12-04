@@ -137,16 +137,17 @@ class WebviewWidget extends HookConsumerWidget {
                     }
                   },
                 ),
-                PullDownOption(
-                  label: s.shareUrl.capitalCase,
-                  iconWidget: Icon(context.appIcons.share),
-                  onTap: (_) {
-                    final url = Uri.tryParse(currentUrl.value);
-                    if (url != null) {
-                      SharePlus.instance.share(ShareParams(uri: url));
-                    }
-                  },
-                ),
+                if (useShareDevice)
+                  PullDownOption(
+                    label: s.shareUrl.capitalCase,
+                    iconWidget: Icon(context.appIcons.share),
+                    onTap: (_) {
+                      final url = Uri.tryParse(currentUrl.value);
+                      if (url != null) {
+                        SharePlus.instance.share(ShareParams(uri: url));
+                      }
+                    },
+                  ),
                 PullDownOption(
                   label: s.openInBrowser.capitalCase,
                   iconWidget: Icon(context.appIcons.world),
