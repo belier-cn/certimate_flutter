@@ -24,7 +24,7 @@ class MainFlutterWindow: NSWindow {
     guard let flutterViewController = self.contentViewController as?FlutterViewController else {
       return
     }
-    let channel = FlutterMethodChannel(name: "certimateChannel", binaryMessenger: flutterViewController.engine.binaryMessenger)
+      let channel = FlutterMethodChannel(name: "cn.belier.certimate/channel", binaryMessenger: flutterViewController.engine.binaryMessenger)
     channel.invokeMethod("openSettings", arguments: nil)
   }
 }
