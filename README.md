@@ -37,7 +37,16 @@
 
 ## ⏬ 下载地址
 
-可以通过右侧 [Releases](https://github.com/belier-cn/certimate_flutter/releases) 进行下载或拉取代码到本地进行编译
+可以通过右侧 [Releases](https://github.com/belier-cn/certimate_flutter/releases) 进行下载
+
+> 如果在 MacOS 上安装后无法打开，报错**不受信任**或者**移到垃圾箱**，执行下面命令后再启动
+> ``` shell
+>  sudo xattr -d com.apple.quarantine /Applications/Certimate.app
+> ```
+
+> 如果在 Windows 上打开某些页面闪退，请尝试更新 Microsoft Visual C++ 到最新版本
+>
+> 下载地址：https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
 
 ## 🤝 参与贡献
 
