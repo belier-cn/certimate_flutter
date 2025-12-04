@@ -78,10 +78,10 @@ class ScaffoldWithNavbar extends StatelessWidget {
   }
 
   void _onChange(int index) {
-    navigationShell.goBranch(
-      index,
-      initialLocation: index == navigationShell.currentIndex,
-    );
+    if (index == navigationShell.currentIndex) {
+      return;
+    }
+    navigationShell.goBranch(index);
   }
 }
 
