@@ -11,4 +11,4 @@ PRODUCT_NAME = Certimate
 PRODUCT_BUNDLE_IDENTIFIER = cn.belier.certimate
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 cn.belier. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 Belier. All rights reserved.
