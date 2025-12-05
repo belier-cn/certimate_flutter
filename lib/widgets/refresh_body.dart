@@ -317,19 +317,11 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                     (isFilterMixin ? 1 : 0);
                 if (list.isEmpty) {
                   return [
-                    SliverPadding(
-                      padding: appTheme.bodyPadding,
-                      sliver: SliverList.builder(
-                        itemCount: totalLength,
-                        itemBuilder: (context, index) {
-                          if (isFilterMixin &&
-                              index == data.requireValue.topItemCount) {
-                            return filterWidget(index);
-                          }
-                          return null;
-                        },
+                    if (isFilterMixin)
+                      SliverPadding(
+                        padding: appTheme.bodyPadding,
+                        sliver: SliverToBoxAdapter(child: filterWidget(0)),
                       ),
-                    ),
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: Padding(
@@ -339,6 +331,26 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                     ),
                   ];
                 }
+
+                Widget? listItemBuilder(context, index) {
+                  if (isFilterMixin &&
+                      index == data.requireValue.topItemCount) {
+                    return filterWidget(index);
+                  }
+                  final itemWidget = itemBuilder.call(
+                    context,
+                    data.requireValue,
+                    index - (isFilterMixin ? 1 : 0),
+                  );
+                  if (itemSpacing > 0 && index > totalLength - list.length) {
+                    return Padding(
+                      padding: EdgeInsets.only(top: itemSpacing),
+                      child: itemWidget,
+                    );
+                  }
+                  return itemWidget;
+                }
+
                 return [
                   SliverPadding(
                     padding: appTheme.bodyPadding.copyWith(
@@ -349,28 +361,19 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                           ? mediaQuery.padding.bottom
                           : appTheme.bodyPadding.left,
                     ),
-                    sliver: SliverList.builder(
-                      itemCount: totalLength,
-                      itemBuilder: (context, index) {
-                        if (isFilterMixin &&
-                            index == data.requireValue.topItemCount) {
-                          return filterWidget(index);
-                        }
-                        final itemWidget = itemBuilder.call(
-                          context,
-                          data.requireValue,
-                          index - (isFilterMixin ? 1 : 0),
-                        );
-                        if (itemSpacing > 0 &&
-                            index > totalLength - list.length) {
-                          return Padding(
-                            padding: EdgeInsets.only(top: itemSpacing),
-                            child: itemWidget,
-                          );
-                        }
-                        return itemWidget;
-                      },
-                    ),
+                    sliver: isSubmit
+                        ? SliverList.list(
+                            children: List.generate(
+                              totalLength,
+                              (index) =>
+                                  listItemBuilder(context, index) ??
+                                  const SizedBox.shrink(),
+                            ),
+                          )
+                        : SliverList.builder(
+                            itemCount: totalLength,
+                            itemBuilder: listItemBuilder,
+                          ),
                   ),
                 ];
               },
