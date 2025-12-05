@@ -79,6 +79,9 @@ class HomePage extends HookConsumerWidget {
                 final newServer = await route.push<ServerModel?>(context);
                 if (newServer != null) {
                   ref.read(serverListProvider.notifier).addServer(newServer);
+                  if (isDesktopDevice && context.mounted) {
+                    ServerRoute(serverId: newServer.id).push(context);
+                  }
                 }
               }
             },
