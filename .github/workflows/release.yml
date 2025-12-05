@@ -42,7 +42,7 @@ jobs:
           node-version: latest
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.38.3
+          flutter-version: 3.38.4
           channel: "stable"
       - name: Patch flutter cupertino nav_bar.dart
         shell: bash
@@ -50,7 +50,7 @@ jobs:
           echo "Flutter root: $FLUTTER_ROOT"
           target="$FLUTTER_ROOT/packages/flutter/lib/src/cupertino/nav_bar.dart"
           echo "Patching $target"
-          curl -fsSL "https://github.com/belier-cn/certimate_flutter/releases/download/v0.0.1/cupertino_nav_bar_3.38.3.dart" -o "$target"
+          curl -fsSL "https://github.com/belier-cn/certimate_flutter/releases/download/v0.0.1/cupertino_nav_bar_3.38.4.dart" -o "$target"
       - name: Install dependencies
         run: |
           dart pub global activate fastforge
