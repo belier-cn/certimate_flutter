@@ -16,10 +16,7 @@ part "security.g.dart";
 
 final LocalAuthentication _auth = LocalAuthentication();
 
-AndroidOptions _getAndroidOptions() =>
-    const AndroidOptions(encryptedSharedPreferences: true);
-
-final secureStorage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+const secureStorage = FlutterSecureStorage();
 
 @Riverpod(keepAlive: true)
 List<BiometricType> biometrics(Ref ref) => [];

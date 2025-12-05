@@ -58,7 +58,7 @@ dependencies:
   flutter_form_builder: ^10.2.0
   flutter_smart_dialog: ^4.9.8+9
   flutter_native_splash: ^2.4.7
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.0.0-beta.5
   form_builder_validators: ^11.2.0
   flutter_platform_widgets: ^9.0.0
   extended_nested_scroll_view: ^6.2.1

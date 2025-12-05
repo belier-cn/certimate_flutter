@@ -10,7 +10,7 @@ import device_info_plus
 import dynamic_color
 import file_picker
 import flutter_inappwebview_macos
-import flutter_secure_storage_macos
+import flutter_secure_storage_darwin
 import local_auth_darwin
 import macos_ui
 import macos_window_utils
@@ -30,7 +30,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DynamicColorPlugin.register(with: registry.registrar(forPlugin: "DynamicColorPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   InAppWebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "InAppWebViewFlutterPlugin"))
-  FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
+  FlutterSecureStorageDarwinPlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStorageDarwinPlugin"))
   LocalAuthPlugin.register(with: registry.registrar(forPlugin: "LocalAuthPlugin"))
   MacOSUiPlugin.register(with: registry.registrar(forPlugin: "MacOSUiPlugin"))
   MacOSWindowUtilsPlugin.register(with: registry.registrar(forPlugin: "MacOSWindowUtilsPlugin"))
