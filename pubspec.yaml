@@ -70,6 +70,10 @@ dependencies:
     git: https://github.com/belier-cn/flutter_settings_ui
   flutter_tabler_icons:
     git: https://github.com/bigbadbob2003/flutter_tabler_icons
+  keyboard_actions:
+    git:
+      url: https://github.com/belier-cn/flutter_keyboard_actions
+      ref: feature/add_scroll_controller
 
 dev_dependencies:
   flutter_test:

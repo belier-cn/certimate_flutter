@@ -984,6 +984,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.11.2"
+  keyboard_actions:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "feature/add_scroll_controller"
+      resolved-ref: c36909986dba93c1932bc044df1ebcd31d977cf0
+      url: "https://github.com/belier-cn/flutter_keyboard_actions"
+    source: git
+    version: "4.2.1"
   leak_tracker:
     dependency: transitive
     description:

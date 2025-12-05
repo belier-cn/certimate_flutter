@@ -1,11 +1,14 @@
 import "package:certimate/api/setting_api.dart";
 import "package:certimate/extension/index.dart";
+import "package:certimate/hooks/index.dart";
 import "package:certimate/pages/server_settings/persistence/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
+import "package:flutter_hooks/flutter_hooks.dart";
 import "package:form_builder_validators/form_builder_validators.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
+import "package:keyboard_actions/keyboard_actions.dart";
 
 class ServerPersistencePage extends HookConsumerWidget {
   final int serverId;
@@ -22,42 +25,56 @@ class ServerPersistencePage extends HookConsumerWidget {
       FormBuilderValidators.numeric(),
       FormBuilderValidators.max(36500),
     ]);
+    final focusNodes = useFocusNodes(count: 2);
+    final scrollController = useScrollController();
     return BasePage(
       child: Scaffold(
-        body: RefreshBody<SubmitRefreshData<PersistenceContent?>>(
-          title: Text(s.persistence.titleCase),
-          provider: provider,
-          itemBuilder: (context, data, index) {
-            final notifier = ref.read(provider.notifier);
-            return FormBuilder(
-              key: notifier.formKey,
-              child: PlatformFormBuilderSection(
-                insetGrouped: false,
-                children: [
-                  PlatformFormBuilderTextField(
-                    title: Text(s.workflowRunsMaxDaysRetention.capitalCase),
-                    name: "workflowRunsMaxDaysRetention",
-                    initialValue:
-                        "${data.value?.workflowRunsMaxDaysRetention ?? 0}",
-                    inputFormatters: inputFormatters,
-                    validator: validator,
-                    valueTransformer: integerValueTransformer,
-                  ),
-                  PlatformFormBuilderTextField(
-                    name: "expiredCertificatesMaxDaysRetention",
-                    title: Text(
-                      s.expiredCertificatesMaxDaysRetention.capitalCase,
+        body: KeyboardActions(
+          scrollController: scrollController,
+          config: KeyboardActionsConfig(
+            defaultDoneButtonText: s.done.capitalCase,
+            keyboardActionsPlatform: KeyboardActionsPlatform.IOS,
+            actions: focusNodes
+                .map((focusNode) => KeyboardActionsItem(focusNode: focusNode))
+                .toList(),
+          ),
+          child: RefreshBody<SubmitRefreshData<PersistenceContent?>>(
+            title: Text(s.persistence.titleCase),
+            provider: provider,
+            itemBuilder: (context, data, index) {
+              final notifier = ref.read(provider.notifier);
+              return FormBuilder(
+                key: notifier.formKey,
+                child: PlatformFormBuilderSection(
+                  insetGrouped: false,
+                  children: [
+                    PlatformFormBuilderTextField(
+                      title: Text(s.workflowRunsMaxDaysRetention.capitalCase),
+                      name: "workflowRunsMaxDaysRetention",
+                      focusNode: focusNodes[0],
+                      initialValue:
+                          "${data.value?.workflowRunsMaxDaysRetention ?? 0}",
+                      inputFormatters: inputFormatters,
+                      validator: validator,
+                      valueTransformer: integerValueTransformer,
                     ),
-                    initialValue:
-                        "${data.value?.expiredCertificatesMaxDaysRetention ?? 0}",
-                    inputFormatters: inputFormatters,
-                    validator: validator,
-                    valueTransformer: integerValueTransformer,
-                  ),
-                ],
-              ),
-            );
-          },
+                    PlatformFormBuilderTextField(
+                      title: Text(
+                        s.expiredCertificatesMaxDaysRetention.capitalCase,
+                      ),
+                      name: "expiredCertificatesMaxDaysRetention",
+                      focusNode: focusNodes[1],
+                      initialValue:
+                          "${data.value?.expiredCertificatesMaxDaysRetention ?? 0}",
+                      inputFormatters: inputFormatters,
+                      validator: validator,
+                      valueTransformer: integerValueTransformer,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

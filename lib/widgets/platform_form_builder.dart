@@ -139,6 +139,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final FormFieldValidator<String>? validator;
   final ValueTransformer<String?>? valueTransformer;
+  final FocusNode? focusNode;
 
   const PlatformFormBuilderTextField({
     super.key,
@@ -158,6 +159,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
     this.maxLines = 1,
     this.prefix,
     this.prefixIconConstraints,
+    this.focusNode,
   });
 
   @override
@@ -195,6 +197,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
               readOnly: readOnly,
               enabled: enabled,
               maxLines: maxLines,
+              focusNode: focusNode,
             )
           : _buildMaterial(context, sectionData, hintText, cupertino: true),
     );
@@ -244,6 +247,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
       enabled: enabled,
       maxLines: maxLines,
       obscureText: obscureText,
+      focusNode: focusNode,
     );
   }
 }
