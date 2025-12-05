@@ -50,6 +50,8 @@ class ServerPasswordPage extends HookConsumerWidget {
                       obscureText: true,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
+                        FormBuilderValidators.minLength(10),
+                        FormBuilderValidators.maxLength(32),
                       ]),
                     ),
                     PlatformFormBuilderTextField(
