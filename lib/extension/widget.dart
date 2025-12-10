@@ -1,17 +1,8 @@
-import "dart:io";
-
 import "package:certimate/theme/theme.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
-
-bool get isDesktopDevice =>
-    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-
-bool get isPhoneDevice => Platform.isIOS || Platform.isAndroid;
-
-bool get useShareDevice => isPhoneDevice || Platform.isMacOS;
 
 extension NoneIconExt on IconData {
   IconData none(bool none) =>

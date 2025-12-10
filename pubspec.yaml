@@ -12,7 +12,10 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
   dio: ^5.9.0
+  web: ^1.1.1
   path: ^1.9.1
   uuid: ^4.5.1
   intl: ^0.20.2
@@ -71,9 +74,9 @@ dependencies:
   flutter_tabler_icons:
     git: https://github.com/bigbadbob2003/flutter_tabler_icons
   keyboard_actions:
-    git:
-      url: https://github.com/belier-cn/flutter_keyboard_actions
-      ref: feature/add_scroll_controller
+    git: https://github.com/diegoveloper/flutter_keyboard_actions
+  device_wrapper:
+    git: https://github.com/belier-cn/device_wrapper
 
 dev_dependencies:
   flutter_test:

@@ -1,17 +1,19 @@
-import "dart:io";
-
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/l10n.dart";
+import "package:certimate/provider/platform.dart";
+import "package:certimate/router/router.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:go_router/go_router.dart";
+import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:window_manager/window_manager.dart";
 
-class ScaffoldWithNavbar extends HookWidget {
+class ScaffoldWithNavbar extends HookConsumerWidget {
   const ScaffoldWithNavbar(this.navigationShell, {super.key});
 
   static const _certimateChannel = MethodChannel("cn.belier.certimate/channel");
@@ -19,19 +21,38 @@ class ScaffoldWithNavbar extends HookWidget {
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 布局发生改变，就重新 build
+    ref.watch(deviceModeProvider.select((_) => RunPlatform.isDesktopUi));
+    final router = ref.read(routerProvider);
+    final showNavBarNotifier = useValueNotifier(
+      navBarRoutes.contains(router.state.path),
+    );
     useEffect(() {
-      if (isDesktopDevice) {
+      if (RunPlatform.isDesktopUi) {
         _certimateChannel.setMethodCallHandler((call) async {
-          _onChange(1);
+          if (call.method == "openSettings") {
+            _onChange(1);
+          }
         });
       }
-      return null;
+      void routerListener() {
+        showNavBarNotifier.value = navBarRoutes.contains(router.state.path);
+      }
+
+      router.routerDelegate.addListener(routerListener);
+      return () {
+        router.routerDelegate.removeListener(routerListener);
+      };
     }, []);
     final s = context.s;
-    if (isDesktopDevice) {
+
+    final currentIndex = navigationShell.currentIndex > 1
+        ? 1
+        : navigationShell.currentIndex;
+    if (RunPlatform.isDesktopUi) {
       final navigationRail = NavigationRail(
-        selectedIndex: navigationShell.currentIndex,
+        selectedIndex: currentIndex,
         onDestinationSelected: _onChange,
         labelType: NavigationRailLabelType.selected,
         leading: context.isCupertinoStyle
@@ -51,7 +72,7 @@ class ScaffoldWithNavbar extends HookWidget {
       return Scaffold(
         body: Row(
           children: [
-            Platform.isMacOS
+            kIsWeb || RunPlatform.isMacOS
                 ? navigationRail
                 : Stack(
                     children: [
@@ -70,20 +91,27 @@ class ScaffoldWithNavbar extends HookWidget {
     }
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: PlatformNavBar(
-        currentIndex: navigationShell.currentIndex,
-        cupertino: (_, _) => CupertinoTabBarData(iconSize: 22),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(context.platformIcons.home),
-            label: s.home.titleCase,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(context.platformIcons.settings),
-            label: s.settings.titleCase,
-          ),
-        ],
-        itemChanged: _onChange,
+      bottomNavigationBar: ValueListenableBuilder(
+        valueListenable: showNavBarNotifier,
+        builder: (context, showNavBar, child) {
+          return showNavBar
+              ? PlatformNavBar(
+                  currentIndex: currentIndex,
+                  cupertino: (_, _) => CupertinoTabBarData(iconSize: 22),
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(context.platformIcons.home),
+                      label: s.home.titleCase,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(context.platformIcons.settings),
+                      label: s.settings.titleCase,
+                    ),
+                  ],
+                  itemChanged: _onChange,
+                )
+              : const SizedBox.shrink();
+        },
       ),
     );
   }

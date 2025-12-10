@@ -19,7 +19,7 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (navigationShell == null && isDesktopDevice) {
+    if (navigationShell == null && RunPlatform.isDesktopUi) {
       return const Scaffold();
     }
     final s = context.s;
@@ -30,7 +30,7 @@ class HomePage extends HookConsumerWidget {
     final activeServerId = useValueNotifier<int?>(null);
 
     useEffect(() {
-      if (isDesktopDevice) {
+      if (RunPlatform.isDesktopUi) {
         void listener(_, route, _) {
           final routeHistory = getServersRouteHistory();
           var find = false;
@@ -79,7 +79,7 @@ class HomePage extends HookConsumerWidget {
                 final newServer = await route.push<ServerModel?>(context);
                 if (newServer != null) {
                   ref.read(serverListProvider.notifier).addServer(newServer);
-                  if (isDesktopDevice && context.mounted) {
+                  if (RunPlatform.isDesktopUi && context.mounted) {
                     ServerRoute(serverId: newServer.id).push(context);
                   }
                 }
@@ -119,7 +119,7 @@ class HomePage extends HookConsumerWidget {
     );
 
     if (navigationShell != null) {
-      if (isDesktopDevice) {
+      if (RunPlatform.isDesktopUi) {
         return Row(
           children: [
             SizedBox(width: 300, child: page),

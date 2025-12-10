@@ -97,7 +97,7 @@ class _WorkflowNodeWidgetState extends State<WorkflowNodeWidget>
     final toolbarHeight = theme.appBarTheme.toolbarHeight ?? 44;
     return widget.fullscreen
         ? RotatedBox(
-            quarterTurns: isPhoneDevice ? 1 : 0,
+            quarterTurns: RunPlatform.isPhone ? 1 : 0,
             child: Stack(
               children: [
                 Container(

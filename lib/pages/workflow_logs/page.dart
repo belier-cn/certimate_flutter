@@ -132,7 +132,7 @@ class WorkflowLogsPage extends HookConsumerWidget {
         })
         .join(newLine + newLine);
     final fileName = "certimate_workflow_run_#${runId}_logs.txt";
-    if (isPhoneDevice) {
+    if (RunPlatform.isPhone) {
       final temporaryDirectory = await getTemporaryDirectory();
       final filePath = "${temporaryDirectory.path}/$fileName";
       await File(filePath).writeAsString(content);

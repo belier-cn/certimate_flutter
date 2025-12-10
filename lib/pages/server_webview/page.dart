@@ -1,5 +1,6 @@
 import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_inappwebview/flutter_inappwebview.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
@@ -38,21 +39,23 @@ class ServerWebViewPage extends HookConsumerWidget {
       serverId: serverId,
       url: url.startsWith("http") ? url : "${server.value?.host}$url",
       onWebViewCreated: (controller) {
-        controller.addJavaScriptHandler(
-          handlerName: "onFetchRequest",
-          callback: (args) {
-            final String url = args[0]["url"];
-            final method = args[0]["method"];
-            final status = args[0]["status"];
-            if (method == "POST" &&
-                status == 200 &&
-                url.startsWith(
-                  "${server.value?.host}/api/collections/access/records",
-                )) {
-              Navigator.of(context).maybePop(1);
-            }
-          },
-        );
+        if (!kIsWeb) {
+          controller.addJavaScriptHandler(
+            handlerName: "onFetchRequest",
+            callback: (args) {
+              final String url = args[0]["url"];
+              final method = args[0]["method"];
+              final status = args[0]["status"];
+              if (method == "POST" &&
+                  status == 200 &&
+                  url.startsWith(
+                    "${server.value?.host}/api/collections/access/records",
+                  )) {
+                Navigator.of(context).maybePop(1);
+              }
+            },
+          );
+        }
       },
       initialUserScripts: [
         UserScript(

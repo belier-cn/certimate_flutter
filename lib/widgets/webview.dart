@@ -1,10 +1,10 @@
 import "dart:collection";
-import "dart:io";
 
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/l10n.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
@@ -41,7 +41,7 @@ class WebviewWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (Platform.isLinux) {
+    if (RunPlatform.isLinux) {
       return Scaffold(
         appBar: AppBar(
           title: const Text("WebView"),
@@ -137,7 +137,7 @@ class WebviewWidget extends HookConsumerWidget {
                     }
                   },
                 ),
-                if (useShareDevice)
+                if (RunPlatform.useShareDevice)
                   PullDownOption(
                     label: s.shareUrl.capitalCase,
                     iconWidget: Icon(context.appIcons.share),
@@ -175,7 +175,7 @@ class WebviewWidget extends HookConsumerWidget {
                 allowsInlineMediaPlayback: true,
                 overScrollMode: OverScrollMode.NEVER,
                 underPageBackgroundColor: backgroundColor,
-                transparentBackground: isPhoneDevice,
+                transparentBackground: RunPlatform.isPhone,
               ),
               onLoadStart: (_, _) {
                 progressNotifier.value = 0;
@@ -228,12 +228,14 @@ class WebviewWidget extends HookConsumerWidget {
               ]),
               onWebViewCreated: (controller) {
                 webviewController.value = controller;
-                controller.addJavaScriptHandler(
-                  handlerName: "routeChangeHandler",
-                  callback: (args) {
-                    navigationHistory.value.add(args[0] as String);
-                  },
-                );
+                if (!kIsWeb) {
+                  controller.addJavaScriptHandler(
+                    handlerName: "routeChangeHandler",
+                    callback: (args) {
+                      navigationHistory.value.add(args[0] as String);
+                    },
+                  );
+                }
                 onWebViewCreated?.call(controller);
               },
             ),

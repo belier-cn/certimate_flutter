@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:certimate/extension/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
@@ -25,7 +26,7 @@ class ExitInterceptorState extends State<ExitInterceptor> {
   Widget build(BuildContext context) {
     return PopScope(
       // 拦截只针对 Android
-      canPop: Platform.isAndroid ? false : true,
+      canPop: !kIsWeb && RunPlatform.isAndroid ? false : true,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) {
           return;
@@ -43,7 +44,7 @@ class ExitInterceptorState extends State<ExitInterceptor> {
             return;
           }
           // 两次后强制退出
-          if (Platform.isIOS) {
+          if (RunPlatform.isIOS) {
             exit(0);
           } else {
             SystemNavigator.pop();

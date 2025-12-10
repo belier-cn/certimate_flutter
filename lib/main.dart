@@ -1,11 +1,11 @@
-import "dart:io";
-
 import "package:certimate/app.dart";
-import "package:certimate/extension/widget.dart";
+import "package:certimate/extension/index.dart";
 import "package:certimate/provider/package.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/theme/theme.dart";
+import "package:certimate/web/index.dart" as web;
 import "package:device_info_plus/device_info_plus.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_native_splash/flutter_native_splash.dart";
@@ -17,7 +17,9 @@ import "package:window_manager/window_manager.dart";
 
 void main() {
   init().then((res) {
-    FlutterNativeSplash.remove();
+    if (!kIsWeb) {
+      FlutterNativeSplash.remove();
+    }
     runApp(
       ProviderScope(
         overrides: [
@@ -33,7 +35,9 @@ void main() {
 
 Future<(PackageInfo, List<BiometricType>)> init() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  if (isDesktopDevice) {
+  if (kIsWeb) {
+    web.usePathUrlStrategy();
+  } else if (RunPlatform.isDesktop) {
     await windowManager.ensureInitialized();
     final windowOptions = const WindowOptions(
       size: Size(800, 600),
@@ -46,17 +50,16 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
       await windowManager.show();
       await windowManager.focus();
     });
-  }
-  if (isPhoneDevice) {
+  } else {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-    if (Platform.isAndroid) {
+    if (RunPlatform.isAndroid) {
       // 配置状态栏和虚拟按钮主题
       SystemChrome.setSystemUIOverlayStyle(lightSystemUiOverlayStyle);
       // 导航栏设置，开启全面屏（安卓10开始支持）
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
-    if (Platform.isAndroid ||
-        (Platform.isIOS &&
+    if (RunPlatform.isAndroid ||
+        (RunPlatform.isIOS &&
             (await DeviceInfoPlugin().iosInfo).systemName.contains("iOS"))) {
       // 强制竖屏
       await SystemChrome.setPreferredOrientations(const [
@@ -66,5 +69,8 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
     }
   }
   await SpUtil.getInstance();
-  return (await PackageInfo.fromPlatform(), await getAvailableBiometrics());
+  final List<BiometricType> biometrics = kIsWeb
+      ? []
+      : await getAvailableBiometrics();
+  return (await PackageInfo.fromPlatform(), biometrics);
 }

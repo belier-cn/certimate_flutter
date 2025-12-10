@@ -24,6 +24,9 @@ class ServerSettingsPage extends ConsumerWidget {
         body: SingleChildScrollView(
           child: SettingsList(
             shrinkWrap: true,
+            platform: context.isCupertinoStyle
+                ? DevicePlatform.iOS
+                : DevicePlatform.android,
             physics: const NeverScrollableScrollPhysics(),
             sections: [
               SettingsSection(

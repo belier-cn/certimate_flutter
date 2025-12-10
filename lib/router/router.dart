@@ -2,7 +2,9 @@ import "package:certimate/extension/index.dart";
 import "package:certimate/pages/home/page.dart";
 import "package:certimate/router/navbar.dart";
 import "package:certimate/router/route.dart";
+import "package:certimate/web/index.dart" as web;
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:go_router/go_router.dart";
@@ -12,19 +14,37 @@ part "router.g.dart";
 
 final RouteObserver routeObserver = RouteObserver();
 
+final List<NavigatorObserver> observers = [
+  FlutterSmartDialog.observer,
+  routeObserver,
+];
+
+String? lastRoutePath = "/servers";
+
+final navBarRoutes = [
+  const HomeRoute().location,
+  const SettingsRoute().location,
+];
+
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   final router = GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: "/servers",
-    routes: isDesktopDevice
+    initialLocation: lastRoutePath,
+    routes: kIsWeb || RunPlatform.isDesktopUi
         ? [
             StatefulShellRoute.indexedStack(
               branches: [
                 StatefulShellBranch(
+                  observers: [NavigatorObserverDelegate(observers)],
                   routes: [
                     ShellRoute(
-                      observers: [ServersRouteObserver()],
+                      observers: [
+                        NavigatorObserverDelegate([
+                          ...observers,
+                          ServersRouteObserver(),
+                        ]),
+                      ],
                       routes: [$homeRoute],
                       builder: (context, state, child) {
                         return HomePage(navigationShell: child, state: state);
@@ -32,7 +52,16 @@ GoRouter router(Ref ref) {
                     ),
                   ],
                 ),
-                StatefulShellBranch(routes: $appRoutes.sublist(1)),
+                // old StatefulShellBranch(routes: $appRoutes.sublist(1)),
+                // 之前的方案会导致先访问哪个页面，哪个页面就被缓存了，通过 navigationShell.goBranch 无法切换到设置页面
+                ...$appRoutes
+                    .sublist(1)
+                    .map(
+                      (route) => StatefulShellBranch(
+                        routes: [route],
+                        observers: [NavigatorObserverDelegate(observers)],
+                      ),
+                    ),
               ],
               builder: (context, state, navigationShell) {
                 return ScaffoldWithNavbar(navigationShell);
@@ -42,8 +71,14 @@ GoRouter router(Ref ref) {
         : [
             StatefulShellRoute.indexedStack(
               branches: [
-                StatefulShellBranch(routes: [$singleHomeRoute]),
-                StatefulShellBranch(routes: [$settingsRoute]),
+                StatefulShellBranch(
+                  routes: [$singleHomeRoute],
+                  observers: [NavigatorObserverDelegate(observers)],
+                ),
+                StatefulShellBranch(
+                  routes: [$settingsRoute],
+                  observers: [NavigatorObserverDelegate(observers)],
+                ),
               ],
               builder: (context, state, navigationShell) {
                 return ScaffoldWithNavbar(navigationShell);
@@ -52,8 +87,18 @@ GoRouter router(Ref ref) {
             $homeRoute,
             ...($appRoutes.sublist(2)),
           ],
-    observers: [FlutterSmartDialog.observer, routeObserver],
+    observers: [NavigatorObserverDelegate(observers)],
   );
+
+  router.routerDelegate.addListener(() {
+    final fullPath = router.state.fullPath;
+    lastRoutePath = fullPath;
+    if (kIsWeb && fullPath != null && web.getPathName() != fullPath) {
+      Future.delayed(const Duration(milliseconds: 50)).then((_) {
+        web.replacePath(fullPath);
+      });
+    }
+  });
 
   ref.onDispose(router.dispose);
 
@@ -177,6 +222,61 @@ class ServersRouteListener {
       } catch (err) {
         debugPrint("route change listener error: $err");
       }
+    }
+  }
+}
+
+class NavigatorObserverDelegate extends NavigatorObserver {
+  final List<NavigatorObserver> observers;
+
+  NavigatorObserverDelegate(this.observers);
+
+  @override
+  void didStopUserGesture() {
+    for (final observer in observers) {
+      observer.didStopUserGesture();
+    }
+  }
+
+  @override
+  void didStartUserGesture(Route route, Route? previousRoute) {
+    for (final observer in observers) {
+      observer.didStartUserGesture(route, previousRoute);
+    }
+  }
+
+  @override
+  void didChangeTop(Route topRoute, Route? previousTopRoute) {
+    for (final observer in observers) {
+      observer.didChangeTop(topRoute, previousTopRoute);
+    }
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    for (final observer in observers) {
+      observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    }
+  }
+
+  @override
+  void didRemove(Route route, Route? previousRoute) {
+    for (final observer in observers) {
+      observer.didRemove(route, previousRoute);
+    }
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    for (final observer in observers) {
+      observer.didPop(route, previousRoute);
+    }
+  }
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    for (final observer in observers) {
+      observer.didPush(route, previousRoute);
     }
   }
 }

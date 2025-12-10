@@ -51,7 +51,7 @@ class CertificateDetailNotifier extends _$CertificateDetailNotifier {
         state.value?.list.first.subjectAltNames?.replaceFirst("*", "_") ?? "";
     final fileName =
         '$certId${name.isNotEmpty ? "-$name" : ""}.${res.data.fileFormat ?? "zip"}';
-    if (isPhoneDevice) {
+    if (RunPlatform.isPhone) {
       final directory = await getTemporaryDirectory();
       final filePath = "${directory.path}/$fileName";
       await File(filePath).writeAsBytes(base64Decode(res.data.fileBytes ?? ""));

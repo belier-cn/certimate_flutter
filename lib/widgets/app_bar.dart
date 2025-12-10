@@ -1,7 +1,9 @@
 import "package:certimate/extension/index.dart";
+import "package:certimate/router/router.dart";
 import "package:certimate/widgets/index.dart";
 import "package:extra_hittest_area/extra_hittest_area.dart";
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:go_router/go_router.dart";
@@ -79,7 +81,11 @@ class AppSliverAppBar extends StatelessWidget {
                 automaticallyImplyLeading: false,
                 leading:
                     leading ??
-                    (automaticallyImplyLeading != false && context.canPop()
+                    ((kIsWeb &&
+                                RunPlatform.isPhoneUi &&
+                                !navBarRoutes.contains(lastRoutePath)) ||
+                            (automaticallyImplyLeading != false &&
+                                context.canPop())
                         ? const AppBarLeading()
                         : null),
                 largeTitle: title,
@@ -112,7 +118,10 @@ class AppSliverAppBar extends StatelessWidget {
       automaticallyImplyLeading: false,
       leading:
           leading ??
-          (automaticallyImplyLeading != false && context.canPop()
+          ((kIsWeb &&
+                      RunPlatform.isPhoneUi &&
+                      !navBarRoutes.contains(lastRoutePath)) ||
+                  (automaticallyImplyLeading != false && context.canPop())
               ? const AppBarLeading()
               : null),
       leadingWidth: leadingWidth,

@@ -3,6 +3,7 @@ import "dart:ui";
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/l10n.dart";
 import "package:certimate/widgets/well.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -42,7 +43,7 @@ class PrivacyBlurNotifier extends _$PrivacyBlurNotifier {
 
   @override
   bool build() {
-    return SpUtil.getBool(cacheKey, defValue: true)!;
+    return SpUtil.getBool(cacheKey, defValue: !kIsWeb)!;
   }
 
   void update(bool privacyBlur) {

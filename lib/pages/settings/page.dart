@@ -1,5 +1,3 @@
-import "dart:io";
-
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/intl/messages_all.dart";
@@ -51,6 +49,9 @@ class SettingsPage extends ConsumerWidget {
             children: [
               SettingsList(
                 shrinkWrap: true,
+                platform: context.isCupertinoStyle
+                    ? DevicePlatform.iOS
+                    : DevicePlatform.android,
                 physics: const NeverScrollableScrollPhysics(),
                 sections: [
                   SettingsSection(
@@ -88,7 +89,7 @@ class SettingsPage extends ConsumerWidget {
                           const ThemeRoute().push(context);
                         },
                       ),
-                      if (Platform.isIOS || Platform.isMacOS)
+                      if (RunPlatform.isIOS || RunPlatform.isMacOS)
                         SettingsTile.switchTile(
                           leading: const Icon(TablerIcons.device_mobile),
                           title: const Text("Material"),
@@ -103,9 +104,9 @@ class SettingsPage extends ConsumerWidget {
                                 );
                           },
                         ),
-                      if (Platform.isAndroid ||
-                          Platform.isWindows ||
-                          Platform.isLinux)
+                      if (RunPlatform.isAndroid ||
+                          RunPlatform.isWindows ||
+                          RunPlatform.isLinux)
                         SettingsTile.switchTile(
                           leading: const Icon(TablerIcons.device_mobile),
                           title: const Text("Cupertino"),
@@ -164,7 +165,7 @@ class SettingsPage extends ConsumerWidget {
                         onPressed: (_) async {
                           final url =
                               "https://github.com/belier-cn/certimate_flutter";
-                          if (useShareDevice) {
+                          if (RunPlatform.useShareDevice) {
                             SharePlus.instance.share(
                               ShareParams(uri: Uri.parse(url)),
                             );

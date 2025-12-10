@@ -1,9 +1,8 @@
-import "dart:io";
-
 import "package:certimate/extension/index.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/router/router.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
@@ -33,12 +32,12 @@ class AppBarLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.canPop()) {
+    if (!kIsWeb && !context.canPop()) {
       return const SizedBox.shrink();
     }
     final theme = context.theme;
     final isCupertinoStyle = context.isCupertinoStyle;
-    final isCloseIcon = getPreviousRoute() == "/servers";
+    final isCloseIcon = getPreviousRoute() == const HomeRoute().location;
     return CupertinoWell(
       onPressed:
           onPressed ??
@@ -46,13 +45,15 @@ class AppBarLeading extends StatelessWidget {
             final router = GoRouter.of(context);
             if (router.canPop()) {
               router.pop();
+            } else {
+              const HomeRoute().replace(context);
             }
           },
       child: Icon(
         isCloseIcon ? context.appIcons.close : context.appIcons.back,
         size: _getIconSize(isCloseIcon, isCupertinoStyle),
         color: isCupertinoStyle ? theme.colorScheme.primary : null,
-        fontWeight: isCupertinoStyle && !Platform.isIOS
+        fontWeight: isCupertinoStyle && !RunPlatform.isIOS
             ? FontWeight.bold
             : null,
       ),
@@ -61,9 +62,9 @@ class AppBarLeading extends StatelessWidget {
 
   double _getIconSize(bool isCloseIcon, bool isCupertinoStyle) {
     if (isCupertinoStyle && !isCloseIcon) {
-      if (Platform.isIOS) {
+      if (RunPlatform.isIOS) {
         return 32;
-      } else if (isDesktopDevice) {
+      } else if (RunPlatform.isDesktop) {
         return 26;
       }
     }
@@ -173,7 +174,7 @@ class DebugDraggableButtonState extends State<DebugDraggableButton> {
       top = (screenHeight - widget.btnSize) / 2;
     }
     if (left < 0) {
-      if (isDesktopDevice) {
+      if (RunPlatform.isDesktop) {
         left = 15;
       } else {
         left = screenWidth - widget.btnSize - 20;

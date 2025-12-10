@@ -1,3 +1,4 @@
+import "package:certimate/extension/index.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
@@ -20,6 +21,9 @@ class DebugPage extends HookConsumerWidget {
         body: SingleChildScrollView(
           child: SettingsList(
             shrinkWrap: true,
+            platform: context.isCupertinoStyle
+                ? DevicePlatform.iOS
+                : DevicePlatform.android,
             physics: const NeverScrollableScrollPhysics(),
             sections: [
               SettingsSection(

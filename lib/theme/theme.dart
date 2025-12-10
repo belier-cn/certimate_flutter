@@ -1,9 +1,9 @@
 import "package:certimate/extension/index.dart";
 import "package:certimate/theme/border.dart";
 import "package:chinese_font_library/chinese_font_library.dart";
-import "package:easy_refresh/easy_refresh.dart";
 import "package:flex_color_scheme/flex_color_scheme.dart";
 import "package:flutter/cupertino.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -141,8 +141,6 @@ ThemeData _initTheme(BuildContext context, ThemeData theme) {
   final cupertino =
       theme.platform == TargetPlatform.iOS ||
       theme.platform == TargetPlatform.macOS;
-  EasyRefresh.defaultHeaderBuilder = () =>
-      cupertino ? const CupertinoHeader() : const MaterialHeader();
   final isLight = theme.brightness == Brightness.light;
   final scaffoldBackgroundColor = isLight
       ? (cupertino
@@ -172,7 +170,9 @@ ThemeData _initTheme(BuildContext context, ThemeData theme) {
       : null;
   return theme.copyWith(
     scaffoldBackgroundColor: scaffoldBackgroundColor,
-    textTheme: theme.textTheme.useSystemChineseFont(theme.brightness),
+    textTheme: kIsWeb
+        ? theme.textTheme
+        : theme.textTheme.useSystemChineseFont(theme.brightness),
     appBarTheme: AppBarTheme(
       backgroundColor: scaffoldBackgroundColor,
       iconTheme: cupertino
@@ -192,7 +192,7 @@ ThemeData _initTheme(BuildContext context, ThemeData theme) {
       centerTitle: cupertino,
       leadingWidth: cupertino ? 40 : null,
       toolbarHeight: cupertino ? 44 : kToolbarHeight,
-      scrolledUnderElevation: isDesktopDevice ? 0 : null,
+      scrolledUnderElevation: RunPlatform.isDesktopUi ? 0 : null,
     ),
     tooltipTheme: const TooltipThemeData(
       decoration: BoxDecoration(color: Colors.transparent),

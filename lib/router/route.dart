@@ -40,7 +40,6 @@ RouteBase get $singleHomeRoute =>
   routes: [
     TypedGoRoute<ServerAddRoute>(path: "add"),
     TypedGoRoute<ServerEditRoute>(path: "edit"),
-    TypedGoRoute<ServerWebViewRoute>(path: "webview"),
     TypedGoRoute<ServerSettingsRoute>(
       path: "settings",
       routes: [
@@ -52,6 +51,7 @@ RouteBase get $singleHomeRoute =>
     TypedGoRoute<ServerRoute>(
       path: ":serverId",
       routes: [
+        TypedGoRoute<ServerWebViewRoute>(path: "webview"),
         TypedGoRoute<CertificatesRoute>(
           path: "certificates",
           routes: [TypedGoRoute<CertificateDetailRoute>(path: ":certId")],
@@ -466,7 +466,7 @@ class AppRoutePage<T> extends Page<T> {
   @override
   Route<T> createRoute(BuildContext context) {
     if (context.isCupertinoStyle) {
-      if (isDesktopDevice) {
+      if (RunPlatform.isDesktop) {
         return _NoSwipeCupertinoPageRoute<T>(
           settings: this,
           builder: (context) => child,
