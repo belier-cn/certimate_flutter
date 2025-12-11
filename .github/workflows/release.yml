@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        type: [ android, ios, macos, windows, linux ]
+        type: [ android, ios, macos, windows, linux, web ]
         include:
           - type: android
             os: ubuntu-latest
@@ -27,6 +27,8 @@ jobs:
           - type: windows
             os: windows-latest
           - type: linux
+            os: ubuntu-latest
+          - type: web
             os: ubuntu-latest
 
     steps:
@@ -93,7 +95,19 @@ jobs:
           sudo apt-get update
           sudo apt install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libfuse2 locate
           fastforge package --platform linux --targets appimage --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.appimage
-      - uses: actions/upload-artifact@v4
+      - if: ${{ matrix.type == 'web' }}
+        name: Build web
+        run: |
+          flutter build web --release --base-href /${{ github.event.repository.name }}/ --dart-define FLUTTER_BASE_HREF=/${{ github.event.repository.name }}/
+          cp build/web/index.html build/web/404.html
+      - if: ${{ matrix.type == 'web' }}
+        name: Upload GitHub Pages artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+      - if: ${{ matrix.type != 'web' }}
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.type }}
           retention-days: 1
@@ -117,3 +131,17 @@ jobs:
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
