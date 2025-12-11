@@ -14,6 +14,8 @@ part "router.g.dart";
 
 final RouteObserver routeObserver = RouteObserver();
 
+const baseHref = String.fromEnvironment("FLUTTER_BASE_HREF", defaultValue: "/");
+
 final List<NavigatorObserver> observers = [
   FlutterSmartDialog.observer,
   routeObserver,
@@ -93,9 +95,11 @@ GoRouter router(Ref ref) {
   router.routerDelegate.addListener(() {
     final fullPath = router.state.fullPath;
     lastRoutePath = fullPath;
-    if (kIsWeb && fullPath != null && web.getPathName() != fullPath) {
+    final webFullPath =
+        "${baseHref.endsWith("/") ? baseHref.substring(0, baseHref.length - 1) : baseHref}$fullPath";
+    if (kIsWeb && fullPath != null && web.getPathName() != webFullPath) {
       Future.delayed(const Duration(milliseconds: 50)).then((_) {
-        web.replacePath(fullPath);
+        web.replacePath(webFullPath);
       });
     }
   });
