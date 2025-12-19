@@ -17,7 +17,7 @@ import "package:window_manager/window_manager.dart";
 
 void main() {
   init().then((res) {
-    if (!kIsWeb) {
+    if (RunPlatform.isAndroid || RunPlatform.isIOS) {
       FlutterNativeSplash.remove();
     }
     runApp(
@@ -35,6 +35,9 @@ void main() {
 
 Future<(PackageInfo, List<BiometricType>)> init() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  if (RunPlatform.isAndroid || RunPlatform.isIOS) {
+    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  }
   if (kIsWeb) {
     web.usePathUrlStrategy();
   } else if (RunPlatform.isDesktop) {
@@ -51,14 +54,14 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
       await windowManager.focus();
     });
   } else {
-    FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-    if (RunPlatform.isAndroid) {
+    if (RunPlatform.isAndroid || RunPlatform.isOhos) {
       // 配置状态栏和虚拟按钮主题
       SystemChrome.setSystemUIOverlayStyle(lightSystemUiOverlayStyle);
       // 导航栏设置，开启全面屏（安卓10开始支持）
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
     if (RunPlatform.isAndroid ||
+        RunPlatform.isOhos ||
         (RunPlatform.isIOS &&
             (await DeviceInfoPlugin().iosInfo).systemName.contains("iOS"))) {
       // 强制竖屏
@@ -69,8 +72,5 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
     }
   }
   await SpUtil.getInstance();
-  final List<BiometricType> biometrics = kIsWeb
-      ? []
-      : await getAvailableBiometrics();
-  return (await PackageInfo.fromPlatform(), biometrics);
+  return (await PackageInfo.fromPlatform(), await getAvailableBiometrics());
 }

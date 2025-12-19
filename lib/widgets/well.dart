@@ -1,5 +1,5 @@
+import "package:certimate/extension/index.dart";
 import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/rendering.dart";
 
@@ -12,14 +12,11 @@ class CupertinoWell extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   static double tapMoveSlop() {
-    return switch (defaultTargetPlatform) {
-      TargetPlatform.iOS ||
-      TargetPlatform.android ||
-      TargetPlatform.fuchsia => kCupertinoButtonTapMoveSlop,
-      TargetPlatform.macOS ||
-      TargetPlatform.linux ||
-      TargetPlatform.windows => 0.0,
-    };
+    if (RunPlatform.isPhone) {
+      return kCupertinoButtonTapMoveSlop;
+    } else {
+      return 0;
+    }
   }
 
   const CupertinoWell({

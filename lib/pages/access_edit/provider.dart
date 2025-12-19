@@ -1,6 +1,7 @@
 import "dart:convert";
 
 import "package:certimate/api/access_api.dart";
+import "package:certimate/extension/index.dart";
 import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
@@ -60,7 +61,9 @@ class AccessDetailNotifier extends _$AccessDetailNotifier with SubmitMixin {
   @override
   Future submit(context, data) async {
     await _submit(data).then((newData) {
-      if (context.mounted) context.pop(newData);
+      if (context.mounted) {
+        context.pop(RunPlatform.isOhos ? () => newData : newData);
+      }
     });
   }
 }

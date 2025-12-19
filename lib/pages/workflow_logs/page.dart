@@ -104,7 +104,13 @@ class WorkflowLogsPage extends HookConsumerWidget {
               data: item,
               start: start,
               status: start ? "succeeded" : null,
-              onDownload: start ? () => _onDownload(data.list) : null,
+              onDownload: start
+                  ? () {
+                      _onDownload(data.list).catchError((err) {
+                        SmartDialog.showToast("$err");
+                      });
+                    }
+                  : null,
               end: itemIndex == data.list.length - 1,
               node: start || item.nodeId != data.list[itemIndex - 1].nodeId,
             );
@@ -116,7 +122,7 @@ class WorkflowLogsPage extends HookConsumerWidget {
     );
   }
 
-  void _onDownload(List<WorkflowLogResult> logs) async {
+  Future<void> _onDownload(List<WorkflowLogResult> logs) async {
     final newLine = "\n";
     final content = logs
         .groupListsBy((log) => log.nodeId)

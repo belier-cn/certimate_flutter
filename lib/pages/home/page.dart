@@ -76,11 +76,14 @@ class HomePage extends HookConsumerWidget {
             onPressed: () async {
               final route = const ServerAddRoute();
               if (state?.fullPath != route.location) {
-                final newServer = await route.push<ServerModel?>(context);
-                if (newServer != null) {
-                  ref.read(serverListProvider.notifier).addServer(newServer);
+                final newServer = await route.push(context);
+                final realServer = newServer is Function
+                    ? newServer.call()
+                    : newServer;
+                if (realServer is ServerModel? && realServer != null) {
+                  ref.read(serverListProvider.notifier).addServer(realServer);
                   if (RunPlatform.isDesktopUi && context.mounted) {
-                    ServerRoute(serverId: newServer.id).push(context);
+                    ServerRoute(serverId: realServer.id).push(context);
                   }
                 }
               }

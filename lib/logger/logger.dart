@@ -1,4 +1,4 @@
-import "package:talker_flutter/talker_flutter.dart";
+import "package:talker/talker.dart";
 
 abstract class Logger {
   static final Talker _logger = Talker();

@@ -1,3 +1,4 @@
+import "package:certimate/extension/index.dart";
 import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/foundation.dart";
@@ -51,7 +52,9 @@ class ServerWebViewPage extends HookConsumerWidget {
                   url.startsWith(
                     "${server.value?.host}/api/collections/access/records",
                   )) {
-                Navigator.of(context).maybePop(1);
+                Navigator.of(
+                  context,
+                ).maybePop(RunPlatform.isOhos ? () => 1 : 1);
               }
             },
           );

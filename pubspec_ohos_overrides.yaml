@@ -1,0 +1,76 @@
+dependency_overrides:
+  intl: ^0.20.2
+  drift: 2.23.1
+  flutter_form_builder: 10.1.0
+  drift_flutter:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: drift_flutter
+  adaptive_dialog:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: adaptive_dialog
+  material_design:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: material_design
+  macos_ui:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: macos_ui
+  flex_color_scheme:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: flex_color_scheme
+  flutter_platform_widgets:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: flutter_platform_widgets
+  flutter_settings_ui:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: flutter_settings_ui
+  flutter_secure_storage_ohos:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: flutter_secure_storage_ohos
+  share_plus:
+    git:
+      url: https://github.com/belier-cn/flutter_ohos_packages
+      path: share_plus
+  path_provider:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/path_provider/path_provider
+  url_launcher:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/url_launcher/url_launcher
+  local_auth:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/local_auth/local_auth
+  shared_preferences:
+    git:
+      url: https://gitcode.com/openharmony-tpc/flutter_packages.git
+      path: packages/shared_preferences/shared_preferences
+  package_info_plus:
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
+      path: packages/package_info_plus/package_info_plus
+  device_info_plus:
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_plus_plugins.git
+      path: packages/device_info_plus/device_info_plus
+  flutter_inappwebview:
+    git:
+      url: https://gitcode.com/openharmony-sig/flutter_inappwebview.git
+      path: flutter_inappwebview
+  sqlite3_flutter_libs:
+    git:
+      url: https://github.com/SageMik/sqlite3-ohos.dart.git
+      path: sqlite3_flutter_libs
+  sqlite3:
+    git:
+      url: https://github.com/SageMik/sqlite3-ohos.dart.git
+      path: sqlite3

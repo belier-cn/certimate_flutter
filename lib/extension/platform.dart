@@ -21,13 +21,15 @@ abstract class RunPlatform {
       (kIsWeb && deviceMode.mode == DeviceMode.desktop) ||
       (!kIsWeb && isDesktop);
 
-  static bool get isPhone => isIOS || isAndroid;
+  static bool get isPhone => isIOS || isAndroid || isOhos;
 
   static bool get isPhoneUi => !isDesktopUi;
 
   static bool get useShareDevice => isPhone || isMacOS;
 
   static bool get isAndroid => defaultTargetPlatform == TargetPlatform.android;
+
+  static bool get isOhos => defaultTargetPlatform.name == "ohos";
 
   static bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 

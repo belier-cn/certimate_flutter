@@ -38,9 +38,6 @@ class ServersDao extends DatabaseAccessor<AppDatabase> with _$ServersDaoMixin {
   }
 
   Future<ServerModel?> updateById(int id, ServersCompanion server) async {
-    if (server.passwordId.present) {
-      server = server.copyWith(passwordId: const Value.absent());
-    }
     final count = await (update(
       servers,
     )..where((t) => t.id.equals(id))).write(server);

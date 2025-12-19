@@ -5,8 +5,11 @@ import "package:certimate/generated/l10n.dart";
 import "package:certimate/widgets/well.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:flutter_secure_storage_ohos/flutter_secure_storage_ohos.dart"
+    as ohos;
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:local_auth/local_auth.dart";
@@ -17,7 +20,10 @@ part "security.g.dart";
 
 final LocalAuthentication _auth = LocalAuthentication();
 
-const secureStorage = FlutterSecureStorage();
+final secureStorage = SecureStorage(
+  ohosStorage: RunPlatform.isOhos ? const ohos.FlutterSecureStorage() : null,
+  storage: RunPlatform.isOhos ? null : const FlutterSecureStorage(),
+);
 
 @Riverpod(keepAlive: true)
 List<BiometricType> biometrics(Ref ref) => [];
@@ -55,6 +61,12 @@ class PrivacyBlurNotifier extends _$PrivacyBlurNotifier {
 int _lastUnlockTime = 0;
 
 Future<List<BiometricType>> getAvailableBiometrics() async {
+  if (kIsWeb) {
+    return [];
+  }
+  if (RunPlatform.isOhos) {
+    return [BiometricType.strong];
+  }
   if (await _auth.canCheckBiometrics) {
     final biometrics = await _auth.getAvailableBiometrics();
     if (biometrics.isNotEmpty) {
@@ -161,14 +173,46 @@ Future<bool> localAuthenticate(String msg) async {
       _lastUnlockTime = DateTime.now().millisecondsSinceEpoch;
     }
     return didAuthenticate;
-  } on LocalAuthException catch (e) {
-    if (e.code != LocalAuthExceptionCode.userCanceled) {
-      SmartDialog.showToast(
-        e.code == LocalAuthExceptionCode.noCredentialsSet
-            ? S.current.noCredentialsSetTip
-            : (e.description ?? e.code.name),
-      );
-    }
+  } on PlatformException catch (e) {
+    SmartDialog.showToast(
+      e.code == "NotEnrolled" ||
+              e.message == "No Biometrics enrolled on this device."
+          ? S.current.noCredentialsSetTip
+          : (e.message ?? e.code),
+    );
     rethrow;
+  }
+}
+
+class SecureStorage {
+  FlutterSecureStorage? storage;
+
+  ohos.FlutterSecureStorage? ohosStorage;
+
+  SecureStorage({this.storage, this.ohosStorage});
+
+  Future<void> write({required String key, required String? value}) async {
+    if (storage != null) {
+      await storage!.write(key: key, value: value);
+    } else if (ohosStorage != null) {
+      await ohosStorage!.write(key: key, value: value);
+    }
+  }
+
+  Future<String?> read({required String key}) async {
+    if (storage != null) {
+      return await storage!.read(key: key);
+    } else if (ohosStorage != null) {
+      return await ohosStorage!.read(key: key);
+    }
+    return null;
+  }
+
+  Future<void> delete({required String key}) async {
+    if (storage != null) {
+      await storage!.delete(key: key);
+    } else if (ohosStorage != null) {
+      await ohosStorage!.delete(key: key);
+    }
   }
 }

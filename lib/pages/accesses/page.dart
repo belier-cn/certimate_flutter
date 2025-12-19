@@ -25,11 +25,12 @@ class AccessesPage extends HookConsumerWidget {
     final topVisible = useValueNotifier(false);
 
     void toAddPage(BuildContext context, String type) async {
-      final res = await "/#/accesses/new?usage=$type".toServerWebview<int>(
+      final res = await "/#/accesses/new?usage=$type".toServerWebview(
         context,
         serverId,
       );
-      if (res != null && res > 0) {
+      final realRes = res is Function ? res.call() : res;
+      if (realRes is int && realRes > 0) {
         // 添加成功，刷新页面
         refreshController.callRefresh(scrollController: scrollController);
       }
@@ -94,9 +95,12 @@ class AccessesPage extends HookConsumerWidget {
                 final newData = await AccessEditRoute(
                   serverId: serverId,
                   accessId: item.id ?? "",
-                ).push<AccessDetailResult?>(context);
-                if (newData != null) {
-                  ref.read(provider.notifier).updateAccess(newData);
+                ).push(context);
+                final realData = (newData is Function
+                    ? newData.call()
+                    : newData);
+                if (realData is AccessDetailResult? && realData != null) {
+                  ref.read(provider.notifier).updateAccess(realData);
                 }
               },
             );

@@ -71,11 +71,14 @@ class ServerPage extends HookConsumerWidget {
                 onTap: (_) async {
                   final newServer = await ServerEditRoute(
                     serverId: serverId,
-                  ).push<ServerModel?>(context);
-                  if (newServer != null) {
+                  ).push(context);
+                  final realServer = newServer is Function
+                      ? newServer.call()
+                      : newServer;
+                  if (realServer is ServerModel? && realServer != null) {
                     ref
                         .read(serverProvider(serverId).notifier)
-                        .updateServer(newServer);
+                        .updateServer(realServer);
                   }
                 },
               ),

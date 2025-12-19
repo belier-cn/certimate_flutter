@@ -1,6 +1,7 @@
 import "package:certimate/api/auth_api.dart";
 import "package:certimate/database/database.dart";
 import "package:certimate/database/servers_dao.dart";
+import "package:certimate/extension/index.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:drift/drift.dart";
@@ -43,7 +44,9 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     final server = state.value?.value;
     String userId = "";
     String tokenValue = "";
-    final passwordId = server?.passwordId ?? const UuidV4().generate();
+    final passwordId = server?.passwordId.isNotEmpty == true
+        ? server!.passwordId
+        : const UuidV4().generate().replaceAll("-", "");
     if (serverId == null ||
         host != server?.host ||
         username != server?.username ||
@@ -100,7 +103,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
         userId: userId.isNotEmpty && userId != server?.userId
             ? Value(userId)
             : const Value.absent(),
-        passwordId: savePassword ? Value(passwordId) : const Value(""),
+        passwordId: savePassword == true ? Value(passwordId) : const Value(""),
         token: tokenValue.isNotEmpty && tokenValue != server?.token
             ? Value(tokenValue)
             : const Value.absent(),
@@ -115,7 +118,9 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
   @override
   Future submit(context, data) {
     return _submit(data).then((newServer) {
-      if (newServer != null && context.mounted) context.pop(newServer);
+      if (newServer != null && context.mounted) {
+        context.pop(RunPlatform.isOhos ? () => newServer : newServer);
+      }
       return newServer;
     });
   }

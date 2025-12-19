@@ -20,7 +20,7 @@ class AppBarIconButton extends StatelessWidget {
     return Icon(
       icon,
       size: isCupertinoStyle ? 24 : 26,
-      fontWeight: isCupertinoStyle ? FontWeight.bold : null,
+      // fontWeight: isCupertinoStyle ? FontWeight.bold : null,
     );
   }
 }
@@ -53,9 +53,9 @@ class AppBarLeading extends StatelessWidget {
         isCloseIcon ? context.appIcons.close : context.appIcons.back,
         size: _getIconSize(isCloseIcon, isCupertinoStyle),
         color: isCupertinoStyle ? theme.colorScheme.primary : null,
-        fontWeight: isCupertinoStyle && !RunPlatform.isIOS
-            ? FontWeight.bold
-            : null,
+        // fontWeight: isCupertinoStyle && !RunPlatform.isIOS
+        //     ? FontWeight.bold
+        //     : null,
       ),
     );
   }
