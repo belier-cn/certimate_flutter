@@ -102,3 +102,6 @@ flutter:
 
 flutter_intl:
   enabled: true
+
+# HarmonyOS dependency_overrides
+

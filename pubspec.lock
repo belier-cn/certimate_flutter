@@ -714,7 +714,7 @@ packages:
     description:
       path: flutter_secure_storage_ohos
       ref: HEAD
-      resolved-ref: f52edd00bdefda0396633cb7e82f1d2e6d77ab0e
+      resolved-ref: "36688ab7d82085bdf0fba3b1e427b1e20a450582"
       url: "https://github.com/belier-cn/flutter_ohos_packages"
     source: git
     version: "1.2.2"
@@ -942,10 +942,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: "48c11d0943b93b6fb29103d956ff89aafeae48f6058a3939649be2093dcff0bf"
+      sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.7.1"
+    version: "4.7.2"
   inflector_dart:
     dependency: "direct main"
     description:

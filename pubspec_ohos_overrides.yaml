@@ -70,7 +70,9 @@ dependency_overrides:
     git:
       url: https://github.com/SageMik/sqlite3-ohos.dart.git
       path: sqlite3_flutter_libs
+      ref: sqlite3_flutter_libs-0.5.25-ohos
   sqlite3:
     git:
       url: https://github.com/SageMik/sqlite3-ohos.dart.git
       path: sqlite3
+      ref: sqlite3-2.4.7-ohos

@@ -1,8 +1,10 @@
 import path from 'path'
 import {appTasks} from '@ohos/hvigor-ohos-plugin';
 import {flutterHvigorPlugin} from 'flutter-hvigor-plugin';
+import {signingReplacePlugin} from './plugins/hvigor-signing-replace';
+import signingConfigs from "./signing-configs.json";
 
 export default {
-    system: appTasks,  /* Built-in plugin of Hvigor. It cannot be modified. */
-    plugins:[flutterHvigorPlugin(path.dirname(__dirname))]         /* Custom plugin to extend the functionality of Hvigor. */
+    system: appTasks,
+    plugins: [signingReplacePlugin(signingConfigs), flutterHvigorPlugin(path.dirname(__dirname))]
 }
