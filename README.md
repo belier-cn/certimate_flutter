@@ -6,7 +6,6 @@
 
 [![License: AGPL](https://img.shields.io/badge/License-AGPL-purple.svg)](https://opensource.org/license/agpl-v3)
 [![Release](https://img.shields.io/github/v/release/belier-cn/certimate_flutter?sort=semver&label=Release)](https://github.com/belier-cn/certimate_flutter/releases)
-![Platforms](https://img.shields.io/badge/Platforms-Android%20%7C%20iOS%20%7C%20MacOS%20%7C%20Windows%20%7C%20Linux-green.svg)
 ![Certimate](https://img.shields.io/badge/Certimate-0.4%2B-F97318.svg)
 ![Flutter](https://img.shields.io/badge/Flutter-3.38%2B-02569B.svg)
 
@@ -25,9 +24,9 @@
 - 提供多套丰富主题，个性化定制界面
 - 可自由切换 Material 与 Cupertino 双风格 UI
 
-> Linux 平台暂未支持 WebView，目前无法访问网页。
-
 ## ⭐ 运行界面
+
+[在线预览](https://belier-cn.github.io/certimate_flutter)
 
 | iOS                                                          | Android                                                          | Desktop                                                          |
 |--------------------------------------------------------------|------------------------------------------------------------------|------------------------------------------------------------------|
@@ -35,11 +34,27 @@
 | <img height="350"  src="docs/screenshot/server_ios.png" />   | <img height="350"  src="docs/screenshot/server_android.png" />   | <img height="350"  src="docs/screenshot/server_desktop.png" />   |
 | <img height="350"  src="docs/screenshot/settings_ios.png" /> | <img height="350"  src="docs/screenshot/settings_android.png" /> | <img height="350"  src="docs/screenshot/settings_desktop.png" /> |
 
+## 💿 支持平台
+
+| 平台            | 支持版本   |
+|---------------|--------|
+| **iOS**       | 13.0+  |
+| **Android**   | 7.0+   |
+| **HarmonyOS** | 5.0+   |
+| **macOS**     | 10.15+ |
+| **Windows**   | 10.0+  |
+| **Debian**    | 10.0+  |
+| **Ubuntu**    | 20.04+ |
+
+> Linux 暂未实现 WebView，目前无法访问网页。
+
+> HarmonyOS 打包后闪退，需等待相关 [PR](https://gitcode.com/openharmony-sig/fluttertpc_dart_sdk/pull/18) 合并。
+
 ## ⏬ 下载地址
 
 可以通过右侧 [Releases](https://github.com/belier-cn/certimate_flutter/releases) 进行下载
 
-> 如果在 MacOS 上安装后无法打开，报错**不受信任**或者**移到垃圾箱**，执行下面命令后再启动
+> 如果在 macOS 上安装后无法打开，报错**不受信任**或者**移到垃圾箱**，执行下面命令后再启动
 > ``` shell
 >  sudo xattr -d com.apple.quarantine /Applications/Certimate.app
 > ```
