@@ -104,9 +104,7 @@ class SettingsPage extends ConsumerWidget {
                                 );
                           },
                         ),
-                      if (RunPlatform.isAndroid ||
-                          RunPlatform.isWindows ||
-                          RunPlatform.isLinux)
+                      if (!(RunPlatform.isIOS || RunPlatform.isMacOS))
                         SettingsTile.switchTile(
                           leading: const Icon(TablerIcons.device_mobile),
                           title: const Text("Cupertino"),
