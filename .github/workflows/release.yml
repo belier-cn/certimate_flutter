@@ -45,7 +45,7 @@ jobs:
         name: Checkout code
       - uses: actions/setup-java@v4
         name: Setup Java SDK
-        if: ${{ matrix.type == 'android' }}
+        if: ${{ matrix.type == 'android' || matrix.type == 'ohos' }}
         with:
           distribution: "zulu"
           java-version: "17"
@@ -70,16 +70,27 @@ jobs:
           curl -fsSL "https://github.com/belier-cn/certimate_flutter/releases/download/v0.0.1/cupertino_nav_bar_${{ matrix.flutter }}.dart" -o "$target"
       - if: ${{ matrix.type == 'ohos' }}
         name: Setup Harmony SDK
-        uses: openharmony-rs/setup-ohos-sdk@v0.2
-        with:
-          version: 6.0.0.1
+        run: |
+          FILE_NAME="commandline-tools-linux-x64-6.0.1.251.zip"
+          wget -c -q -P "$HOME" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.aa" || exit 1
+          wget -c -q -P "$HOME" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.ab" || exit 1
+          cat "$HOME/${FILE_NAME}.a"* > "$HOME/${FILE_NAME}"
+          unzip -q "$HOME/${FILE_NAME}" -d "$HOME"
+          echo "$HOME/command-line-tools/bin" >> $GITHUB_PATH
+          export PATH="$HOME/command-line-tools/bin:$PATH"
+          ohpm -v
+          rm -rf "${FILE_NAME}"*
       - if: ${{ matrix.type == 'ohos' }}
         name: Setup Harmony Flutter SDK
         run: |
           cat pubspec_ohos_overrides.yaml >> pubspec.yaml
-          git clone --branch ${{ matrix.flutter }} https://gitcode.com/openharmony-tpc/flutter_flutter.git harmony_flutter
-          export PATH="$PWD/harmony_flutter/bin:$PATH"
+          rm -rf pubspec.lock
+          git clone --branch ${{ matrix.flutter }} https://gitcode.com/openharmony-tpc/flutter_flutter.git "$HOME/harmony_flutter"
+          echo "$HOME/harmony_flutter/bin" >> $GITHUB_PATH
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+          export PATH="$HOME/harmony_flutter/bin:$PATH"
           flutter --version
+          flutter config --ohos-sdk="$HOME/command-line-tools/sdk"
       - name: Install dependencies
         run: |
           flutter pub global activate fastforge
@@ -99,7 +110,7 @@ jobs:
       - if: ${{ matrix.type == 'ios' }}
         name: Build ios
         run: |
-          wget -O fastforge "https://github.com/belier-cn/fastforge/releases/download/v0.6.7-beta.1/fastforge-v0.6.7-beta.1-macos-arm64"
+          wget -c -q -O fastforge "https://github.com/belier-cn/fastforge/releases/download/v0.6.7-beta.1/fastforge-v0.6.7-beta.1-macos-arm64" || exit 1
           chmod +x fastforge
           ./fastforge package --platform ios --targets ipa --flutter-build-args no-codesign --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.ipa
       - if: ${{ matrix.type == 'macos' }}
@@ -116,7 +127,7 @@ jobs:
       - if: ${{ matrix.type == 'linux' }}
         name: Build linux
         run: |
-          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          wget -c -q -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" || exit 1
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
           sudo apt-get update
@@ -126,15 +137,12 @@ jobs:
         name: Build ohos
         run: |
           echo -n "$HARMONY_SIGNING_BASE64" | openssl base64 -d -A > ohos/signing-configs.json
-          echo -n "$HARMONY_KEYSTORE_BASE64" | openssl base64 -d -A > ohos/certimate.p12
-          echo -n "$HARMONY_CERT_BASE64" | openssl base64 -d -A > ohos/certimate.cer
-          echo -n "$HARMONY_PROFILE_BASE64" | openssl base64 -d -A > ohos/certimate.p7b
+          echo -n "$HARMONY_SIGNING_FILE_BASE64" | openssl base64 -d -A > ohos/signature.zip
+          unzip -q ohos/signature.zip -d ohos
           fastforge package --platform ohos --targets hap
         env:
           HARMONY_SIGNING_BASE64: ${{ secrets.HARMONY_SIGNING_BASE64 }}
-          HARMONY_KEYSTORE_BASE64: ${{ secrets.HARMONY_KEYSTORE_BASE64 }}
-          HARMONY_CERT_BASE64: ${{ secrets.HARMONY_CERT_BASE64 }}
-          HARMONY_PROFILE_BASE64: ${{ secrets.HARMONY_PROFILE_BASE64 }}
+          HARMONY_SIGNING_FILE_BASE64: ${{ secrets.HARMONY_SIGNING_FILE_BASE64 }}
       - if: ${{ matrix.type == 'web' }}
         name: Build web
         run: |
