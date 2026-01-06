@@ -1,39 +1,28 @@
 import "package:flutter/material.dart";
+import "package:keyboard_detection/keyboard_detection.dart";
 
-class RemoveFocus extends StatefulWidget {
-  final Widget child;
+class RemoveFocus extends StatelessWidget {
+  final Widget? child;
 
-  const RemoveFocus({super.key, required this.child});
-
-  @override
-  State<RemoveFocus> createState() => _RemoveFocusState();
-}
-
-class _RemoveFocusState extends State<RemoveFocus> {
-  FocusNode? _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-  }
+  const RemoveFocus({super.key, this.child});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (_focusNode != null) {
-          FocusScope.of(context).requestFocus(_focusNode);
-        }
-      },
-      child: widget.child,
+    return KeyboardDetection(
+      controller: KeyboardDetectionController(
+        onChanged: (state) {
+          if (state == KeyboardState.hidden) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          }
+        },
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: child,
+      ),
     );
-  }
-
-  @override
-  void dispose() {
-    _focusNode?.dispose();
-    super.dispose();
   }
 }

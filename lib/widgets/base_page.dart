@@ -13,9 +13,6 @@ class BasePage<T> extends StatelessWidget {
   // AnnotatedRegion
   final SystemUiOverlayStyle? systemOverlayStyle;
 
-  // RemoveFocus
-  final bool removeFocus;
-
   // RouteAwareWidget
   final VoidCallback? didPush;
   final VoidCallback? didPushNext;
@@ -34,7 +31,6 @@ class BasePage<T> extends StatelessWidget {
     this.child,
     this.systemOverlayStyle,
     this.exitInterceptor = false,
-    this.removeFocus = true,
     this.didPush,
     this.didPushNext,
     this.didPop,
@@ -61,9 +57,6 @@ class BasePage<T> extends StatelessWidget {
         onPopInvokedWithResult: onPopInvokedWithResult,
         child: widget,
       );
-    }
-    if (removeFocus) {
-      widget = RemoveFocus(child: widget);
     }
     if (didPush != null ||
         didPopNext != null ||
