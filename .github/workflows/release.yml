@@ -53,7 +53,7 @@ jobs:
         name: Setup Node SDK
         if: ${{ matrix.type == 'macos' }}
         with:
-          node-version: latest
+          node-version: 20
       - if: ${{ matrix.type != 'ohos' }}
         name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
@@ -85,6 +85,7 @@ jobs:
         run: |
           cat pubspec_ohos_overrides.yaml >> pubspec.yaml
           rm -rf pubspec.lock
+          git config --global http.postBuffer 1048576000
           git clone --branch ${{ matrix.flutter }} https://gitcode.com/openharmony-tpc/flutter_flutter.git "$HOME/harmony_flutter"
           echo "$HOME/harmony_flutter/bin" >> $GITHUB_PATH
           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
@@ -139,7 +140,7 @@ jobs:
           echo -n "$HARMONY_SIGNING_BASE64" | openssl base64 -d -A > ohos/signing-configs.json
           echo -n "$HARMONY_SIGNING_FILE_BASE64" | openssl base64 -d -A > ohos/signature.zip
           unzip -q ohos/signature.zip -d ohos
-          fastforge package --platform ohos --targets hap
+          fastforge package --platform ohos --targets hap --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.hap
         env:
           HARMONY_SIGNING_BASE64: ${{ secrets.HARMONY_SIGNING_BASE64 }}
           HARMONY_SIGNING_FILE_BASE64: ${{ secrets.HARMONY_SIGNING_FILE_BASE64 }}
@@ -148,14 +149,9 @@ jobs:
         run: |
           flutter build web --release --base-href /${{ github.event.repository.name }}/ --dart-define FLUTTER_BASE_HREF=/${{ github.event.repository.name }}/
           cp build/web/index.html build/web/404.html
-      - if: ${{ matrix.type == 'web' }}
-        name: Upload GitHub Pages artifact
-        id: deployment
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/web
-      - if: ${{ matrix.type != 'web' }}
-        name: Upload artifact
+          mkdir -p "dist/${{ github.ref_name }}"
+          tar -cvf dist/${{ github.ref_name }}/certimate-${{ github.ref_name }}-web.tar -C build/web .
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.type }}
@@ -166,11 +162,14 @@ jobs:
             dist/**/*.hap
             dist/**/*.dmg
             dist/**/*.exe
+            dist/**/*.tar
             dist/**/*.appimage
 
   release:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         name: Download artifact
@@ -183,17 +182,3 @@ jobs:
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

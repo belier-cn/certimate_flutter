@@ -1,0 +1,59 @@
+name: Deploy Web and Appcast
+on:
+  release:
+    types: [ published ]
+
+env:
+  COMBINED_SITE_DIR: "combined_site"
+
+jobs:
+  deploy-pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download web.tar
+        run: |
+          mkdir -p "${{ env.COMBINED_SITE_DIR }}"
+          mkdir -p temp_web
+          gh release download "${{ github.ref_name }}" \
+            --pattern "certimate-${{ github.ref_name }}-web.tar" \
+            --dir temp_web
+          tar -xf "temp_web/certimate-${{ github.ref_name }}-web.tar" -C "${{ env.COMBINED_SITE_DIR }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@v1
+
+      - name: Generate appcast.xml
+        working-directory: ./appcast
+        run: |
+          dart pub get
+          dart index.dart
+        env:
+          VERSION_NAME: ${{ github.ref_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          PUBLISHED_AT: ${{ github.event.release.published_at }}
+          OUTPUT_PATH: "../${{ env.COMBINED_SITE_DIR }}/appcast.xml"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./${{ env.COMBINED_SITE_DIR }}"
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
