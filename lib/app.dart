@@ -4,6 +4,7 @@ import "package:certimate/provider/language.dart";
 import "package:certimate/provider/platform.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/provider/theme.dart";
+import "package:certimate/provider/upgrader.dart";
 import "package:certimate/router/router.dart";
 import "package:certimate/theme/theme.dart";
 import "package:certimate/widgets/index.dart";
@@ -16,6 +17,7 @@ import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:form_builder_validators/form_builder_validators.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
+import "package:upgrader/upgrader.dart";
 
 class App extends HookConsumerWidget {
   const App({super.key});
@@ -28,6 +30,7 @@ class App extends HookConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final themeScheme = ref.watch(themeSchemeProvider);
     final language = ref.watch(languageProvider);
+    final upgrader = ref.read(upgraderProviderProvider);
     final showUnlock = useValueNotifier(false);
     useEffect(() {
       if (ref.read(biometricProvider)) {
@@ -66,7 +69,6 @@ class App extends HookConsumerWidget {
               () => DebugDraggableButton.show(),
             );
           }
-          // return child!;
           if (kIsWeb) {
             return PlatformProvider(
               settings: PlatformSettingsData(
@@ -91,9 +93,19 @@ class App extends HookConsumerWidget {
               },
             );
           } else {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(highContrast: false),
-              child: child!,
+            return UpgradeAlert(
+              key: upgraderKey,
+              navigatorKey: router.routerDelegate.navigatorKey,
+              dialogStyle:
+                  targetPlatform == TargetPlatform.iOS ||
+                      targetPlatform == TargetPlatform.macOS
+                  ? UpgradeDialogStyle.cupertino
+                  : UpgradeDialogStyle.material,
+              upgrader: upgrader,
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(highContrast: false),
+                child: child!,
+              ),
             );
           }
         },

@@ -1,5 +1,6 @@
 import "package:certimate/app.dart";
 import "package:certimate/extension/index.dart";
+import "package:certimate/provider/device.dart";
 import "package:certimate/provider/package.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/theme/theme.dart";
@@ -24,7 +25,8 @@ void main() {
       ProviderScope(
         overrides: [
           packageInfoProvider.overrideWithValue(res.$1),
-          biometricsProvider.overrideWithValue(res.$2),
+          deviceInfoProvider.overrideWithValue(res.$2),
+          biometricsProvider.overrideWithValue(res.$3),
         ],
         child: const App(),
         retry: (retryCount, error) => null,
@@ -33,11 +35,12 @@ void main() {
   });
 }
 
-Future<(PackageInfo, List<BiometricType>)> init() async {
+Future<(PackageInfo, BaseDeviceInfo, List<BiometricType>)> init() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   if (RunPlatform.isAndroid || RunPlatform.isIOS) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   }
+  final baseDeviceInfo = await DeviceInfoPlugin().deviceInfo;
   if (kIsWeb) {
     web.usePathUrlStrategy();
   } else if (RunPlatform.isDesktop) {
@@ -63,7 +66,9 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
     if (RunPlatform.isAndroid ||
         RunPlatform.isOhos ||
         (RunPlatform.isIOS &&
-            (await DeviceInfoPlugin().iosInfo).systemName.contains("iOS"))) {
+            (IosDeviceInfo.fromMap(
+              baseDeviceInfo.data,
+            )).systemName.contains("iOS"))) {
       // 强制竖屏
       await SystemChrome.setPreferredOrientations(const [
         DeviceOrientation.portraitUp,
@@ -72,5 +77,9 @@ Future<(PackageInfo, List<BiometricType>)> init() async {
     }
   }
   await SpUtil.getInstance();
-  return (await PackageInfo.fromPlatform(), await getAvailableBiometrics());
+  return (
+    await PackageInfo.fromPlatform(),
+    baseDeviceInfo,
+    await getAvailableBiometrics(),
+  );
 }

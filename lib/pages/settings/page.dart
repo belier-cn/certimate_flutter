@@ -1,4 +1,5 @@
 import "package:adaptive_dialog/adaptive_dialog.dart";
+import "package:badges/badges.dart" as badges;
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/intl/messages_all.dart";
 import "package:certimate/generated/l10n.dart";
@@ -7,18 +8,20 @@ import "package:certimate/provider/package.dart";
 import "package:certimate/provider/platform.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/provider/theme.dart";
+import "package:certimate/provider/upgrader.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
+import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:go_router/go_router.dart";
+import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
 import "package:local_auth/local_auth.dart";
 import "package:share_plus/share_plus.dart";
+import "package:upgrader/upgrader.dart";
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -30,11 +33,11 @@ class SettingsPage extends ConsumerWidget {
     final language = ref.read(languageProvider);
     final packageInfo = ref.read(packageInfoProvider);
     final biometrics = ref.read(biometricsProvider);
+    final upgrader = ref.read(upgraderProviderProvider);
 
     final privacyBlur = ref.watch(privacyBlurProvider);
     final biometric = ref.watch(biometricProvider);
 
-    final theme = Theme.of(context);
     final s = context.s;
 
     return BasePage(
@@ -193,22 +196,27 @@ class SettingsPage extends ConsumerWidget {
                               "https://github.com/belier-cn/certimate_flutter/issues",
                         ).push(context),
                       ),
+                      SettingsTile.navigation(
+                        leading: const Icon(TablerIcons.refresh),
+                        title: badges.Badge(
+                          showBadge: upgrader.isUpdateAvailable(),
+                          badgeAnimation: const badges.BadgeAnimation.scale(),
+                          position: badges.BadgePosition.topEnd(
+                            top: -2,
+                            end: -12,
+                          ),
+                          child: Text(s.version.capitalCase),
+                        ),
+                        value: packageInfo != null
+                            ? Text(packageInfo.version)
+                            : null,
+                        onPressed: (_) => showNewVersion(context, upgrader),
+                      ),
                     ],
                   ),
                 ],
               ),
-              if (packageInfo != null)
-                Padding(
-                  padding: isMaterial(context)
-                      ? const EdgeInsets.only(top: 10, bottom: 40)
-                      : const EdgeInsets.only(bottom: 30),
-                  child: Text(
-                    "${s.version.capitalCase} ${packageInfo.version} (${packageInfo.buildNumber})",
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -276,6 +284,28 @@ class SettingsPage extends ConsumerWidget {
       ref
           .read(languageProvider.notifier)
           .update(value.languageCode == "null" ? null : value);
+    }
+  }
+
+  void showNewVersion(BuildContext context, Upgrader upgrader) async {
+    await upgrader.initialize();
+    await upgrader.updateVersionInfo();
+    if (!context.mounted) {
+      return;
+    }
+    if (upgraderKey.currentState != null && upgrader.isUpdateAvailable()) {
+      final appMessages = upgrader.determineMessages(context);
+      upgraderKey.currentState!.showTheDialog(
+        key: const Key("upgrader_alert_dialog"),
+        context: context,
+        title: appMessages.message(UpgraderMessage.title),
+        message: upgrader.body(appMessages),
+        releaseNotes: upgrader.releaseNotes,
+        barrierDismissible: true,
+        messages: appMessages,
+      );
+    } else {
+      SmartDialog.showToast(context.s.alreadyUpToDate);
     }
   }
 }

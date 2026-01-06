@@ -147,5 +147,6 @@
   "hostEndsErrorMsg": "不能以\"/\"结尾",
   "openInBrowser": "在浏览器中打开",
   "copyUrl": "复制链接",
-  "shareUrl": "分享链接"
+  "shareUrl": "分享链接",
+  "alreadyUpToDate": "已经是最新版本了"
 }
