@@ -4,7 +4,8 @@ import "package:intl/intl.dart";
 import "package:xml/xml.dart";
 
 const platformList = ["ios", "android", "ohos", "macos", "windows", "linux"];
-final String version = Platform.environment["VERSION_NAME"] ?? "0.0.1";
+final String version = (Platform.environment["VERSION_NAME"] ?? "v0.0.1")
+    .replaceFirst("v", "");
 final String releaseNotes = Platform.environment["RELEASE_BODY"] ?? "";
 final String releaseUrl = Platform.environment["RELEASE_URL"] ?? "";
 final String publishedAt = Platform.environment["PUBLISHED_AT"] ?? "";
