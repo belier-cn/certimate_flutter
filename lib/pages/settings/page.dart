@@ -11,6 +11,7 @@ import "package:certimate/provider/theme.dart";
 import "package:certimate/provider/upgrader.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
@@ -288,6 +289,10 @@ class SettingsPage extends ConsumerWidget {
   }
 
   void showNewVersion(BuildContext context, Upgrader upgrader) async {
+    if (kIsWeb) {
+      SmartDialog.showToast(context.s.alreadyUpToDate);
+      return;
+    }
     await upgrader.initialize();
     await upgrader.updateVersionInfo();
     if (!context.mounted) {

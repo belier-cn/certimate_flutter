@@ -2,6 +2,7 @@ import "package:certimate/extension/platform.dart";
 import "package:certimate/provider/device.dart";
 import "package:certimate/provider/language.dart";
 import "package:device_info_plus/device_info_plus.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
 import "package:upgrader/upgrader.dart";
@@ -48,7 +49,7 @@ class UpgraderProvider extends _$UpgraderProvider {
   }
 
   String? getOsVersionString(BaseDeviceInfo? devicInfo) {
-    if (devicInfo == null) {
+    if (kIsWeb || devicInfo == null) {
       return null;
     }
     if (RunPlatform.isAndroid) {
