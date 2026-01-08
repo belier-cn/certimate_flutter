@@ -6,6 +6,7 @@ import "package:flutter_form_builder/flutter_form_builder.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_polygon_input_border/flutter_polygon_input_border.dart";
 import "package:form_builder_cupertino_fields/form_builder_cupertino_fields.dart";
+import "package:form_builder_validators/form_builder_validators.dart";
 
 class PlatformFormBuilderSectionData {
   final bool? insetGrouped;
@@ -258,6 +259,8 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
 
   final bool? initialValue;
   final FormFieldValidator<bool>? validator;
+  final ValueChanged<bool?>? onChanged;
+  final bool enabled;
 
   const PlatformFormBuilderSwitch({
     super.key,
@@ -265,6 +268,8 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
     required this.title,
     this.initialValue,
     this.validator,
+    this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -287,6 +292,8 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
               initialValue: initialValue,
               validator: validator,
               autovalidateMode: sectionData?.validateMode,
+              onChanged: onChanged,
+              enabled: enabled,
               title: const SizedBox(),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -310,6 +317,8 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
         initialValue: initialValue,
         validator: validator,
         autovalidateMode: sectionData?.validateMode,
+        onChanged: onChanged,
+        enabled: enabled,
         contentPadding: insetGrouped != true
             ? const EdgeInsets.only(top: 12)
             : null,
@@ -340,3 +349,11 @@ class IntegerInputFormatter extends TextInputFormatter {
 
 int? integerValueTransformer(String? value) =>
     value == null ? null : int.tryParse(value);
+
+// https://zod.dev/api?id=emails
+final zodEmailValidator = FormBuilderValidators.email(
+  regex: RegExp(
+    r"^(?!\.)(?!.*\.\.)([a-z0-9_'+\-.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$",
+    caseSensitive: false,
+  ),
+);

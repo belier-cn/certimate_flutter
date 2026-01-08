@@ -62,6 +62,8 @@ abstract class ServerModel with _$ServerModel {
     required String username,
     required String passwordId,
     required String token,
+    required String localId,
+    String? version,
     required DateTime createdAt,
   }) = _ServerModel;
 }
@@ -74,6 +76,8 @@ extension ServerModelConvert on ServerModel {
       userId: Value(userId),
       username: Value(username),
       token: Value(token),
+      localId: Value(localId),
+      version: Value(version),
     );
   }
 }
@@ -88,6 +92,8 @@ extension ServerConvert on Server {
       username: username,
       passwordId: passwordId,
       token: token,
+      localId: localId ?? "",
+      version: version,
       createdAt: createdAt,
     );
   }

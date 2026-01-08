@@ -4,6 +4,7 @@ import "package:certimate/api/workflow_api.dart";
 import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/pages/home/provider.dart";
+import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:flutter/material.dart";
@@ -123,7 +124,11 @@ class ServerDataNotifier extends _$ServerDataNotifier {
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      return await ref.read(serversDaoProvider).deleteById(server.id);
+      final deleted = await ref.read(serversDaoProvider).deleteById(server.id);
+      if (deleted > 0 && server.localId.isNotEmpty) {
+        await ref.read(localCertimateManagerProvider).stopLocalServer(server);
+      }
+      return deleted;
     }
     return 0;
   }

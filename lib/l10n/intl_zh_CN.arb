@@ -148,5 +148,6 @@
   "openInBrowser": "在浏览器中打开",
   "copyUrl": "复制链接",
   "shareUrl": "分享链接",
-  "alreadyUpToDate": "已经是最新版本了"
+  "alreadyUpToDate": "已经是最新版本了",
+  "localServer": "本地服务"
 }

@@ -7,3 +7,5 @@ void replacePath(String path) =>
     web.window.history.replaceState(null, "", path);
 
 void usePathUrlStrategy() => web_plugin.usePathUrlStrategy();
+
+String getCurrentAbi() => throw UnsupportedError("getCurrentAbi");

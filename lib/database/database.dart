@@ -20,6 +20,10 @@ class Servers extends Table {
 
   TextColumn get token => text()();
 
+  TextColumn get localId => text().nullable()();
+
+  TextColumn get version => text().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
 }
 
@@ -33,7 +37,17 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(servers, servers.localId);
+        await m.addColumn(servers, servers.version);
+      }
+    },
+  );
 
   static QueryExecutor _openConnection() {
     return driftDatabase(

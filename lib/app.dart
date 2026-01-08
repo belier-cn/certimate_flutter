@@ -1,6 +1,7 @@
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/l10n.dart";
 import "package:certimate/provider/language.dart";
+import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/provider/platform.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/provider/theme.dart";
@@ -45,6 +46,7 @@ class App extends HookConsumerWidget {
           ),
         );
       }
+      ref.read(localCertimateManagerProvider).ensureLocalServersStarted();
       return null;
     }, []);
     useOnAppLifecycleStateChange(

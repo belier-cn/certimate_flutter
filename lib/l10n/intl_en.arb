@@ -148,5 +148,6 @@
   "openInBrowser": "open in browser",
   "copyUrl": "copy url",
   "shareUrl": "share url",
-  "alreadyUpToDate": "already up to date"
+  "alreadyUpToDate": "already up to date",
+  "localServer": "local service"
 }

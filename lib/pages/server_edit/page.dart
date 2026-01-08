@@ -2,7 +2,9 @@ import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/hooks/index.dart";
 import "package:certimate/pages/server_edit/provider.dart";
+import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
@@ -21,6 +23,7 @@ class ServerEditPage extends HookConsumerWidget {
     final provider = serverEditProvider(serverId);
     final focusNodes = useFocusNodes(count: 4);
     final scrollController = useScrollController();
+    final isLocal = useValueNotifier(false);
     return BasePage(
       child: Scaffold(
         body: KeyboardActions(
@@ -53,20 +56,26 @@ class ServerEditPage extends HookConsumerWidget {
                         FormBuilderValidators.required(),
                       ]),
                     ),
-                    PlatformFormBuilderTextField(
-                      title: Text(s.host.capitalCase),
-                      name: "host",
-                      focusNode: focusNodes[1],
-                      initialValue: item?.host,
-                      placeholder: s.pleaseEnter(s.url),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                        FormBuilderValidators.url(),
-                        FormBuilderValidators.matchNot(
-                          RegExp(r"^(.*[^/])$"),
-                          errorText: s.hostEndsErrorMsg,
-                        ),
-                      ]),
+                    ValueListenableBuilder(
+                      valueListenable: isLocal,
+                      builder: (context, readOnly, _) {
+                        return PlatformFormBuilderTextField(
+                          title: Text(s.host.capitalCase),
+                          name: "host",
+                          focusNode: focusNodes[1],
+                          initialValue: item?.host,
+                          placeholder: s.pleaseEnter(s.url),
+                          readOnly: readOnly,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.url(),
+                            FormBuilderValidators.matchNot(
+                              RegExp(r"^(.*[^/])$"),
+                              errorText: s.hostEndsErrorMsg,
+                            ),
+                          ]),
+                        );
+                      },
                     ),
                     PlatformFormBuilderTextField(
                       title: Text(s.user.capitalCase),
@@ -76,6 +85,7 @@ class ServerEditPage extends HookConsumerWidget {
                       placeholder: s.pleaseEnter(s.username),
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
+                        zodEmailValidator,
                       ]),
                     ),
                     PlatformFormBuilderTextField(
@@ -85,17 +95,35 @@ class ServerEditPage extends HookConsumerWidget {
                       initialValue: item?.passwordId,
                       placeholder: s.pleaseEnter(s.password),
                       obscureText: true,
-                      validator: serverId == null
-                          ? FormBuilderValidators.compose([
-                              FormBuilderValidators.required(),
-                            ])
-                          : null,
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.minLength(10),
+                        FormBuilderValidators.maxLength(32),
+                      ]),
                     ),
                     PlatformFormBuilderSwitch(
                       name: "savePassword",
                       initialValue: item?.passwordId.isNotEmptyOrNull ?? false,
                       title: Text(s.savePassword.capitalCase),
                     ),
+                    if (!kIsWeb && RunPlatform.isDesktop)
+                      PlatformFormBuilderSwitch(
+                        name: "isLocal",
+                        title: Text(s.localServer.capitalCase),
+                        initialValue: item?.localId.isNotEmpty == true,
+                        enabled: serverId == null,
+                        onChanged: (value) async {
+                          isLocal.value = value ?? false;
+                          if (value == true && serverId == null) {
+                            final port = await ref
+                                .read(localCertimateManagerProvider)
+                                .pickAvailablePort();
+                            final formState = notifier.formKey?.currentState;
+                            final host = "http://127.0.0.1:$port";
+                            formState?.fields["host"]?.didChange(host);
+                          }
+                        },
+                      ),
                   ],
                 ),
               );

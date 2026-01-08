@@ -2,6 +2,7 @@ import "package:certimate/api/auth_api.dart";
 import "package:certimate/database/database.dart";
 import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
+import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/provider/security.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:drift/drift.dart";
@@ -41,12 +42,28 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     final String password = data["password"];
     final displayName = data["displayName"];
     final savePassword = data["savePassword"];
+    final isLocal = data["isLocal"] == true;
     final server = state.value?.value;
     String userId = "";
     String tokenValue = "";
+    String? localVersion;
     final passwordId = server?.passwordId.isNotEmpty == true
         ? server!.passwordId
         : const UuidV4().generate().replaceAll("-", "");
+    final localId = server?.localId.isNotEmpty == true
+        ? server!.passwordId
+        : const UuidV4().generate().replaceAll("-", "");
+    if (isLocal && serverId == null) {
+      localVersion = await ref
+          .read(localCertimateManagerProvider)
+          .createLocalServer(
+            host: host,
+            displayName: displayName,
+            username: username,
+            password: password,
+            localId: localId,
+          );
+    }
     if (serverId == null ||
         host != server?.host ||
         username != server?.username ||
@@ -67,7 +84,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     }
 
     if (serverId == null) {
-      if (savePassword == true) {
+      if (savePassword == true && !RunPlatform.isMacOS) {
         // 保存密码
         await secureStorage.write(key: passwordId, value: password);
       }
@@ -80,6 +97,8 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
           passwordId: savePassword ? passwordId : "",
           token: tokenValue,
           createdAt: DateTime.now(),
+          localId: Value.absentIfNull(localId),
+          version: Value.absentIfNull(localVersion),
         ),
       );
     } else {

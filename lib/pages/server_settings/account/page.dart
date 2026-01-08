@@ -50,6 +50,7 @@ class ServerAccountPage extends HookConsumerWidget {
                       placeholder: s.pleaseEnter(s.currentPassword),
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
+                        zodEmailValidator,
                       ]),
                     ),
                   ],

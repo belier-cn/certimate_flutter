@@ -82,9 +82,11 @@ class HomePage extends HookConsumerWidget {
                     : newServer;
                 if (realServer is ServerModel? && realServer != null) {
                   ref.read(serverListProvider.notifier).addServer(realServer);
-                  if (RunPlatform.isDesktopUi && context.mounted) {
-                    ServerRoute(serverId: realServer.id).push(context);
-                  }
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (RunPlatform.isDesktopUi && context.mounted) {
+                      ServerRoute(serverId: realServer.id).push(context);
+                    }
+                  });
                 }
               }
             },
