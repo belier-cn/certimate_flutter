@@ -18,14 +18,18 @@ class SettingApi {
 
   SettingApi({required this.dio});
 
-  Future<PersistenceContent?> getPersistence(ServerModel server) async {
+  Future<SettingResult<T>> getSettings<T>(
+    ServerModel server,
+    String settingName,
+    T Function(Map<String, Object?> json) fromJsonT,
+  ) async {
     final response = await dio.get(
       "${server.host}/api/collections/settings/records",
       queryParameters: {
         "page": 1,
         "perPage": 1,
         "skipTotal": 1,
-        "filter": "name='persistence'",
+        "filter": "name='$settingName'",
       },
       options: server.getOptions(),
     );
@@ -33,27 +37,36 @@ class SettingApi {
       response.data,
       (json) => SettingResult.fromJson(
         json as Map<String, Object?>,
-        (json) => PersistenceContent.fromJson(json as Map<String, Object?>),
+        (json) => fromJsonT(json as Map<String, Object?>),
       ),
     );
-    return data.items.firstOrNull?.content;
+    return data.items.firstOrNull ??
+        SettingResult(name: settingName, content: fromJsonT({}));
   }
 
-  Future<void> updatePersistence(
-    ServerModel server, {
-    required int workflowRunsMaxDaysRetention,
-    required int expiredCertificatesMaxDaysRetention,
-  }) async {
-    await dio.patch(
-      "${server.host}/api/collections/settings/records",
-      data: {
-        "content": {
-          "workflowRunsMaxDaysRetention": workflowRunsMaxDaysRetention,
-          "expiredCertificatesMaxDaysRetention":
-              expiredCertificatesMaxDaysRetention,
-        },
-        "name": "persistence",
-      },
+  Future<SettingResult<T>> updateSettings<T>(
+    ServerModel server,
+    SettingResult<T> settings,
+    T Function(Map<String, Object?> json) fromJsonT,
+    Object? Function(T) toJsonT,
+  ) async {
+    Response response;
+    if (settings.id?.isNotEmpty == true) {
+      response = await dio.patch(
+        "${server.host}/api/collections/settings/records/${settings.id}",
+        data: settings.toJson(toJsonT),
+        options: server.getOptions(),
+      );
+    } else {
+      response = await dio.post(
+        "${server.host}/api/collections/settings/records",
+        data: {"name": settings.name, "content": settings.content},
+        options: server.getOptions(),
+      );
+    }
+    return SettingResult.fromJson(
+      response.data,
+      (json) => fromJsonT(json as Map<String, Object?>),
     );
   }
 }
@@ -80,6 +93,7 @@ abstract class SettingResult<T> with _$SettingResult<T> {
 @freezed
 abstract class PersistenceContent with _$PersistenceContent {
   const factory PersistenceContent({
+    int? certificatesWarningDaysBeforeExpire,
     int? expiredCertificatesMaxDaysRetention,
     int? workflowRunsMaxDaysRetention,
   }) = _PersistenceContent;

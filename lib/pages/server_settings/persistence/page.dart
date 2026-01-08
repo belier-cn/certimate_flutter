@@ -25,7 +25,7 @@ class ServerPersistencePage extends HookConsumerWidget {
       FormBuilderValidators.numeric(),
       FormBuilderValidators.max(36500),
     ]);
-    final focusNodes = useFocusNodes(count: 2);
+    final focusNodes = useFocusNodes(count: 3);
     final scrollController = useScrollController();
     return BasePage(
       child: Scaffold(
@@ -38,7 +38,7 @@ class ServerPersistencePage extends HookConsumerWidget {
                 .map((focusNode) => KeyboardActionsItem(focusNode: focusNode))
                 .toList(),
           ),
-          child: RefreshBody<SubmitRefreshData<PersistenceContent?>>(
+          child: RefreshBody<SubmitRefreshData<SettingResult<PersistenceContent>>>(
             title: Text(s.persistence.titleCase),
             provider: provider,
             itemBuilder: (context, data, index) {
@@ -49,11 +49,28 @@ class ServerPersistencePage extends HookConsumerWidget {
                   insetGrouped: false,
                   children: [
                     PlatformFormBuilderTextField(
-                      title: Text(s.workflowRunsMaxDaysRetention.capitalCase),
-                      name: "workflowRunsMaxDaysRetention",
+                      title: Text(
+                        s.certificatesWarningDaysBeforeExpire.capitalCase,
+                      ),
+                      name: "certificatesWarningDaysBeforeExpire",
                       focusNode: focusNodes[0],
                       initialValue:
-                          "${data.value?.workflowRunsMaxDaysRetention ?? 0}",
+                          "${data.value.content?.certificatesWarningDaysBeforeExpire ?? 21}",
+                      inputFormatters: inputFormatters,
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.numeric(),
+                        FormBuilderValidators.min(1),
+                        FormBuilderValidators.max(365),
+                      ]),
+                      valueTransformer: integerValueTransformer,
+                    ),
+                    PlatformFormBuilderTextField(
+                      title: Text(s.workflowRunsMaxDaysRetention.capitalCase),
+                      name: "workflowRunsMaxDaysRetention",
+                      focusNode: focusNodes[1],
+                      initialValue:
+                          "${data.value.content?.workflowRunsMaxDaysRetention ?? 0}",
                       inputFormatters: inputFormatters,
                       validator: validator,
                       valueTransformer: integerValueTransformer,
@@ -63,9 +80,9 @@ class ServerPersistencePage extends HookConsumerWidget {
                         s.expiredCertificatesMaxDaysRetention.capitalCase,
                       ),
                       name: "expiredCertificatesMaxDaysRetention",
-                      focusNode: focusNodes[1],
+                      focusNode: focusNodes[2],
                       initialValue:
-                          "${data.value?.expiredCertificatesMaxDaysRetention ?? 0}",
+                          "${data.value.content?.expiredCertificatesMaxDaysRetention ?? 0}",
                       inputFormatters: inputFormatters,
                       validator: validator,
                       valueTransformer: integerValueTransformer,

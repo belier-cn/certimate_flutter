@@ -149,5 +149,7 @@
   "copyUrl": "复制链接",
   "shareUrl": "分享链接",
   "alreadyUpToDate": "已经是最新版本了",
-  "localServer": "本地服务"
+  "localServer": "本地服务",
+  "certificatesWarningDaysBeforeExpire": "证书即将过期预警阈值",
+  "saveSuccess": "保存成功"
 }
