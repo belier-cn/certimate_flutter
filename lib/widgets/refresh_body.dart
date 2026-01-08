@@ -319,8 +319,9 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                 final totalLength =
                     list.length +
                     data.requireValue.topItemCount +
+                    (list.isEmpty ? 1 : 0) +
                     (isFilterMixin ? 1 : 0);
-                if (list.isEmpty) {
+                if (data.requireValue.topItemCount <= 0 && list.isEmpty) {
                   return [
                     if (isFilterMixin)
                       SliverPadding(
@@ -341,6 +342,12 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                   if (isFilterMixin &&
                       index == data.requireValue.topItemCount) {
                     return filterWidget(index);
+                  }
+                  if (list.isEmpty && index == totalLength - 1) {
+                    return Padding(
+                      padding: EdgeInsets.all(appTheme.bodyPadding.left),
+                      child: const EmptyWidget(),
+                    );
                   }
                   final itemWidget = itemBuilder.call(
                     context,
