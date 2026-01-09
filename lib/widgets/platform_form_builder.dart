@@ -7,6 +7,7 @@ import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_polygon_input_border/flutter_polygon_input_border.dart";
 import "package:form_builder_cupertino_fields/form_builder_cupertino_fields.dart";
 import "package:form_builder_validators/form_builder_validators.dart";
+import "package:re_editor/re_editor.dart";
 
 class PlatformFormBuilderSectionData {
   final bool? insetGrouped;
@@ -250,6 +251,231 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
       obscureText: obscureText,
       focusNode: focusNode,
     );
+  }
+}
+
+class PlatformFormBuilderCodeField extends StatefulWidget {
+  final Widget title;
+  final String name;
+
+  final CodeLineEditingController? controller;
+
+  final String? initialValue;
+  final String? placeholder;
+
+  final bool readOnly;
+  final bool enabled;
+
+  final int maxLines;
+  final double? height;
+  final bool wordWrap;
+  final CodeEditorStyle? style;
+  final CodeIndicatorBuilder? indicatorBuilder;
+  final EdgeInsetsGeometry? padding;
+
+  final FormFieldValidator<String>? validator;
+  final ValueTransformer<String?>? valueTransformer;
+  final FocusNode? focusNode;
+  final ValueChanged<String?>? onChanged;
+
+  const PlatformFormBuilderCodeField({
+    super.key,
+    required this.name,
+    required this.title,
+    this.controller,
+    this.initialValue,
+    this.placeholder,
+    this.readOnly = false,
+    this.enabled = true,
+    this.maxLines = 8,
+    this.height,
+    this.wordWrap = false,
+    this.style,
+    this.indicatorBuilder,
+    this.padding,
+    this.validator,
+    this.valueTransformer,
+    this.focusNode,
+    this.onChanged,
+  });
+
+  @override
+  State<PlatformFormBuilderCodeField> createState() =>
+      _PlatformFormBuilderCodeFieldState();
+}
+
+class _PlatformFormBuilderCodeFieldState
+    extends State<PlatformFormBuilderCodeField> {
+  late CodeLineEditingController _controller;
+  late bool _ownsController;
+  bool _syncingFromField = false;
+  String? _pendingText;
+
+  FormBuilderFieldState<FormBuilderField<String>, String>? _fieldState;
+
+  CodeLineEditingController get _effectiveController =>
+      widget.controller ?? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _initController();
+    _effectiveController.addListener(_handleControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant PlatformFormBuilderCodeField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.controller != widget.controller) {
+      final oldController = oldWidget.controller ?? _controller;
+      oldController.removeListener(_handleControllerChanged);
+
+      if (_ownsController && oldWidget.controller == null) {
+        _controller.dispose();
+      }
+
+      _initController();
+      _effectiveController.addListener(_handleControllerChanged);
+    }
+  }
+
+  void _initController() {
+    if (widget.controller != null) {
+      _ownsController = false;
+      _controller = widget.controller!;
+      return;
+    }
+
+    _ownsController = true;
+    _controller = CodeLineEditingController.fromText(widget.initialValue);
+  }
+
+  void _handleControllerChanged() {
+    if (_syncingFromField) {
+      return;
+    }
+    final fieldState = _fieldState;
+    if (fieldState == null) {
+      return;
+    }
+    final nextValue = _effectiveController.text;
+    if (fieldState.value != nextValue) {
+      fieldState.didChange(nextValue);
+    }
+  }
+
+  void _syncControllerText(String? value) {
+    final nextText = value ?? "";
+    final controller = _effectiveController;
+    if (controller.text == nextText) {
+      return;
+    }
+    if (_pendingText == nextText) {
+      return;
+    }
+    _pendingText = nextText;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final pendingText = _pendingText;
+      _pendingText = null;
+      if (pendingText == null) {
+        return;
+      }
+      final controller = _effectiveController;
+      if (controller.text == pendingText) {
+        return;
+      }
+      _syncingFromField = true;
+      controller.text = pendingText;
+      _syncingFromField = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _effectiveController.removeListener(_handleControllerChanged);
+    if (_ownsController) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.s;
+    final sectionData = PlatformFormBuilderSectionInherited.of(context);
+    final insetGrouped = sectionData?.insetGrouped;
+    final titleWidget = insetGrouped == true
+        ? widget.title
+        : DefaultTextStyle(
+            style: Theme.of(context).textTheme.titleMedium!,
+            child: widget.title,
+          );
+    final hintText = widget.placeholder ?? s.pleaseEnter("");
+    final lineHeight =
+        (widget.style?.fontSize ?? 13.0) * (widget.style?.fontHeight ?? 1.4);
+    final editorHeight = widget.height ?? (widget.maxLines * lineHeight + 10);
+
+    final field = FormBuilderField<String>(
+      name: widget.name,
+      focusNode: widget.focusNode,
+      initialValue: widget.initialValue,
+      validator: widget.validator,
+      autovalidateMode: sectionData?.validateMode,
+      valueTransformer: widget.valueTransformer,
+      enabled: widget.enabled,
+      onChanged: widget.onChanged,
+      builder: (formField) {
+        final fieldState =
+            formField
+                as FormBuilderFieldState<FormBuilderField<String>, String>;
+        _fieldState = fieldState;
+
+        _syncControllerText(fieldState.value);
+
+        final editor = SizedBox(
+          height: editorHeight,
+          child: CodeEditor(
+            autofocus: false,
+            controller: _effectiveController,
+            focusNode: fieldState.effectiveFocusNode,
+            hint: hintText,
+            padding: widget.padding,
+            style: widget.style,
+            indicatorBuilder: widget.indicatorBuilder,
+            readOnly: widget.readOnly || !fieldState.enabled,
+            showCursorWhenReadOnly: fieldState.enabled,
+            wordWrap: widget.wordWrap,
+          ),
+        );
+
+        if (insetGrouped == true && context.isCupertinoStyle) {
+          return CupertinoFormRow(
+            prefix: titleWidget,
+            error: fieldState.errorText != null
+                ? Text(fieldState.errorText!)
+                : null,
+            child: editor,
+          );
+        }
+        return InputDecorator(
+          isFocused: fieldState.effectiveFocusNode.hasFocus,
+          isEmpty: (fieldState.value ?? "").isEmpty,
+          decoration: InputDecoration(
+            contentPadding: insetGrouped != true
+                ? const EdgeInsets.all(6)
+                : EdgeInsets.zero,
+            errorText: fieldState.errorText,
+          ),
+          child: editor,
+        );
+      },
+    );
+
+    return PlatformFormBuilderRow(title: titleWidget, child: field);
   }
 }
 

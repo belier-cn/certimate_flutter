@@ -71,6 +71,10 @@ class AppIcons {
   IconData get settings =>
       isMaterial(context) ? TablerIcons.settings : CupertinoIcons.settings;
 
+  IconData get template => isMaterial(context)
+      ? TablerIcons.code_dots
+      : CupertinoIcons.chevron_left_slash_chevron_right;
+
   IconData get credential => isMaterial(context)
       ? TablerIcons.fingerprint
       : CupertinoIcons.checkmark_shield;

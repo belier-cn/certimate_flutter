@@ -151,5 +151,12 @@
   "alreadyUpToDate": "already up to date",
   "localServer": "local service",
   "certificatesWarningDaysBeforeExpire": "certificate expiration warning threshold",
-  "saveSuccess": "save success"
+  "saveSuccess": "save success",
+  "presetTemplate": "presets",
+  "notifyTemplate": "notify template",
+  "scriptTemplate": "script template",
+  "subject": "subject",
+  "content": "content",
+  "command": "command",
+  "join2": "{one} {two}"
 }

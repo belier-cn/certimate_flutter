@@ -151,5 +151,12 @@
   "alreadyUpToDate": "已经是最新版本了",
   "localServer": "本地服务",
   "certificatesWarningDaysBeforeExpire": "证书即将过期预警阈值",
-  "saveSuccess": "保存成功"
+  "saveSuccess": "保存成功",
+  "presetTemplate": "预设模版",
+  "notifyTemplate": "通知模版",
+  "scriptTemplate": "脚本模版",
+  "subject": "主题",
+  "content": "内容",
+  "command": "脚本命令",
+  "join2": "{one}{two}"
 }

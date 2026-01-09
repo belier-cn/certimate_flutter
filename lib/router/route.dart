@@ -16,6 +16,8 @@ import "package:certimate/pages/server_settings/password/page.dart";
 import "package:certimate/pages/server_settings/persistence/page.dart";
 import "package:certimate/pages/server_webview/page.dart";
 import "package:certimate/pages/settings/page.dart";
+import "package:certimate/pages/template/page.dart";
+import "package:certimate/pages/template_edit/page.dart";
 import "package:certimate/pages/theme/page.dart";
 import "package:certimate/pages/webview/page.dart";
 import "package:certimate/pages/workflow_logs/page.dart";
@@ -52,6 +54,10 @@ RouteBase get $singleHomeRoute =>
       path: ":serverId",
       routes: [
         TypedGoRoute<ServerWebViewRoute>(path: "webview"),
+        TypedGoRoute<ServerTemplatesRoute>(
+          path: "templates",
+          routes: [TypedGoRoute<TemplateEditRoute>(path: "edit")],
+        ),
         TypedGoRoute<CertificatesRoute>(
           path: "certificates",
           routes: [TypedGoRoute<CertificateDetailRoute>(path: ":certId")],
@@ -284,6 +290,47 @@ class ServerSettingsRoute extends GoRouteData with $ServerSettingsRoute {
     return AppRoutePage(
       state: state,
       child: ServerSettingsPage(serverId: serverId),
+    );
+  }
+}
+
+@immutable
+class ServerTemplatesRoute extends GoRouteData with $ServerTemplatesRoute {
+  final int serverId;
+
+  const ServerTemplatesRoute({required this.serverId});
+
+  @override
+  Page<Function> buildPage(BuildContext context, GoRouterState state) {
+    return AppRoutePage(
+      state: state,
+      child: ServerTemplatePage(serverId: serverId),
+    );
+  }
+}
+
+@immutable
+class TemplateEditRoute extends GoRouteData with $TemplateEditRoute {
+  final int serverId;
+  final String settingName;
+  final int? templateIndex;
+
+  const TemplateEditRoute({
+    required this.serverId,
+    required this.settingName,
+    this.templateIndex,
+  });
+
+  @override
+  Page<Function> buildPage(BuildContext context, GoRouterState state) {
+    return AppRoutePage(
+      child: TemplateEditPage(
+        serverId: serverId,
+        settingName: settingName,
+        templateIndex: templateIndex,
+      ),
+      state: state,
+      sheet: true,
     );
   }
 }

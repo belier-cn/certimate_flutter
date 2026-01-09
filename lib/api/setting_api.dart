@@ -58,9 +58,12 @@ class SettingApi {
         options: server.getOptions(),
       );
     } else {
+      final Object? content = settings.content == null
+          ? null
+          : toJsonT(settings.content as T);
       response = await dio.post(
         "${server.host}/api/collections/settings/records",
-        data: {"name": settings.name, "content": settings.content},
+        data: {"name": settings.name, if (content != null) "content": content},
         options: server.getOptions(),
       );
     }
@@ -100,4 +103,43 @@ abstract class PersistenceContent with _$PersistenceContent {
 
   factory PersistenceContent.fromJson(Map<String, Object?> json) =>
       _$PersistenceContentFromJson(json);
+}
+
+@freezed
+abstract class NotifyTemplateContent with _$NotifyTemplateContent {
+  const factory NotifyTemplateContent({List<NotifyTemplate>? templates}) =
+      _NotifyTemplateContent;
+
+  factory NotifyTemplateContent.fromJson(Map<String, Object?> json) =>
+      _$NotifyTemplateContentFromJson(json);
+}
+
+@freezed
+abstract class NotifyTemplate with _$NotifyTemplate {
+  const factory NotifyTemplate({
+    String? message,
+    String? name,
+    String? subject,
+  }) = _NotifyTemplate;
+
+  factory NotifyTemplate.fromJson(Map<String, Object?> json) =>
+      _$NotifyTemplateFromJson(json);
+}
+
+@freezed
+abstract class ScriptTemplateContent with _$ScriptTemplateContent {
+  const factory ScriptTemplateContent({List<ScriptTemplate>? templates}) =
+      _ScriptTemplateContent;
+
+  factory ScriptTemplateContent.fromJson(Map<String, Object?> json) =>
+      _$ScriptTemplateContentFromJson(json);
+}
+
+@freezed
+abstract class ScriptTemplate with _$ScriptTemplate {
+  const factory ScriptTemplate({String? command, String? name}) =
+      _ScriptTemplate;
+
+  factory ScriptTemplate.fromJson(Map<String, Object?> json) =>
+      _$ScriptTemplateFromJson(json);
 }

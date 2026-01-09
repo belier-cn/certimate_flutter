@@ -121,6 +121,8 @@ class ModelCardCell extends StatelessWidget {
 
   final bool center;
 
+  final Axis direction;
+
   factory ModelCardCell.string({
     Key? key,
     String? label,
@@ -131,6 +133,7 @@ class ModelCardCell extends StatelessWidget {
     Widget? subtitle,
     Widget? trailing,
     bool center = false,
+    Axis direction = Axis.horizontal,
   }) {
     return ModelCardCell(
       key: key,
@@ -139,6 +142,7 @@ class ModelCardCell extends StatelessWidget {
       subtitle: subtitle ?? (desc != null ? Text(desc) : null),
       trailing: trailing,
       center: center,
+      direction: direction,
     );
   }
 
@@ -149,6 +153,7 @@ class ModelCardCell extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.center = false,
+    this.direction = Axis.horizontal,
   });
 
   @override
@@ -156,7 +161,8 @@ class ModelCardCell extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
+      child: Flex(
+        direction: direction,
         crossAxisAlignment: center
             ? CrossAxisAlignment.center
             : CrossAxisAlignment.start,

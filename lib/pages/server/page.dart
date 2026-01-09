@@ -58,6 +58,12 @@ class ServerPage extends HookConsumerWidget {
                 onTap: (_) => AccessesRoute(serverId: serverId).push(context),
               ),
               PullDownOption(
+                label: s.presetTemplate.capitalCase,
+                iconWidget: Icon(context.appIcons.template),
+                onTap: (_) =>
+                    ServerTemplatesRoute(serverId: serverId).push(context),
+              ),
+              PullDownOption(
                 label: s.systemSettings.capitalCase,
                 iconWidget: Icon(context.appIcons.settings),
                 withDivider: true,
