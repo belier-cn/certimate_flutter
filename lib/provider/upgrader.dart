@@ -24,7 +24,6 @@ class UpgraderProvider extends _$UpgraderProvider {
       osVersion: osVersion,
     );
     return Upgrader(
-      debugLogging: true,
       messages: MyUpgraderMessages(code: language?.languageCode),
       upgraderOS: MyUpgraderOS(),
       storeController: UpgraderStoreController(
