@@ -47,7 +47,7 @@ class ServerAccountPage extends HookConsumerWidget {
                       name: "email",
                       focusNode: focusNodes[0],
                       initialValue: data.list.first,
-                      placeholder: s.pleaseEnter(s.currentPassword),
+                      placeholder: s.pleaseEnter(s.email),
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                         zodEmailValidator,
