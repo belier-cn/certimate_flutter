@@ -130,6 +130,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
   final TextEditingController? controller;
   final String? initialValue;
   final String? placeholder;
+  final String? helper;
   final bool obscureText;
   final bool clear;
   final bool readOnly;
@@ -150,6 +151,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
     this.controller,
     this.initialValue,
     this.placeholder,
+    this.helper,
     this.obscureText = false,
     this.clear = false,
     this.readOnly = false,
@@ -193,6 +195,14 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
                 fontWeight: FontWeight.w400,
                 color: CupertinoColors.placeholderText,
               ),
+              helper: helper?.isNotEmpty == true
+                  ? Text(
+                      helper!,
+                      style: context.textTheme.bodySmall!.copyWith(
+                        color: context.theme.hintColor,
+                      ),
+                    )
+                  : null,
               keyboardType: keyboardType,
               inputFormatters: inputFormatters,
               valueTransformer: valueTransformer,
@@ -243,6 +253,7 @@ class PlatformFormBuilderTextField<T> extends StatelessWidget {
         prefixIcon: prefix,
         prefixIconConstraints: prefixIconConstraints,
         hintText: hintText,
+        helperText: helper?.isNotEmpty == true ? helper : null,
         focusedBorder: focusedBorder,
       ),
       readOnly: readOnly,
@@ -482,6 +493,7 @@ class _PlatformFormBuilderCodeFieldState
 class PlatformFormBuilderSwitch extends StatelessWidget {
   final String name;
   final Widget title;
+  final String? helper;
 
   final bool? initialValue;
   final FormFieldValidator<bool>? validator;
@@ -492,6 +504,7 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
     super.key,
     required this.name,
     required this.title,
+    this.helper,
     this.initialValue,
     this.validator,
     this.onChanged,
@@ -521,9 +534,9 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
               onChanged: onChanged,
               enabled: enabled,
               title: const SizedBox(),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: InputBorder.none,
-                isCollapsed: true,
+                helperText: helper,
               ),
             ),
             Positioned(
@@ -540,6 +553,14 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
       cupertino: (_, _) => FormBuilderCupertinoSwitch(
         name: name,
         prefix: titleWidget,
+        helper: helper?.isNotEmpty == true
+            ? Text(
+                helper!,
+                style: context.textTheme.bodySmall!.copyWith(
+                  color: context.theme.hintColor,
+                ),
+              )
+            : null,
         initialValue: initialValue,
         validator: validator,
         autovalidateMode: sectionData?.validateMode,

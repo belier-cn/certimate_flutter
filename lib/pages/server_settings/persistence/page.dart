@@ -53,6 +53,8 @@ class ServerPersistencePage extends HookConsumerWidget {
                         s.certificatesWarningDaysBeforeExpire.capitalCase,
                       ),
                       name: "certificatesWarningDaysBeforeExpire",
+                      helper: s.certificatesWarningDaysBeforeExpireHelper,
+
                       focusNode: focusNodes[0],
                       initialValue:
                           "${data.value.content?.certificatesWarningDaysBeforeExpire ?? 21}",
@@ -68,6 +70,8 @@ class ServerPersistencePage extends HookConsumerWidget {
                     PlatformFormBuilderTextField(
                       title: Text(s.workflowRunsMaxDaysRetention.capitalCase),
                       name: "workflowRunsMaxDaysRetention",
+                      helper: s.workflowRunsMaxDaysRetentionHelper,
+
                       focusNode: focusNodes[1],
                       initialValue:
                           "${data.value.content?.workflowRunsMaxDaysRetention ?? 0}",
@@ -80,6 +84,8 @@ class ServerPersistencePage extends HookConsumerWidget {
                         s.expiredCertificatesMaxDaysRetention.capitalCase,
                       ),
                       name: "expiredCertificatesMaxDaysRetention",
+                      helper: s.expiredCertificatesMaxDaysRetentionHelper,
+
                       focusNode: focusNodes[2],
                       initialValue:
                           "${data.value.content?.expiredCertificatesMaxDaysRetention ?? 0}",

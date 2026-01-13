@@ -52,6 +52,7 @@ class ServerEditPage extends HookConsumerWidget {
                       focusNode: focusNodes[0],
                       initialValue: item?.displayName,
                       placeholder: s.pleaseEnter(s.displayName),
+                      helper: s.serverDisplayNameHelper,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                       ]),
@@ -65,6 +66,7 @@ class ServerEditPage extends HookConsumerWidget {
                           focusNode: focusNodes[1],
                           initialValue: item?.host,
                           placeholder: s.pleaseEnter(s.url),
+                          helper: s.serverHostHelper,
                           readOnly: readOnly,
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.required(),
@@ -83,6 +85,7 @@ class ServerEditPage extends HookConsumerWidget {
                       focusNode: focusNodes[2],
                       initialValue: item?.username,
                       placeholder: s.pleaseEnter(s.username),
+                      helper: s.accountEmailHelper,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
                         zodEmailValidator,
@@ -94,6 +97,7 @@ class ServerEditPage extends HookConsumerWidget {
                       focusNode: focusNodes[3],
                       initialValue: item?.passwordId,
                       placeholder: s.pleaseEnter(s.password),
+                      helper: s.passwordMinLengthHelper,
                       obscureText: true,
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(),
@@ -105,11 +109,13 @@ class ServerEditPage extends HookConsumerWidget {
                       name: "savePassword",
                       initialValue: item?.passwordId.isNotEmptyOrNull ?? false,
                       title: Text(s.savePassword.capitalCase),
+                      helper: s.savePasswordHelper,
                     ),
                     if (!kIsWeb && RunPlatform.isDesktop)
                       PlatformFormBuilderSwitch(
                         name: "isLocal",
                         title: Text(s.localServer.capitalCase),
+                        helper: s.localServerHelper,
                         initialValue: item?.localId.isNotEmpty == true,
                         enabled: serverId == null,
                         onChanged: (value) async {
