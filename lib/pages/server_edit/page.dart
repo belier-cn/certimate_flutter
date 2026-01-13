@@ -105,12 +105,14 @@ class ServerEditPage extends HookConsumerWidget {
                         FormBuilderValidators.maxLength(32),
                       ]),
                     ),
-                    PlatformFormBuilderSwitch(
-                      name: "savePassword",
-                      initialValue: item?.passwordId.isNotEmptyOrNull ?? false,
-                      title: Text(s.savePassword.capitalCase),
-                      helper: s.savePasswordHelper,
-                    ),
+                    if (!RunPlatform.isMacOS)
+                      PlatformFormBuilderSwitch(
+                        name: "savePassword",
+                        initialValue:
+                            item?.passwordId.isNotEmptyOrNull ?? false,
+                        title: Text(s.savePassword.capitalCase),
+                        helper: s.savePasswordHelper,
+                      ),
                     if (!kIsWeb && RunPlatform.isDesktop)
                       PlatformFormBuilderSwitch(
                         name: "isLocal",

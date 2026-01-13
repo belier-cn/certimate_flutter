@@ -84,7 +84,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     }
 
     if (serverId == null) {
-      if (savePassword == true && !RunPlatform.isMacOS) {
+      if (savePassword == true) {
         // 保存密码
         await secureStorage.write(key: passwordId, value: password);
       }
