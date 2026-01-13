@@ -73,21 +73,25 @@ class _EmptyLoadButtonState extends State<EmptyLoadButton> {
           setState(() {
             loading = true;
           });
-          loadingTime = loadingTime = DateTime.now().millisecondsSinceEpoch;
+          loadingTime = DateTime.now().millisecondsSinceEpoch;
           result.whenComplete(() {
             final milliseconds =
                 DateTime.now().millisecondsSinceEpoch - loadingTime;
             if (milliseconds >= 1200) {
-              setState(() {
-                loading = false;
-              });
+              if (context.mounted) {
+                setState(() {
+                  loading = false;
+                });
+              }
             } else {
               // 加载状态至少持续 1.2s
               final duration = Duration(milliseconds: 1200 - milliseconds);
               Future.delayed(duration).then((_) {
-                setState(() {
-                  loading = false;
-                });
+                if (context.mounted) {
+                  setState(() {
+                    loading = false;
+                  });
+                }
               });
             }
           });
