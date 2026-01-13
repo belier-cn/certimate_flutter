@@ -109,6 +109,7 @@ class ErrorInterceptor extends Interceptor {
               );
             }
           }
+          return;
         }
       }
     }
@@ -158,10 +159,17 @@ class ErrorInterceptor extends Interceptor {
     ServerModel server, {
     inputAccount = false,
   }) async {
+    String? password;
     if (inputAccount) {
       final accountInfo = await _inputAccount(server);
-      // 保存最新密码
-      await secureStorage.write(key: server.passwordId, value: accountInfo[1]);
+      if (accountInfo.isEmpty) {
+        return null;
+      }
+      password = accountInfo[1];
+      if (server.passwordId.isNotEmpty) {
+        // 保存最新密码
+        await secureStorage.write(key: server.passwordId, value: password);
+      }
       if (accountInfo.isNotEmpty) {
         server = server.copyWith(username: accountInfo[0]);
       } else {
@@ -169,7 +177,7 @@ class ErrorInterceptor extends Interceptor {
       }
     }
     try {
-      final newToken = await _refreshToken(server);
+      final newToken = await _refreshToken(server, password);
       return server.copyWith(token: newToken);
     } catch (err) {
       if (!inputAccount &&
@@ -181,7 +189,7 @@ class ErrorInterceptor extends Interceptor {
     return null;
   }
 
-  Future<String> _refreshToken(ServerModel server) async {
+  Future<String> _refreshToken(ServerModel server, String? password) async {
     final currentCompleter = ref.read(refreshTokenCompleterProvider(server.id));
     if (currentCompleter != null) {
       return currentCompleter.future;
@@ -192,7 +200,6 @@ class ErrorInterceptor extends Interceptor {
     );
     completerNotifier.updateCompleter(completer);
     try {
-      final password = await secureStorage.read(key: server.passwordId);
       final loginRes = await ref
           .read(authApiProvider)
           .login(
@@ -242,8 +249,17 @@ class ErrorInterceptor extends Interceptor {
                   DialogTextField(obscureText: true, hintText: s.password),
                 ],
                 onCancel: () => SmartDialog.dismiss(tag: tag),
-                onSubmit: (values) =>
-                    SmartDialog.dismiss(tag: tag, result: values),
+                onSubmit: (values) {
+                  if (values[0].isNotEmpty != true) {
+                    SmartDialog.showToast(s.pleaseEnter(s.username));
+                    return;
+                  }
+                  if (values[1].isNotEmpty != true) {
+                    SmartDialog.showToast(s.pleaseEnter(s.password));
+                    return;
+                  }
+                  SmartDialog.dismiss(tag: tag, result: values);
+                },
               );
             },
           )) ??
