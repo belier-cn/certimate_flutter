@@ -90,6 +90,12 @@ GoRouter router(Ref ref) {
             ...($appRoutes.sublist(2)),
           ],
     observers: [NavigatorObserverDelegate(observers)],
+    redirect: (context, state) {
+      if (state.matchedLocation == "/") {
+        return lastRoutePath;
+      }
+      return null;
+    },
   );
 
   router.routerDelegate.addListener(() {
