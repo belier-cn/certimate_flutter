@@ -38,7 +38,7 @@ jobs:
             flutter: 3.38.6
           - type: ohos
             os: ubuntu-latest
-            flutter: oh-3.32.0-release
+            flutter: oh-3.35.7-dev
 
     steps:
       - uses: actions/checkout@v4
