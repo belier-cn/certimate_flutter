@@ -48,7 +48,7 @@
 
 > Linux 暂未实现 WebView，目前无法访问网页。
 
-> HarmonyOS 打包后闪退，需等待相关 [PR](https://gitcode.com/openharmony-sig/fluttertpc_dart_sdk/pull/18) 合并。
+> ~~HarmonyOS 打包后闪退，需等待相关 [PR](https://gitcode.com/openharmony-sig/fluttertpc_dart_sdk/pull/18) 合并。~~
 
 ## ⏬ 下载地址
 
