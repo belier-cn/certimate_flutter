@@ -1,12 +1,8 @@
 import "package:certimate/extension/index.dart";
-import "package:certimate/router/router.dart";
-import "package:certimate/widgets/index.dart";
 import "package:extra_hittest_area/extra_hittest_area.dart";
 import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
-import "package:go_router/go_router.dart";
 
 class AppSliverAppBar extends StatelessWidget {
   final Widget title;
@@ -46,27 +42,18 @@ class AppSliverAppBar extends StatelessWidget {
       material: (context, _) => _buildMaterialSliverAppBar(context),
       cupertino: (context, _) {
         if (!largeTitle && searchController == null) {
-          return _buildMaterialSliverAppBar(context, cupertino: true);
+          return SliverToBoxAdapter(
+            child: CupertinoNavigationBar(
+              leading: leading,
+              middle: title,
+              trailing: trailing,
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            ),
+          );
         }
-        final theme = Theme.of(context);
-        final appBarTheme = theme.appBarTheme;
-        final iconTheme =
-            appBarTheme.actionsIconTheme ??
-            appBarTheme.iconTheme ??
-            IconThemeData(
-              color: appBarTheme.foregroundColor ?? theme.colorScheme.onSurface,
-              size: 24.0,
-            );
-        final trailingWidget = trailing != null
-            ? IconTheme(data: iconTheme, child: trailing!)
-            : null;
-        const border = Border(
-          // 不显示边框
-          bottom: BorderSide(color: Colors.transparent, width: 0.0),
-        );
         return searchController != null
             ? CupertinoSliverNavigationBar.search(
-                border: border,
                 searchField: CupertinoSearchTextField(
                   controller: searchController,
                   placeholder: searchPlaceholder,
@@ -78,30 +65,17 @@ class AppSliverAppBar extends StatelessWidget {
                     }
                   },
                 ),
-                automaticallyImplyLeading: false,
-                leading:
-                    leading ??
-                    ((kIsWeb &&
-                                RunPlatform.isPhoneUi &&
-                                !navBarRoutes.contains(lastRoutePath)) ||
-                            (automaticallyImplyLeading != false &&
-                                context.canPop())
-                        ? const AppBarLeading()
-                        : null),
+                leading: leading,
                 largeTitle: title,
-                trailing: trailingWidget,
+                trailing: trailing,
+                border: const Border(),
                 padding: EdgeInsetsDirectional.zero,
               )
             : CupertinoSliverNavigationBar(
-                automaticallyImplyLeading: false,
-                leading:
-                    leading ??
-                    (automaticallyImplyLeading != false && context.canPop()
-                        ? const AppBarLeading()
-                        : null),
+                leading: leading,
                 largeTitle: title,
-                trailing: trailingWidget,
-                border: border,
+                trailing: trailing,
+                border: const Border(),
                 padding: EdgeInsetsDirectional.zero,
               );
       },
@@ -115,15 +89,7 @@ class AppSliverAppBar extends StatelessWidget {
     final theme = context.theme;
     final toolbarHeight = theme.appBarTheme.toolbarHeight ?? kToolbarHeight;
     return SliverAppBar(
-      automaticallyImplyLeading: false,
-      leading:
-          leading ??
-          ((kIsWeb &&
-                      RunPlatform.isPhoneUi &&
-                      !navBarRoutes.contains(lastRoutePath)) ||
-                  (automaticallyImplyLeading != false && context.canPop())
-              ? const AppBarLeading()
-              : null),
+      leading: leading,
       leadingWidth: leadingWidth,
       title: title,
       pinned: true,

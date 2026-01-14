@@ -36,7 +36,9 @@ class ServerEditPage extends HookConsumerWidget {
                 .toList(),
           ),
           child: RefreshBody<SubmitRefreshData<ServerModel?>>(
-            title: Text((serverId == null ? s.add : s.edit).titleCase),
+            title: Text(
+              (s.join2(serverId == null ? s.add : s.edit, s.server)).titleCase,
+            ),
             provider: provider,
             scrollController: scrollController,
             itemBuilder: (context, data, index) {

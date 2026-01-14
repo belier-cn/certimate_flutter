@@ -25,6 +25,7 @@
   "url": "url",
   "user": "user",
   "servers": "servers",
+  "server": "server",
   "username": "username",
   "password": "password",
   "backgroundLock": "background lock",

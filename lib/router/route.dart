@@ -96,7 +96,11 @@ class ServerAddRoute extends GoRouteData with $ServerAddRoute {
 
   @override
   Page<Function> buildPage(BuildContext context, GoRouterState state) {
-    return AppRoutePage(state: state, child: const ServerEditPage());
+    return AppRoutePage(
+      child: const ServerEditPage(),
+      state: state,
+      sheet: true,
+    );
   }
 }
 
@@ -269,12 +273,13 @@ class AccessEditRoute extends GoRouteData with $AccessEditRoute {
   @override
   Page<Function> buildPage(BuildContext context, GoRouterState state) {
     return AppRoutePage(
-      state: state,
       child: AccessEditPage(
         serverId: serverId,
         accessId: accessId,
         readonly: false,
       ),
+      state: state,
+      sheet: true,
     );
   }
 }
@@ -527,11 +532,7 @@ class AppRoutePage<T> extends Page<T> {
       }
     }
 
-    return MaterialPageRoute(
-      settings: this,
-      fullscreenDialog: sheet,
-      builder: (context) => child,
-    );
+    return MaterialPageRoute(settings: this, builder: (context) => child);
   }
 }
 

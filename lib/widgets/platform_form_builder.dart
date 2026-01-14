@@ -537,11 +537,12 @@ class PlatformFormBuilderSwitch extends StatelessWidget {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 helperText: helper,
+                fillColor: Colors.transparent,
               ),
             ),
             Positioned(
               top: 0,
-              bottom: 0,
+              bottom: helper?.isNotEmpty == true ? 20 : 0,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [titleWidget],

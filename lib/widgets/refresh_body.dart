@@ -171,6 +171,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                 width: leadingWidth,
                 alignment: Alignment.centerLeft,
                 child: CupertinoButton(
+                  padding: appTheme.cupertinoButtonPadding,
                   onPressed: context.pop,
                   child: Text(s.cancel.capitalCase),
                 ),

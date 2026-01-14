@@ -175,23 +175,6 @@ ThemeData _initTheme(BuildContext context, ThemeData theme) {
         : theme.textTheme.useSystemChineseFont(theme.brightness),
     appBarTheme: AppBarTheme(
       backgroundColor: scaffoldBackgroundColor,
-      iconTheme: cupertino
-          ? theme.appBarTheme.iconTheme?.copyWith(
-              color: theme.colorScheme.primary,
-            )
-          : theme.appBarTheme.iconTheme,
-      actionsIconTheme: !cupertino ? theme.appBarTheme.iconTheme : null,
-      surfaceTintColor: cupertino ? Colors.transparent : null,
-      titleTextStyle: cupertino
-          ? CupertinoTheme.of(context).textTheme.navTitleTextStyle.copyWith(
-              color: isLight
-                  ? CupertinoColors.label.color
-                  : CupertinoColors.label.darkColor,
-            )
-          : null,
-      centerTitle: cupertino,
-      leadingWidth: cupertino ? 40 : null,
-      toolbarHeight: cupertino ? 44 : kToolbarHeight,
       scrolledUnderElevation: RunPlatform.isDesktopUi ? 0 : null,
     ),
     tooltipTheme: const TooltipThemeData(

@@ -2,6 +2,7 @@ import "package:certimate/extension/index.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/router/router.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -19,8 +20,8 @@ class AppBarIconButton extends StatelessWidget {
     final isCupertinoStyle = context.isCupertinoStyle;
     return Icon(
       icon,
-      size: isCupertinoStyle ? 24 : 26,
-      // fontWeight: isCupertinoStyle ? FontWeight.bold : null,
+      color: context.theme.primaryColor,
+      size: isCupertinoStyle ? 26 : null,
     );
   }
 }
@@ -35,40 +36,26 @@ class AppBarLeading extends StatelessWidget {
     if (!kIsWeb && !context.canPop()) {
       return const SizedBox.shrink();
     }
-    final theme = context.theme;
-    final isCupertinoStyle = context.isCupertinoStyle;
-    final isCloseIcon = getPreviousRoute() == const HomeRoute().location;
-    return CupertinoWell(
-      onPressed:
-          onPressed ??
-          () {
-            final router = GoRouter.of(context);
-            if (router.canPop()) {
-              router.pop();
-            } else {
-              const HomeRoute().replace(context);
-            }
-          },
-      child: Icon(
-        isCloseIcon ? context.appIcons.close : context.appIcons.back,
-        size: _getIconSize(isCloseIcon, isCupertinoStyle),
-        color: isCupertinoStyle ? theme.colorScheme.primary : null,
-        // fontWeight: isCupertinoStyle && !RunPlatform.isIOS
-        //     ? FontWeight.bold
-        //     : null,
-      ),
-    );
-  }
 
-  double _getIconSize(bool isCloseIcon, bool isCupertinoStyle) {
-    if (isCupertinoStyle && !isCloseIcon) {
-      if (RunPlatform.isIOS) {
-        return 32;
-      } else if (RunPlatform.isDesktop) {
-        return 26;
+    defaultOnPressed() {
+      final router = GoRouter.of(context);
+      if (router.canPop()) {
+        router.pop();
+      } else {
+        const HomeRoute().replace(context);
       }
     }
-    return 24;
+
+    if (context.isCupertinoStyle) {
+      return CupertinoNavigationBarBackButton(
+        onPressed: onPressed ?? defaultOnPressed,
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: BackButton(onPressed: onPressed ?? defaultOnPressed),
+      );
+    }
   }
 }
 
@@ -94,17 +81,18 @@ class ActionButton extends StatelessWidget {
         height: kToolbarHeight,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [child],
         ),
       ),
     );
     return well
-        ? CupertinoWell(
-            onPressed: onPressed,
-            onLongPress: onLongPress,
-            child: body,
-          )
+        ? (context.isCupertinoStyle
+              ? CupertinoWell(
+                  onPressed: onPressed,
+                  onLongPress: onLongPress,
+                  child: body,
+                )
+              : IconButton(onPressed: onPressed, icon: child))
         : body;
   }
 }

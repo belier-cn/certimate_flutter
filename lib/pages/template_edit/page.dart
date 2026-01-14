@@ -36,6 +36,10 @@ class TemplateEditPage extends HookConsumerWidget {
     final provider = templateEditProvider(serverId, settingName, templateIndex);
     final focusNodes = useFocusNodes(count: isNotifyTemplate ? 3 : 2);
     final scrollController = useScrollController();
+    final title = s.join2(
+      templateIndex == null ? s.add : s.edit,
+      Intl.message(settingName, name: settingName),
+    );
     return BasePage(
       child: Scaffold(
         body: KeyboardActions(
@@ -48,12 +52,7 @@ class TemplateEditPage extends HookConsumerWidget {
                 .toList(),
           ),
           child: RefreshBody<SubmitRefreshData<Object?>>(
-            title: Text(
-              s.join2(
-                (templateIndex == null ? s.add : s.edit).titleCase,
-                Intl.message(settingName, name: settingName),
-              ),
-            ),
+            title: Text(title.titleCase),
             provider: provider,
             scrollController: scrollController,
             itemBuilder: (context, data, index) {

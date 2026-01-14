@@ -14,10 +14,10 @@ import "package:certimate/widgets/index.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
-import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
 import "package:local_auth/local_auth.dart";
@@ -44,10 +44,12 @@ class SettingsPage extends ConsumerWidget {
     return BasePage(
       exitInterceptor: true,
       child: Scaffold(
-        appBar: AppBar(
+        appBar: PlatformAppBar(
           title: Text(s.settings.titleCase),
-          leading: context.canPop() ? const AppBarLeading() : null,
-        ),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(border: const Border());
+          },
+        ).getAppBar(context),
         body: SingleChildScrollView(
           child: Column(
             children: [

@@ -5,7 +5,7 @@ import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
-import "package:go_router/go_router.dart";
+import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
 
@@ -21,10 +21,9 @@ class ServerTemplatePage extends HookConsumerWidget {
     final tabController = useTabController(initialLength: tabs.length);
     return BasePage(
       child: Scaffold(
-        appBar: AppBar(
+        appBar: PlatformAppBar(
           title: Text(s.presetTemplate.titleCase),
-          leading: context.canPop() ? const AppBarLeading() : null,
-          actions: [
+          trailingActions: [
             ActionButton(
               onPressed: () async {
                 final settingName = tabs[tabController.index];
@@ -49,7 +48,7 @@ class ServerTemplatePage extends HookConsumerWidget {
                 )
                 .toList(),
           ),
-        ),
+        ).getAppBar(context),
         body: TabBarView(
           controller: tabController,
           children: tabs

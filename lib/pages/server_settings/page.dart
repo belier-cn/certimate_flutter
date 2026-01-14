@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
-import "package:go_router/go_router.dart";
 
 class ServerSettingsPage extends ConsumerWidget {
   final int serverId;
@@ -17,10 +16,12 @@ class ServerSettingsPage extends ConsumerWidget {
     final s = context.s;
     return BasePage(
       child: Scaffold(
-        appBar: AppBar(
+        appBar: PlatformAppBar(
           title: Text(s.systemSettings.titleCase),
-          leading: context.canPop() ? const AppBarLeading() : null,
-        ),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(border: const Border());
+          },
+        ).getAppBar(context),
         body: SingleChildScrollView(
           child: SettingsList(
             shrinkWrap: true,

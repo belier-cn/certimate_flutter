@@ -9,6 +9,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_inappwebview/flutter_inappwebview.dart";
+import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:share_plus/share_plus.dart";
@@ -79,12 +80,15 @@ class WebviewWidget extends HookConsumerWidget {
     return BasePage(
       child: Scaffold(
         backgroundColor: bodyBackgroundColor,
-        appBar: AppBar(
+        appBar: PlatformAppBar(
           backgroundColor: appBarBackgroundColor,
           title: ValueListenableBuilder(
             valueListenable: titleNotifier,
             builder: (context, title, _) {
-              return Text(title);
+              return Text(
+                title,
+                style: const TextStyle(overflow: TextOverflow.ellipsis),
+              );
             },
           ),
           leading: AppBarLeading(
@@ -110,7 +114,7 @@ class WebviewWidget extends HookConsumerWidget {
               }
             },
           ),
-          actions: [
+          trailingActions: [
             PlatformPullDownButton(
               options: [
                 PullDownOption(
@@ -159,11 +163,16 @@ class WebviewWidget extends HookConsumerWidget {
                   },
                 ),
               ],
-              icon: AppBarIconButton(context.appIcons.ellipsis),
+              icon: ActionButton(
+                well: false,
+                child: AppBarIconButton(context.appIcons.ellipsis),
+              ),
             ),
-            SizedBox(width: theme.appTheme.bodyPadding.right),
           ],
-        ),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(border: const Border());
+          },
+        ).getAppBar(context),
         body: Stack(
           children: [
             InAppWebView(

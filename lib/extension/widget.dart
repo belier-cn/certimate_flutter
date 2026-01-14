@@ -22,6 +22,14 @@ extension AppIconsExt on BuildContext {
   }) => isMaterial(this) ? material : cupertino;
 }
 
+extension PlatformAppBarExt on PlatformAppBar {
+  PreferredSizeWidget getAppBar(BuildContext context) {
+    return isCupertino(context)
+        ? createCupertinoWidget(context)
+        : createMaterialWidget(context);
+  }
+}
+
 class AppIcons {
   AppIcons(this.context);
 
