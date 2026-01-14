@@ -1,18 +1,11 @@
 import "package:certimate/extension/index.dart";
 import "package:flex_color_scheme/flex_color_scheme.dart";
 import "package:flutter/material.dart";
-import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 
 class ThemeItemWidget extends StatelessWidget {
   final FlexScheme flexScheme;
 
-  final ValueNotifier<FlexScheme> selected;
-
-  const ThemeItemWidget({
-    super.key,
-    required this.flexScheme,
-    required this.selected,
-  });
+  const ThemeItemWidget({super.key, required this.flexScheme});
 
   @override
   Widget build(BuildContext context) {
@@ -55,27 +48,9 @@ class ThemeItemWidget extends StatelessWidget {
           const SizedBox(width: 4),
           Text(flexScheme.name.capitalCase),
           const Spacer(),
-          ValueListenableBuilder(
-            valueListenable: selected,
-            builder: (_, selectedValue, child) {
-              return selectedValue == flexScheme
-                  ? PlatformRadio(
-                      value: flexScheme,
-                      activeColor: theme.colorScheme.primary,
-                      groupValue: selectedValue,
-                      onChanged: (value) {
-                        selected.value = value;
-                      },
-                    )
-                  : child!;
-            },
-            child: PlatformRadio(
-              value: flexScheme,
-              activeColor: theme.colorScheme.primary,
-              onChanged: (value) {
-                selected.value = value;
-              },
-            ),
+          Radio.adaptive(
+            value: flexScheme,
+            activeColor: theme.colorScheme.primary,
           ),
         ],
       ),

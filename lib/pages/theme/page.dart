@@ -20,14 +20,7 @@ class ThemePage extends HookConsumerWidget {
     final themePageData = ref.read(themePageProvider);
     final theme = context.theme;
     final isCupertino = context.isCupertinoStyle;
-    final selected = useValueNotifier(themeScheme);
-
     useEffect(() {
-      void selectedListener() {
-        ref.read(themeSchemeProvider.notifier).update(selected.value);
-      }
-
-      selected.addListener(selectedListener);
       if (themePageData.hasValue) {
         // go selected theme
         final list = themePageData.requireValue.list;
@@ -56,25 +49,30 @@ class ThemePage extends HookConsumerWidget {
           });
         }
       }
-      return () {
-        selected.removeListener(selectedListener);
-      };
+      return null;
     }, []);
     return BasePage(
       child: Scaffold(
-        body: RefreshBody<ThemePageData>(
-          topVisible: topVisible,
-          title: Text(s.theme.titleCase),
-          provider: themePageProvider,
-          scrollController: scrollController,
-          itemBuilder: (context, data, index) {
-            final item = data.list[index - data.topItemCount];
-            return ThemeItemWidget(
-              key: ValueKey(item.name),
-              flexScheme: item,
-              selected: selected,
-            );
+        body: RadioGroup(
+          groupValue: themeScheme,
+          onChanged: (value) {
+            if (value != null) {
+              ref.read(themeSchemeProvider.notifier).update(value);
+            }
           },
+          child: RefreshBody<ThemePageData>(
+            topVisible: topVisible,
+            title: Text(s.theme.titleCase),
+            provider: themePageProvider,
+            scrollController: scrollController,
+            itemBuilder: (context, data, index) {
+              final item = data.list[index - data.topItemCount];
+              return ThemeItemWidget(
+                key: ValueKey(item.name),
+                flexScheme: item,
+              );
+            },
+          ),
         ),
       ),
     );
