@@ -42,13 +42,20 @@ class AppSliverAppBar extends StatelessWidget {
       material: (context, _) => _buildMaterialSliverAppBar(context),
       cupertino: (context, _) {
         if (!largeTitle && searchController == null) {
-          return SliverToBoxAdapter(
-            child: CupertinoNavigationBar(
-              leading: leading,
-              middle: title,
-              trailing: trailing,
-              border: const Border(),
-              padding: EdgeInsetsDirectional.zero,
+          return SliverPersistentHeader(
+            pinned: true,
+            delegate: PersistentHeaderBuilder(
+              min: kMinInteractiveDimensionCupertino,
+              max: kMinInteractiveDimensionCupertino,
+              builder: (ctx, offset) {
+                return CupertinoNavigationBar(
+                  leading: leading,
+                  middle: title,
+                  trailing: trailing,
+                  border: const Border(),
+                  padding: EdgeInsetsDirectional.zero,
+                );
+              },
             ),
           );
         }
@@ -175,4 +182,37 @@ class SearchFlexibleSpaceBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class PersistentHeaderBuilder extends SliverPersistentHeaderDelegate {
+  final double max;
+  final double min;
+  final Widget Function(BuildContext context, double offset) builder;
+
+  PersistentHeaderBuilder({
+    required this.max,
+    required this.min,
+    required this.builder,
+  }) : assert(max >= min);
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return builder(context, shrinkOffset);
+  }
+
+  @override
+  double get maxExtent => max;
+
+  @override
+  double get minExtent => min;
+
+  @override
+  bool shouldRebuild(covariant PersistentHeaderBuilder oldDelegate) =>
+      max != oldDelegate.max ||
+      min != oldDelegate.min ||
+      builder != oldDelegate.builder;
 }

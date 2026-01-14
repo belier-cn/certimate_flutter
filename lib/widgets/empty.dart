@@ -98,7 +98,12 @@ class _EmptyLoadButtonState extends State<EmptyLoadButton> {
         }
       },
       child: loading && widget.showLoading
-          ? const PlatformCircularIndicator(color: Colors.white, size: 20)
+          ? PlatformCircularIndicator(
+              color: context.isCupertinoStyle
+                  ? Colors.white
+                  : context.theme.primaryColor,
+              size: 20,
+            )
           : Text(s.reload),
     );
   }

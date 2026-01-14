@@ -175,6 +175,7 @@ ThemeData _initTheme(BuildContext context, ThemeData theme) {
         : theme.textTheme.useSystemChineseFont(theme.brightness),
     appBarTheme: AppBarTheme(
       backgroundColor: scaffoldBackgroundColor,
+      toolbarHeight: cupertino ? kMinInteractiveDimensionCupertino : kToolbarHeight,
       scrolledUnderElevation: RunPlatform.isDesktopUi ? 0 : null,
     ),
     tooltipTheme: const TooltipThemeData(
