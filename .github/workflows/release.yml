@@ -20,22 +20,22 @@ jobs:
         include:
           - type: android
             os: ubuntu-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: ios
             os: macos-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: macos
             os: macos-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: windows
             os: windows-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: linux
             os: ubuntu-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: web
             os: ubuntu-latest
-            flutter: 3.38.5
+            flutter: 3.38.6
           - type: ohos
             os: ubuntu-latest
             flutter: oh-3.32.0-release
