@@ -17,7 +17,10 @@ class DebugPage extends HookConsumerWidget {
         appBar: PlatformAppBar(
           title: const Text("Debug"),
           cupertino: (context, _) {
-            return CupertinoNavigationBarData(border: const Border());
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            );
           },
         ).getAppBar(context),
         body: SingleChildScrollView(

@@ -437,6 +437,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                     offset: visible ? Offset.zero : const Offset(2, 0),
                     duration: const Duration(milliseconds: 300),
                     child: FloatingActionButton.small(
+                      heroTag: null,
                       onPressed: () {
                         scrollController?.animateTo(
                           0,

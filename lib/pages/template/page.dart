@@ -19,6 +19,13 @@ class ServerTemplatePage extends HookConsumerWidget {
     final s = context.s;
     final tabs = ["notifyTemplate", "scriptTemplate"];
     final tabController = useTabController(initialLength: tabs.length);
+    final tabBar = TabBar(
+      controller: tabController,
+      dividerHeight: 0,
+      tabs: tabs
+          .map((tab) => Tab(text: Intl.message(tab, name: tab).capitalCase))
+          .toList(),
+    );
     return BasePage(
       child: Scaffold(
         appBar: PlatformAppBar(
@@ -39,15 +46,16 @@ class ServerTemplatePage extends HookConsumerWidget {
               child: AppBarIconButton(context.appIcons.add),
             ),
           ],
-          bottom: TabBar(
-            controller: tabController,
-            dividerHeight: 0,
-            tabs: tabs
-                .map(
-                  (tab) => Tab(text: Intl.message(tab, name: tab).capitalCase),
-                )
-                .toList(),
-          ),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              bottom: tabBar,
+              padding: EdgeInsetsDirectional.zero,
+            );
+          },
+          material: (context, _) {
+            return MaterialAppBarData(bottom: tabBar);
+          },
         ).getAppBar(context),
         body: TabBarView(
           controller: tabController,

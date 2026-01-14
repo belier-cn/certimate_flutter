@@ -170,7 +170,10 @@ class WebviewWidget extends HookConsumerWidget {
             ),
           ],
           cupertino: (context, _) {
-            return CupertinoNavigationBarData(border: const Border());
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            );
           },
         ).getAppBar(context),
         body: Stack(

@@ -19,7 +19,10 @@ class ServerSettingsPage extends ConsumerWidget {
         appBar: PlatformAppBar(
           title: Text(s.systemSettings.titleCase),
           cupertino: (context, _) {
-            return CupertinoNavigationBarData(border: const Border());
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            );
           },
         ).getAppBar(context),
         body: SingleChildScrollView(
