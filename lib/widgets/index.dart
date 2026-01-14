@@ -11,7 +11,6 @@ export "platform_pull_down_button.dart";
 export "polygon_border.dart";
 export "refresh_body.dart";
 export "remove_focus.dart";
-export "route_aware.dart";
 export "tip.dart";
 export "webview.dart";
 export "well.dart";

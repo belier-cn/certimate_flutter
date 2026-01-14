@@ -12,14 +12,7 @@ import "package:riverpod_annotation/riverpod_annotation.dart";
 
 part "router.g.dart";
 
-final RouteObserver routeObserver = RouteObserver();
-
 const baseHref = String.fromEnvironment("FLUTTER_BASE_HREF", defaultValue: "/");
-
-final List<NavigatorObserver> observers = [
-  FlutterSmartDialog.observer,
-  routeObserver,
-];
 
 String? lastRoutePath = "/servers";
 
@@ -38,14 +31,12 @@ GoRouter router(Ref ref) {
             StatefulShellRoute.indexedStack(
               branches: [
                 StatefulShellBranch(
-                  observers: [NavigatorObserverDelegate(observers)],
+                  observers: [FlutterSmartDialog.observer],
                   routes: [
                     ShellRoute(
                       observers: [
-                        NavigatorObserverDelegate([
-                          ...observers,
-                          ServersRouteObserver(),
-                        ]),
+                        FlutterSmartDialog.observer,
+                        ServersRouteObserver(),
                       ],
                       routes: [$homeRoute],
                       builder: (context, state, child) {
@@ -61,7 +52,7 @@ GoRouter router(Ref ref) {
                     .map(
                       (route) => StatefulShellBranch(
                         routes: [route],
-                        observers: [NavigatorObserverDelegate(observers)],
+                        observers: [FlutterSmartDialog.observer],
                       ),
                     ),
               ],
@@ -75,11 +66,11 @@ GoRouter router(Ref ref) {
               branches: [
                 StatefulShellBranch(
                   routes: [$singleHomeRoute],
-                  observers: [NavigatorObserverDelegate(observers)],
+                  observers: [FlutterSmartDialog.observer],
                 ),
                 StatefulShellBranch(
                   routes: [$settingsRoute],
-                  observers: [NavigatorObserverDelegate(observers)],
+                  observers: [FlutterSmartDialog.observer],
                 ),
               ],
               builder: (context, state, navigationShell) {
@@ -89,7 +80,7 @@ GoRouter router(Ref ref) {
             $homeRoute,
             ...($appRoutes.sublist(2)),
           ],
-    observers: [NavigatorObserverDelegate(observers)],
+    observers: [FlutterSmartDialog.observer],
     redirect: (context, state) {
       if (state.matchedLocation == "/") {
         return lastRoutePath;
@@ -232,61 +223,6 @@ class ServersRouteListener {
       } catch (err) {
         debugPrint("route change listener error: $err");
       }
-    }
-  }
-}
-
-class NavigatorObserverDelegate extends NavigatorObserver {
-  final List<NavigatorObserver> observers;
-
-  NavigatorObserverDelegate(this.observers);
-
-  @override
-  void didStopUserGesture() {
-    for (final observer in observers) {
-      observer.didStopUserGesture();
-    }
-  }
-
-  @override
-  void didStartUserGesture(Route route, Route? previousRoute) {
-    for (final observer in observers) {
-      observer.didStartUserGesture(route, previousRoute);
-    }
-  }
-
-  @override
-  void didChangeTop(Route topRoute, Route? previousTopRoute) {
-    for (final observer in observers) {
-      observer.didChangeTop(topRoute, previousTopRoute);
-    }
-  }
-
-  @override
-  void didReplace({Route? newRoute, Route? oldRoute}) {
-    for (final observer in observers) {
-      observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    }
-  }
-
-  @override
-  void didRemove(Route route, Route? previousRoute) {
-    for (final observer in observers) {
-      observer.didRemove(route, previousRoute);
-    }
-  }
-
-  @override
-  void didPop(Route route, Route? previousRoute) {
-    for (final observer in observers) {
-      observer.didPop(route, previousRoute);
-    }
-  }
-
-  @override
-  void didPush(Route route, Route? previousRoute) {
-    for (final observer in observers) {
-      observer.didPush(route, previousRoute);
     }
   }
 }

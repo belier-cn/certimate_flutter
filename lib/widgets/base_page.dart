@@ -13,12 +13,6 @@ class BasePage<T> extends StatelessWidget {
   // AnnotatedRegion
   final SystemUiOverlayStyle? systemOverlayStyle;
 
-  // RouteAwareWidget
-  final VoidCallback? didPush;
-  final VoidCallback? didPushNext;
-  final VoidCallback? didPop;
-  final VoidCallback? didPopNext;
-
   // ExitInterceptor
   final bool exitInterceptor;
 
@@ -31,10 +25,6 @@ class BasePage<T> extends StatelessWidget {
     this.child,
     this.systemOverlayStyle,
     this.exitInterceptor = false,
-    this.didPush,
-    this.didPushNext,
-    this.didPop,
-    this.didPopNext,
     this.canPop = true,
     this.onPopInvokedWithResult,
     this.builder,
@@ -55,18 +45,6 @@ class BasePage<T> extends StatelessWidget {
       widget = PopScope(
         canPop: canPop,
         onPopInvokedWithResult: onPopInvokedWithResult,
-        child: widget,
-      );
-    }
-    if (didPush != null ||
-        didPopNext != null ||
-        didPop != null ||
-        didPopNext != null) {
-      widget = RouteAwareWidget(
-        didPush: didPush,
-        didPushNext: didPushNext,
-        didPop: didPop,
-        didPopNext: didPopNext,
         child: widget,
       );
     }
