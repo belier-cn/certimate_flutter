@@ -78,7 +78,11 @@ class PlatformPullDownButton extends StatelessWidget {
             );
           }
           if (option.withDivider ?? false) {
-            items.add(const PullDownMenuDivider.large());
+            items.add(
+              const PullDownMenuDivider.large(
+                color: Color.fromRGBO(0, 0, 0, 0.16),
+              ),
+            );
           }
         }
         return items;
