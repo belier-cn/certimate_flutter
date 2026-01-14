@@ -319,10 +319,9 @@ class _PlatformFormBuilderCodeFieldState
     extends State<PlatformFormBuilderCodeField> {
   late CodeLineEditingController _controller;
   late bool _ownsController;
+
   bool _syncingFromField = false;
   String? _pendingText;
-
-  FormBuilderFieldState<FormBuilderField<String>, String>? _fieldState;
 
   CodeLineEditingController get _effectiveController =>
       widget.controller ?? _controller;
@@ -331,7 +330,6 @@ class _PlatformFormBuilderCodeFieldState
   void initState() {
     super.initState();
     _initController();
-    _effectiveController.addListener(_handleControllerChanged);
   }
 
   @override
@@ -339,15 +337,11 @@ class _PlatformFormBuilderCodeFieldState
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.controller != widget.controller) {
-      final oldController = oldWidget.controller ?? _controller;
-      oldController.removeListener(_handleControllerChanged);
-
       if (_ownsController && oldWidget.controller == null) {
         _controller.dispose();
       }
 
       _initController();
-      _effectiveController.addListener(_handleControllerChanged);
     }
   }
 
@@ -362,20 +356,6 @@ class _PlatformFormBuilderCodeFieldState
     _controller = CodeLineEditingController.fromText(widget.initialValue);
   }
 
-  void _handleControllerChanged() {
-    if (_syncingFromField) {
-      return;
-    }
-    final fieldState = _fieldState;
-    if (fieldState == null) {
-      return;
-    }
-    final nextValue = _effectiveController.text;
-    if (fieldState.value != nextValue) {
-      fieldState.didChange(nextValue);
-    }
-  }
-
   void _syncControllerText(String? value) {
     final nextText = value ?? "";
     final controller = _effectiveController;
@@ -385,6 +365,7 @@ class _PlatformFormBuilderCodeFieldState
     if (_pendingText == nextText) {
       return;
     }
+
     _pendingText = nextText;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -400,14 +381,16 @@ class _PlatformFormBuilderCodeFieldState
         return;
       }
       _syncingFromField = true;
-      controller.text = pendingText;
-      _syncingFromField = false;
+      try {
+        controller.text = pendingText;
+      } finally {
+        _syncingFromField = false;
+      }
     });
   }
 
   @override
   void dispose() {
-    _effectiveController.removeListener(_handleControllerChanged);
     if (_ownsController) {
       _controller.dispose();
     }
@@ -443,7 +426,6 @@ class _PlatformFormBuilderCodeFieldState
         final fieldState =
             formField
                 as FormBuilderFieldState<FormBuilderField<String>, String>;
-        _fieldState = fieldState;
 
         _syncControllerText(fieldState.value);
 
@@ -460,6 +442,15 @@ class _PlatformFormBuilderCodeFieldState
             readOnly: widget.readOnly || !fieldState.enabled,
             showCursorWhenReadOnly: fieldState.enabled,
             wordWrap: widget.wordWrap,
+            onChanged: (_) {
+              if (_syncingFromField) {
+                return;
+              }
+              final nextValue = _effectiveController.text;
+              if (fieldState.value != nextValue) {
+                fieldState.didChange(nextValue);
+              }
+            },
           ),
         );
 
