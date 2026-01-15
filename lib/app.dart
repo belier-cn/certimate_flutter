@@ -32,30 +32,22 @@ class App extends HookConsumerWidget {
     final themeScheme = ref.watch(themeSchemeProvider);
     final language = ref.watch(languageProvider);
     final upgrader = ref.read(upgraderProviderProvider);
-    final showUnlock = useValueNotifier(false);
     useEffect(() {
-      if (ref.read(biometricProvider)) {
-        Future.delayed(
-          const Duration(seconds: 1),
-          () => onAppLifecycleStateChangeBySecurity(
+      if (RunPlatform.isPhone && ref.read(biometricProvider)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          onAppLifecycleStateChangeBySecurity(
             ref,
             null,
-            AppLifecycleState.inactive,
-            showUnlock,
-            first: true,
-          ),
-        );
+            AppLifecycleState.resumed,
+          );
+        });
       }
       ref.read(localCertimateManagerProvider).ensureLocalServersStarted();
       return null;
     }, []);
     useOnAppLifecycleStateChange(
-      (previous, current) => onAppLifecycleStateChangeBySecurity(
-        ref,
-        previous,
-        current,
-        showUnlock,
-      ),
+      (previous, current) =>
+          onAppLifecycleStateChangeBySecurity(ref, previous, current),
     );
 
     return MaterialApp.router(
