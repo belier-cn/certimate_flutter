@@ -10,7 +10,6 @@ import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_inappwebview/flutter_inappwebview.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
-import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:share_plus/share_plus.dart";
 import "package:url_launcher/url_launcher.dart";
@@ -44,10 +43,15 @@ class WebviewWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (RunPlatform.isLinux) {
       return Scaffold(
-        appBar: AppBar(
+        appBar: PlatformAppBar(
           title: const Text("WebView"),
-          leading: context.canPop() ? const AppBarLeading() : null,
-        ),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            );
+          },
+        ).getAppBar(context),
         body: const EmptyWidget(msg: "WebView is not supported on Linux"),
       );
     }

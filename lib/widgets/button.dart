@@ -3,7 +3,6 @@ import "package:certimate/router/route.dart";
 import "package:certimate/router/router.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
@@ -33,10 +32,6 @@ class AppBarLeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb && !context.canPop()) {
-      return const SizedBox.shrink();
-    }
-
     defaultOnPressed() {
       final router = GoRouter.of(context);
       if (router.canPop()) {
