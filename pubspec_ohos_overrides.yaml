@@ -1,6 +1,7 @@
 dependency_overrides:
   intl: ^0.20.2
   drift: 2.23.1
+  launch_at_startup: ^0.3.1
   flutter_form_builder: 10.1.0
   drift_flutter:
     git:
