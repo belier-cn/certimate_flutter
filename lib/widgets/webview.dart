@@ -10,6 +10,7 @@ import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_inappwebview/flutter_inappwebview.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
+import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:share_plus/share_plus.dart";
 import "package:url_launcher/url_launcher.dart";
@@ -121,6 +122,11 @@ class WebviewWidget extends HookConsumerWidget {
           trailingActions: [
             PlatformPullDownButton(
               options: [
+                PullDownOption(
+                  label: s.closePage.capitalCase,
+                  iconWidget: Icon(context.appIcons.close),
+                  onTap: (_) => context.pop(),
+                ),
                 PullDownOption(
                   label: s.copyUrl.capitalCase,
                   iconWidget: Icon(context.appIcons.copy),

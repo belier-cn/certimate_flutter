@@ -169,5 +169,6 @@
   "content": "内容",
   "command": "脚本命令",
   "join2": "{one}{two}",
-  "launchAtLogin": "开机启动"
+  "launchAtLogin": "开机启动",
+  "closePage": "关闭页面"
 }

@@ -169,5 +169,6 @@
   "content": "content",
   "command": "command",
   "join2": "{one} {two}",
-  "launchAtLogin": "launch at login"
+  "launchAtLogin": "launch at login",
+  "closePage": "close page"
 }
