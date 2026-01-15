@@ -90,11 +90,11 @@ GoRouter router(Ref ref) {
   );
 
   router.routerDelegate.addListener(() {
-    final fullPath = router.state.fullPath;
+    final fullPath = router.state.matchedLocation;
     lastRoutePath = fullPath;
     final webFullPath =
         "${baseHref.endsWith("/") ? baseHref.substring(0, baseHref.length - 1) : baseHref}$fullPath";
-    if (kIsWeb && fullPath != null && web.getPathName() != webFullPath) {
+    if (kIsWeb && web.getPathName() != webFullPath) {
       Future.delayed(const Duration(milliseconds: 50)).then((_) {
         web.replacePath(webFullPath);
       });

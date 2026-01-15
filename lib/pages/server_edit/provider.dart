@@ -41,7 +41,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     final username = data["username"];
     final String password = data["password"];
     final displayName = data["displayName"];
-    final savePassword = data["savePassword"];
+    final savePassword = data["savePassword"] == true;
     final isLocal = data["isLocal"] == true;
     final server = state.value?.value;
     String userId = "";
@@ -84,7 +84,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     }
 
     if (serverId == null) {
-      if (savePassword == true) {
+      if (savePassword) {
         // 保存密码
         await secureStorage.write(key: passwordId, value: password);
       }
@@ -102,7 +102,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
         ),
       );
     } else {
-      if (savePassword == true) {
+      if (savePassword) {
         if (password != passwordId) {
           // 保存新密码
           await secureStorage.write(key: passwordId, value: password);
