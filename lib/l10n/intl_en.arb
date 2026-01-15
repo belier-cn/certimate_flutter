@@ -168,5 +168,6 @@
   "subject": "subject",
   "content": "content",
   "command": "command",
-  "join2": "{one} {two}"
+  "join2": "{one} {two}",
+  "launchAtLogin": "launch at login"
 }

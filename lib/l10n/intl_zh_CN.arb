@@ -168,5 +168,6 @@
   "subject": "主题",
   "content": "内容",
   "command": "脚本命令",
-  "join2": "{one}{two}"
+  "join2": "{one}{two}",
+  "launchAtLogin": "开机启动"
 }

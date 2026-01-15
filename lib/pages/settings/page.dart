@@ -14,17 +14,19 @@ import "package:certimate/widgets/index.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_hooks/flutter_hooks.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_settings_ui/flutter_settings_ui.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
+import "package:launch_at_startup/launch_at_startup.dart";
 import "package:local_auth/local_auth.dart";
 import "package:share_plus/share_plus.dart";
 import "package:upgrader/upgrader.dart";
 
-class SettingsPage extends ConsumerWidget {
+class SettingsPage extends HookConsumerWidget {
   const SettingsPage({super.key});
 
   @override
@@ -38,6 +40,17 @@ class SettingsPage extends ConsumerWidget {
 
     final privacyBlur = ref.watch(privacyBlurProvider);
     final biometric = ref.watch(biometricProvider);
+
+    final launchAtLogin = useState(false);
+
+    useEffect(() {
+      if (RunPlatform.isDesktop) {
+        launchAtStartup.isEnabled().then((isEnabled) {
+          launchAtLogin.value = isEnabled;
+        });
+      }
+      return null;
+    }, []);
 
     final s = context.s;
 
@@ -133,6 +146,23 @@ class SettingsPage extends ConsumerWidget {
                   SettingsSection(
                     title: Text(s.security.capitalCase),
                     tiles: [
+                      if (RunPlatform.isDesktop)
+                        SettingsTile.switchTile(
+                          leading: const Icon(TablerIcons.rocket),
+                          title: Text(s.launchAtLogin.capitalCase),
+                          initialValue: launchAtLogin.value,
+                          onToggle: (bool value) async {
+                            if (value) {
+                              if (await launchAtStartup.enable()) {
+                                launchAtLogin.value = true;
+                              }
+                            } else {
+                              if (await launchAtStartup.disable()) {
+                                launchAtLogin.value = false;
+                              }
+                            }
+                          },
+                        ),
                       SettingsTile.switchTile(
                         leading: const Icon(TablerIcons.background),
                         title: Text(s.privacyBlur.capitalCase),

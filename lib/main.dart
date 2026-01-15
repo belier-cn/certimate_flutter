@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:certimate/app.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/provider/device.dart";
@@ -11,6 +13,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_native_splash/flutter_native_splash.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:launch_at_startup/launch_at_startup.dart";
 import "package:local_auth/local_auth.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:sp_util/sp_util.dart";
@@ -40,6 +43,7 @@ Future<(PackageInfo, BaseDeviceInfo, List<BiometricType>)> init() async {
   if (RunPlatform.isAndroid || RunPlatform.isIOS) {
     FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   }
+  final packageInfo = await PackageInfo.fromPlatform();
   final baseDeviceInfo = await DeviceInfoPlugin().deviceInfo;
   if (kIsWeb) {
     web.usePathUrlStrategy();
@@ -56,6 +60,11 @@ Future<(PackageInfo, BaseDeviceInfo, List<BiometricType>)> init() async {
       await windowManager.show();
       await windowManager.focus();
     });
+    launchAtStartup.setup(
+      appName: packageInfo.appName,
+      appPath: Platform.resolvedExecutable,
+      packageName: packageInfo.packageName,
+    );
   } else {
     if (RunPlatform.isAndroid || RunPlatform.isOhos) {
       // 配置状态栏和虚拟按钮主题
@@ -77,9 +86,5 @@ Future<(PackageInfo, BaseDeviceInfo, List<BiometricType>)> init() async {
     }
   }
   await SpUtil.getInstance();
-  return (
-    await PackageInfo.fromPlatform(),
-    baseDeviceInfo,
-    await getAvailableBiometrics(),
-  );
+  return (packageInfo, baseDeviceInfo, await getAvailableBiometrics());
 }
