@@ -42,11 +42,14 @@ class AppSliverAppBar extends StatelessWidget {
       material: (context, _) => _buildMaterialSliverAppBar(context),
       cupertino: (context, _) {
         if (!largeTitle && searchController == null) {
+          final height =
+              kMinInteractiveDimensionCupertino +
+              MediaQuery.of(context).padding.top;
           return SliverPersistentHeader(
             pinned: true,
             delegate: PersistentHeaderBuilder(
-              min: kMinInteractiveDimensionCupertino,
-              max: kMinInteractiveDimensionCupertino,
+              min: height,
+              max: height,
               builder: (ctx, offset) {
                 return CupertinoNavigationBar(
                   leading: leading,
