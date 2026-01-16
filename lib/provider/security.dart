@@ -31,7 +31,7 @@ List<BiometricType> biometrics(Ref ref) => [];
 
 @Riverpod(keepAlive: true)
 class BiometricNotifier extends _$BiometricNotifier {
-  final String cacheKey = "biometric";
+  final String cacheKey = "certimate-biometric";
 
   @override
   bool build() {
@@ -46,7 +46,7 @@ class BiometricNotifier extends _$BiometricNotifier {
 
 @Riverpod(keepAlive: true)
 class PrivacyBlurNotifier extends _$PrivacyBlurNotifier {
-  final String cacheKey = "privacy_blur";
+  final String cacheKey = "certimate-privacy-blur";
 
   @override
   bool build() {

@@ -8,7 +8,7 @@ part "platform.g.dart";
 
 @Riverpod(keepAlive: true)
 class TargetPlatformNotifier extends _$TargetPlatformNotifier {
-  final String cacheKey = "target_platform";
+  final String cacheKey = "certimate-target-platform";
 
   @override
   TargetPlatform? build() {
@@ -30,7 +30,7 @@ class TargetPlatformNotifier extends _$TargetPlatformNotifier {
 
 @Riverpod(keepAlive: true)
 class DeviceModeNotifier extends _$DeviceModeNotifier {
-  final String cacheKey = "device_mode";
+  final String cacheKey = "certimate-device-mode";
 
   @override
   DeviceConfig build() {

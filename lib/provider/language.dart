@@ -8,7 +8,7 @@ part "language.g.dart";
 
 @Riverpod(keepAlive: true)
 class Language extends _$Language {
-  final String cacheKey = "language";
+  final String cacheKey = "certimate-language";
 
   @override
   Locale? build() {

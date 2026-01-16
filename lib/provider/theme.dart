@@ -7,7 +7,7 @@ part "theme.g.dart";
 
 @Riverpod(keepAlive: true)
 class ThemeModeNotifier extends _$ThemeModeNotifier {
-  final String cacheKey = "theme-model";
+  final String cacheKey = "certimate-theme-mode";
 
   @override
   ThemeMode build() {
@@ -26,7 +26,7 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
 
 @riverpod
 class ThemeSchemeNotifier extends _$ThemeSchemeNotifier {
-  final String cacheKey = "theme-scheme";
+  final String cacheKey = "certimate-theme-scheme";
 
   @override
   FlexScheme build() {
