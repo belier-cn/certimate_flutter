@@ -1,5 +1,6 @@
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
+import "package:certimate/hooks/index.dart";
 import "package:certimate/theme/theme.dart";
 import "package:certimate/widgets/index.dart";
 import "package:collection/collection.dart";
@@ -9,10 +10,10 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
 import "package:flutter_riverpod/experimental/mutation.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:go_router/go_router.dart";
+import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
 import "package:material_design/material_design.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -109,6 +110,8 @@ mixin SearchMixin {
 typedef RefreshBodyItemBuilder<T> =
     Widget? Function(BuildContext context, T data, int index);
 
+typedef RefreshBodyDataLoad<T> = Function(BuildContext context, T data);
+
 class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
   final $AsyncNotifierProvider<$AsyncNotifier<ValueT>, ValueT> provider;
 
@@ -134,6 +137,8 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
 
   final double itemSpacing;
 
+  final RefreshBodyDataLoad? firstLoadSuccess;
+
   const RefreshBody({
     super.key,
     this.title,
@@ -148,6 +153,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
     this.topVisible,
     this.itemSpacing = M3Spacings.space12,
     this.automaticallyImplyLeading,
+    this.firstLoadSuccess,
   });
 
   @override
@@ -156,10 +162,19 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
     final theme = Theme.of(context);
     final appTheme = theme.extension<AppThemeData>()!;
     final mediaQuery = MediaQuery.of(context);
-    final Widget body = Consumer(
+    final Widget body = HookConsumer(
       builder: (_, ref, _) {
         final data = ref.watch(provider);
         final notifier = ref.read(provider.notifier);
+
+        useCallOnceWhen(data.hasValue, () {
+          final value = data.value;
+          if (value == null) {
+            return;
+          }
+          firstLoadSuccess?.call(context, value);
+        });
+
         final firstLoading = !data.hasValue && data.isLoading;
         final isSubmit = notifier is SubmitMixin;
         final leadingWidth =

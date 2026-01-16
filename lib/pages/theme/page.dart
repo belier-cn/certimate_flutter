@@ -17,40 +17,37 @@ class ThemePage extends HookConsumerWidget {
     final scrollController = useScrollController();
     final topVisible = useValueNotifier(false);
     final themeScheme = ref.watch(themeSchemeProvider);
-    final themePageData = ref.read(themePageProvider);
     final theme = context.theme;
     final isCupertino = context.isCupertinoStyle;
-    useEffect(() {
-      if (themePageData.hasValue) {
-        // go selected theme
-        final list = themePageData.requireValue.list;
-        final index = list.indexOf(themeScheme);
-        final itemHeight = (isCupertino ? 52 : 72) + 12;
-        final appBarHeight =
-            mediaQuery.padding.top +
-            (theme.appBarTheme.toolbarHeight ?? kToolbarHeight);
-        final bottomPadding = mediaQuery.padding.bottom > 0
-            ? mediaQuery.padding.bottom
-            : theme.appTheme.bodyPadding.left;
-        final pageSize = ((mediaQuery.size.height - appBarHeight) / itemHeight)
-            .ceil();
-        final lastPage = index >= list.length - pageSize;
-        final offset =
-            (lastPage ? list.length - pageSize : index - 1) * itemHeight +
-            theme.appTheme.bodyPadding.left / 2 +
-            (lastPage ? bottomPadding : 0);
-        if (offset > 0) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollController.animateTo(
-              offset,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.linear,
-            );
-          });
-        }
+    firstLoadSuccess(_, data) {
+      // go selected theme
+      final list = data.list;
+      final index = list.indexOf(themeScheme);
+      final itemHeight = (isCupertino ? 52 : 72) + 12;
+      final appBarHeight =
+          mediaQuery.padding.top +
+          (theme.appBarTheme.toolbarHeight ?? kToolbarHeight);
+      final bottomPadding = mediaQuery.padding.bottom > 0
+          ? mediaQuery.padding.bottom
+          : theme.appTheme.bodyPadding.left;
+      final pageSize = ((mediaQuery.size.height - appBarHeight) / itemHeight)
+          .ceil();
+      final lastPage = index >= list.length - pageSize;
+      final offset =
+          (lastPage ? list.length - pageSize : index - 1) * itemHeight +
+          theme.appTheme.bodyPadding.left / 2 +
+          (lastPage ? bottomPadding : 0);
+      if (offset > 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          scrollController.animateTo(
+            offset,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.linear,
+          );
+        });
       }
-      return null;
-    }, []);
+    }
+
     return BasePage(
       child: Scaffold(
         body: RadioGroup(
@@ -65,6 +62,7 @@ class ThemePage extends HookConsumerWidget {
             title: Text(s.theme.titleCase),
             provider: themePageProvider,
             scrollController: scrollController,
+            firstLoadSuccess: firstLoadSuccess,
             itemBuilder: (context, data, index) {
               final item = data.list[index - data.topItemCount];
               return ThemeItemWidget(
