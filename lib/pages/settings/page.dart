@@ -66,195 +66,175 @@ class SettingsPage extends HookConsumerWidget {
             );
           },
         ).getAppBar(context),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SettingsList(
-                shrinkWrap: true,
-                platform: context.isCupertinoStyle
-                    ? DevicePlatform.iOS
-                    : DevicePlatform.android,
-                physics: const NeverScrollableScrollPhysics(),
-                sections: [
-                  SettingsSection(
-                    title: Text(s.theme.capitalCase),
-                    tiles: <SettingsTile>[
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.language),
-                        title: Text(s.language.capitalCase),
-                        value: Text(
-                          (language == null ? s.system : s.languageName)
-                              .capitalCase,
-                        ),
-                        onPressed: (context) {
-                          _showSwitchLanguageDialog(context, ref);
-                        },
-                      ),
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.brightness_filled),
-                        title: Text(s.brightness.capitalCase),
-                        value: Text(
-                          Intl.message(
-                            themeMode.name,
-                            name: themeMode.name,
-                          ).capitalCase,
-                        ),
-                        onPressed: (context) {
-                          _showSwitchThemeModelDialog(context, ref);
-                        },
-                      ),
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.palette),
-                        title: Text(s.theme.capitalCase),
-                        value: Text(themeScheme.name.capitalCase),
-                        onPressed: (context) {
-                          const ThemeRoute().push(context);
-                        },
-                      ),
-                      if (RunPlatform.isIOS || RunPlatform.isMacOS)
-                        SettingsTile.switchTile(
-                          leading: const Icon(TablerIcons.device_mobile),
-                          title: const Text("Material"),
-                          initialValue: context.isMaterialStyle,
-                          onToggle: (bool value) {
-                            ref
-                                .read(targetPlatformProvider.notifier)
-                                .update(
-                                  value
-                                      ? TargetPlatform.android
-                                      : TargetPlatform.iOS,
-                                );
-                          },
-                        ),
-                      if (!(RunPlatform.isIOS || RunPlatform.isMacOS))
-                        SettingsTile.switchTile(
-                          leading: const Icon(TablerIcons.device_mobile),
-                          title: const Text("Cupertino"),
-                          initialValue: context.isCupertinoStyle,
-                          onToggle: (bool value) {
-                            ref
-                                .read(targetPlatformProvider.notifier)
-                                .update(
-                                  value
-                                      ? TargetPlatform.iOS
-                                      : TargetPlatform.android,
-                                );
-                          },
-                        ),
-                    ],
+        body: SettingsList(
+          platform: context.isCupertinoStyle
+              ? DevicePlatform.iOS
+              : DevicePlatform.android,
+          sections: [
+            SettingsSection(
+              title: Text(s.theme.capitalCase),
+              tiles: <SettingsTile>[
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.language),
+                  title: Text(s.language.capitalCase),
+                  value: Text(
+                    (language == null ? s.system : s.languageName).capitalCase,
                   ),
-                  SettingsSection(
-                    title: Text(s.security.capitalCase),
-                    tiles: [
-                      if (RunPlatform.isDesktop)
-                        SettingsTile.switchTile(
-                          leading: const Icon(TablerIcons.rocket),
-                          title: Text(s.launchAtLogin.capitalCase),
-                          initialValue: launchAtLogin.value,
-                          onToggle: (bool value) async {
-                            if (value) {
-                              if (await launchAtStartup.enable()) {
-                                launchAtLogin.value = true;
-                              }
-                            } else {
-                              if (await launchAtStartup.disable()) {
-                                launchAtLogin.value = false;
-                              }
-                            }
-                          },
-                        ),
-                      SettingsTile.switchTile(
-                        leading: const Icon(TablerIcons.background),
-                        title: Text(s.privacyBlur.capitalCase),
-                        initialValue: privacyBlur,
-                        onToggle: (bool value) {
-                          ref.read(privacyBlurProvider.notifier).update(value);
-                        },
-                      ),
-                      if (biometrics.isNotEmpty)
-                        SettingsTile.switchTile(
-                          leading: biometrics.contains(BiometricType.face)
-                              ? const Icon(TablerIcons.face_id)
-                              : const Icon(TablerIcons.fingerprint_scan),
-                          title: Text(s.backgroundLock.capitalCase),
-                          initialValue: biometric,
-                          onToggle: (bool value) async {
-                            final didAuthenticate = await localAuthenticate(
-                              value
-                                  ? s.enableBackgroundLockTip
-                                  : s.disableBackgroundLockTip,
-                            );
-                            if (didAuthenticate) {
-                              ref
-                                  .read(biometricProvider.notifier)
-                                  .update(value);
-                            }
-                          },
-                        ),
-                    ],
+                  onPressed: (context) {
+                    _showSwitchLanguageDialog(context, ref);
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.brightness_filled),
+                  title: Text(s.brightness.capitalCase),
+                  value: Text(
+                    Intl.message(
+                      themeMode.name,
+                      name: themeMode.name,
+                    ).capitalCase,
                   ),
-                  SettingsSection(
-                    title: Text(s.about.capitalCase),
-                    tiles: [
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.share_2),
-                        title: Text(s.share.capitalCase),
-                        onPressed: (_) async {
-                          final url =
-                              "https://github.com/belier-cn/certimate_flutter";
-                          if (RunPlatform.useShareDevice) {
-                            SharePlus.instance.share(
-                              ShareParams(uri: Uri.parse(url)),
-                            );
-                          } else {
-                            await Clipboard.setData(ClipboardData(text: url));
-                            if (context.mounted) {
-                              final _ = showOkAlertDialog(
-                                context: context,
-                                message: context.s.copied,
-                              );
-                            }
+                  onPressed: (context) {
+                    _showSwitchThemeModelDialog(context, ref);
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.palette),
+                  title: Text(s.theme.capitalCase),
+                  value: Text(themeScheme.name.capitalCase),
+                  onPressed: (context) {
+                    const ThemeRoute().push(context);
+                  },
+                ),
+                if (RunPlatform.isIOS || RunPlatform.isMacOS)
+                  SettingsTile.switchTile(
+                    leading: const Icon(TablerIcons.device_mobile),
+                    title: const Text("Material"),
+                    initialValue: context.isMaterialStyle,
+                    onToggle: (bool value) {
+                      ref
+                          .read(targetPlatformProvider.notifier)
+                          .update(
+                            value ? TargetPlatform.android : TargetPlatform.iOS,
+                          );
+                    },
+                  ),
+                if (!(RunPlatform.isIOS || RunPlatform.isMacOS))
+                  SettingsTile.switchTile(
+                    leading: const Icon(TablerIcons.device_mobile),
+                    title: const Text("Cupertino"),
+                    initialValue: context.isCupertinoStyle,
+                    onToggle: (bool value) {
+                      ref
+                          .read(targetPlatformProvider.notifier)
+                          .update(
+                            value ? TargetPlatform.iOS : TargetPlatform.android,
+                          );
+                    },
+                  ),
+              ],
+            ),
+            if (!kIsWeb)
+              SettingsSection(
+                title: Text(s.security.capitalCase),
+                tiles: [
+                  if (RunPlatform.isDesktop)
+                    SettingsTile.switchTile(
+                      leading: const Icon(TablerIcons.rocket),
+                      title: Text(s.launchAtLogin.capitalCase),
+                      initialValue: launchAtLogin.value,
+                      onToggle: (bool value) async {
+                        if (value) {
+                          if (await launchAtStartup.enable()) {
+                            launchAtLogin.value = true;
                           }
-                        },
-                      ),
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.file_text),
-                        title: Text(s.document.capitalCase),
-                        onPressed: (_) => const WebViewRoute(
-                          url: "https://docs.certimate.me",
-                        ).push(context),
-                      ),
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.circle_dot),
-                        title: Text(s.issues.capitalCase),
-                        onPressed: (_) => const WebViewRoute(
-                          url:
-                              "https://github.com/belier-cn/certimate_flutter/issues",
-                        ).push(context),
-                      ),
-                      SettingsTile.navigation(
-                        leading: const Icon(TablerIcons.refresh),
-                        title: badges.Badge(
-                          showBadge: upgrader.isUpdateAvailable(),
-                          badgeAnimation: const badges.BadgeAnimation.scale(),
-                          position: badges.BadgePosition.topEnd(
-                            top: -2,
-                            end: -12,
-                          ),
-                          child: Text(s.version.capitalCase),
-                        ),
-                        value: packageInfo != null
-                            ? Text(packageInfo.version)
-                            : null,
-                        onPressed: (_) => showNewVersion(context, upgrader),
-                      ),
-                    ],
+                        } else {
+                          if (await launchAtStartup.disable()) {
+                            launchAtLogin.value = false;
+                          }
+                        }
+                      },
+                    ),
+                  SettingsTile.switchTile(
+                    leading: const Icon(TablerIcons.background),
+                    title: Text(s.privacyBlur.capitalCase),
+                    initialValue: privacyBlur,
+                    onToggle: (bool value) {
+                      ref.read(privacyBlurProvider.notifier).update(value);
+                    },
                   ),
+                  if (biometrics.isNotEmpty)
+                    SettingsTile.switchTile(
+                      leading: biometrics.contains(BiometricType.face)
+                          ? const Icon(TablerIcons.face_id)
+                          : const Icon(TablerIcons.fingerprint_scan),
+                      title: Text(s.backgroundLock.capitalCase),
+                      initialValue: biometric,
+                      onToggle: (bool value) async {
+                        final didAuthenticate = await localAuthenticate(
+                          value
+                              ? s.enableBackgroundLockTip
+                              : s.disableBackgroundLockTip,
+                        );
+                        if (didAuthenticate) {
+                          ref.read(biometricProvider.notifier).update(value);
+                        }
+                      },
+                    ),
                 ],
               ),
-              const SizedBox(height: 30),
-            ],
-          ),
+            SettingsSection(
+              title: Text(s.about.capitalCase),
+              tiles: [
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.share_2),
+                  title: Text(s.share.capitalCase),
+                  onPressed: (_) async {
+                    final url =
+                        "https://github.com/belier-cn/certimate_flutter";
+                    if (RunPlatform.useShareDevice) {
+                      SharePlus.instance.share(
+                        ShareParams(uri: Uri.parse(url)),
+                      );
+                    } else {
+                      await Clipboard.setData(ClipboardData(text: url));
+                      if (context.mounted) {
+                        final _ = showOkAlertDialog(
+                          context: context,
+                          message: context.s.copied,
+                        );
+                      }
+                    }
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.file_text),
+                  title: Text(s.document.capitalCase),
+                  onPressed: (_) => const WebViewRoute(
+                    url: "https://docs.certimate.me",
+                  ).push(context),
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.circle_dot),
+                  title: Text(s.issues.capitalCase),
+                  onPressed: (_) => const WebViewRoute(
+                    url:
+                        "https://github.com/belier-cn/certimate_flutter/issues",
+                  ).push(context),
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.refresh),
+                  title: badges.Badge(
+                    showBadge: upgrader.isUpdateAvailable(),
+                    badgeAnimation: const badges.BadgeAnimation.scale(),
+                    position: badges.BadgePosition.topEnd(top: -2, end: -12),
+                    child: Text(s.version.capitalCase),
+                  ),
+                  value: packageInfo != null ? Text(packageInfo.version) : null,
+                  onPressed: (_) => showNewVersion(context, upgrader),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
