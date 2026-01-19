@@ -23,34 +23,31 @@ class DebugPage extends HookConsumerWidget {
             );
           },
         ).getAppBar(context),
-        body: SingleChildScrollView(
-          child: SettingsList(
-            shrinkWrap: true,
-            platform: context.isCupertinoStyle
-                ? DevicePlatform.iOS
-                : DevicePlatform.android,
-            physics: const NeverScrollableScrollPhysics(),
-            sections: [
-              SettingsSection(
-                tiles: <SettingsTile>[
-                  SettingsTile.navigation(
-                    leading: const Icon(TablerIcons.database),
-                    title: const Text("Tables"),
-                    onPressed: (context) {
-                      const DbViewerRoute().push(context);
-                    },
-                  ),
-                  SettingsTile.navigation(
-                    leading: const Icon(TablerIcons.clock_hour_3),
-                    title: const Text("Logger"),
-                    onPressed: (context) {
-                      const LoggerRoute().push(context);
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+        body: SettingsList(
+          platform: context.isCupertinoStyle
+              ? DevicePlatform.iOS
+              : DevicePlatform.android,
+          physics: const NeverScrollableScrollPhysics(),
+          sections: [
+            SettingsSection(
+              tiles: <SettingsTile>[
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.database),
+                  title: const Text("Tables"),
+                  onPressed: (context) {
+                    const DbViewerRoute().push(context);
+                  },
+                ),
+                SettingsTile.navigation(
+                  leading: const Icon(TablerIcons.clock_hour_3),
+                  title: const Text("Logger"),
+                  onPressed: (context) {
+                    const LoggerRoute().push(context);
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
