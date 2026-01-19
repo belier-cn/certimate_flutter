@@ -31,13 +31,9 @@ GoRouter router(Ref ref) {
             StatefulShellRoute.indexedStack(
               branches: [
                 StatefulShellBranch(
-                  observers: [FlutterSmartDialog.observer],
                   routes: [
                     ShellRoute(
-                      observers: [
-                        FlutterSmartDialog.observer,
-                        ServersRouteObserver(),
-                      ],
+                      observers: [ServersRouteObserver()],
                       routes: [$homeRoute],
                       builder: (context, state, child) {
                         return HomePage(navigationShell: child, state: state);
@@ -49,12 +45,7 @@ GoRouter router(Ref ref) {
                 // 之前的方案会导致先访问哪个页面，哪个页面就被缓存了，通过 navigationShell.goBranch 无法切换到设置页面
                 ...$appRoutes
                     .sublist(1)
-                    .map(
-                      (route) => StatefulShellBranch(
-                        routes: [route],
-                        observers: [FlutterSmartDialog.observer],
-                      ),
-                    ),
+                    .map((route) => StatefulShellBranch(routes: [route])),
               ],
               builder: (context, state, navigationShell) {
                 return ScaffoldWithNavbar(navigationShell);
@@ -64,14 +55,8 @@ GoRouter router(Ref ref) {
         : [
             StatefulShellRoute.indexedStack(
               branches: [
-                StatefulShellBranch(
-                  routes: [$singleHomeRoute],
-                  observers: [FlutterSmartDialog.observer],
-                ),
-                StatefulShellBranch(
-                  routes: [$settingsRoute],
-                  observers: [FlutterSmartDialog.observer],
-                ),
+                StatefulShellBranch(routes: [$singleHomeRoute]),
+                StatefulShellBranch(routes: [$settingsRoute]),
               ],
               builder: (context, state, navigationShell) {
                 return ScaffoldWithNavbar(navigationShell);
