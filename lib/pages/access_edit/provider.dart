@@ -19,7 +19,9 @@ class AccessDetailData extends RefreshData<AccessDetailResult> {
   @override
   final List<AccessDetailResult> list;
 
-  const AccessDetailData(this.list);
+  final String host;
+
+  const AccessDetailData(this.host, this.list);
 }
 
 @riverpod
@@ -35,7 +37,10 @@ class AccessDetailNotifier extends _$AccessDetailNotifier with SubmitMixin {
   @override
   Future<AccessDetailData> build(int serverId, String accessId) async {
     try {
-      return AccessDetailData([await loadData()]);
+      final host = await ref.watch(
+        serverProvider(serverId).selectAsync((val) => val?.host ?? ""),
+      );
+      return AccessDetailData(host, [await loadData()]);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
         SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
@@ -46,15 +51,13 @@ class AccessDetailNotifier extends _$AccessDetailNotifier with SubmitMixin {
   }
 
   Future<AccessDetailResult> loadData() async {
-    final server = ref.watch(serverProvider(serverId)).value!;
-    return await ref.watch(accessApiProvider).getDetail(server, accessId);
+    return await ref.watch(accessApiProvider(serverId)).getDetail(accessId);
   }
 
   Future<AccessDetailResult> _submit(Map<String, dynamic> data) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     await ref
-        .read(accessApiProvider)
-        .update(server, accessId, data["name"], jsonDecode(data["config"]));
+        .read(accessApiProvider(serverId))
+        .update(accessId, data["name"], jsonDecode(data["config"]));
     return state.requireValue.list.first.copyWith(name: data["name"]);
   }
 

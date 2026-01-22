@@ -1,5 +1,4 @@
 import "package:certimate/api/http.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -8,25 +7,26 @@ part "workflow_api.freezed.dart";
 part "workflow_api.g.dart";
 
 @Riverpod(keepAlive: true)
-WorkflowApi workflowApi(Ref ref) {
+WorkflowApi workflowApi(Ref ref, int serverId) {
   final dio = ref.read(dioProvider);
-  return WorkflowApi(dio: dio);
+  return WorkflowApi(dio: dio, serverId: serverId);
 }
 
 class WorkflowApi {
   final Dio dio;
 
-  WorkflowApi({required this.dio});
+  final int serverId;
 
-  Future<ApiPageResult<WorkflowResult>> getRecords(
-    ServerModel server, {
+  WorkflowApi({required this.dio, required this.serverId});
+
+  Future<ApiPageResult<WorkflowResult>> getRecords({
     int page = 1,
     int perPage = 15,
     String sort = "",
     String filter = "",
   }) async {
     final response = await dio.get(
-      "${server.host}/api/collections/workflow/records",
+      "/api/collections/workflow/records",
       queryParameters: {
         "page": page,
         "perPage": perPage,
@@ -35,7 +35,7 @@ class WorkflowApi {
             "id,name,enabled,trigger,hasContent,triggerCron,description,created,lastRunTime",
         "filter": filter,
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiPageResult.fromJson(
       response.data,
@@ -43,14 +43,14 @@ class WorkflowApi {
     );
   }
 
-  Future<void> copy(ServerModel server, String workflowId) async {
+  Future<void> copy(String workflowId) async {
     final workflowRes = await dio.get<Map<String, dynamic>>(
-      "${server.host}/api/collections/workflow/records/$workflowId",
-      options: server.getOptions(),
+      "/api/collections/workflow/records/$workflowId",
+      options: Options(extra: {"serverId": serverId}),
     );
     final workflow = workflowRes.data ?? {};
     await dio.post<Map<String, dynamic>>(
-      "${server.host}/api/collections/workflow/records",
+      "/api/collections/workflow/records",
       data: {
         "description": workflow["description"],
         "graphDraft": workflow["graphDraft"],
@@ -59,59 +59,50 @@ class WorkflowApi {
         "trigger": workflow["trigger"],
         "triggerCron": workflow["triggerCron"],
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<void> delete(ServerModel server, String workflowId) async {
+  Future<void> delete(String workflowId) async {
     await dio.delete(
-      "${server.host}/api/collections/workflow/records/$workflowId",
+      "/api/collections/workflow/records/$workflowId",
       data: {"deleted": DateTime.now().toIso8601String()},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<void> run(ServerModel server, String workflowId) async {
+  Future<void> run(String workflowId) async {
     await dio.post(
-      "${server.host}/api/collections/workflow/records/$workflowId/runs",
+      "/api/collections/workflow/records/$workflowId/runs",
       data: {"trigger": "manual"},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<void> cancel(
-    ServerModel server,
-    String workflowId,
-    String runId,
-  ) async {
+  Future<void> cancel(String workflowId, String runId) async {
     await dio.post(
-      "${server.host}/api/collections/workflow/records/$workflowId/runs/$runId/cancel",
-      options: server.getOptions(),
+      "/api/collections/workflow/records/$workflowId/runs/$runId/cancel",
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<ApiResult> enabled(
-    ServerModel server,
-    String workflowId,
-    bool enabled,
-  ) async {
+  Future<ApiResult> enabled(String workflowId, bool enabled) async {
     final response = await dio.patch(
-      "${server.host}/api/collections/workflow/records/$workflowId",
+      "/api/collections/workflow/records/$workflowId",
       data: {"id": workflowId, "enabled": enabled},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiResult.fromJson(response.data, (json) => json);
   }
 
-  Future<ApiPageResult<WorkflowRunResult>> getRunRecords(
-    ServerModel server, {
+  Future<ApiPageResult<WorkflowRunResult>> getRunRecords({
     int page = 1,
     int perPage = 15,
     String sort = "-created",
     String filter = "",
   }) async {
     final response = await dio.get(
-      "${server.host}/api/collections/workflow_run/records",
+      "/api/collections/workflow_run/records",
       queryParameters: {
         "page": page,
         "perPage": perPage,
@@ -121,7 +112,7 @@ class WorkflowApi {
             "id,status,trigger,endedAt,startedAt,expand.workflowRef.id,expand.workflowRef.name,expand.workflowRef.description",
         "filter": filter,
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiPageResult.fromJson(
       response.data,
@@ -129,32 +120,26 @@ class WorkflowApi {
     );
   }
 
-  Future<void> deleteRun(ServerModel server, String runId) async {
+  Future<void> deleteRun(String runId) async {
     await dio.delete(
-      "${server.host}/api/collections/workflow_run/records/$runId",
+      "/api/collections/workflow_run/records/$runId",
       data: {"deleted": DateTime.now().toIso8601String()},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<WorkflowRunDetailResult> getRunDetail(
-    ServerModel server,
-    String runId,
-  ) async {
+  Future<WorkflowRunDetailResult> getRunDetail(String runId) async {
     final response = await dio.get(
-      "${server.host}/api/collections/workflow_run/records/$runId",
+      "/api/collections/workflow_run/records/$runId",
       data: {"fields": "id,status,graph,trigger,startedAt,endedAt"},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return WorkflowRunDetailResult.fromJson(response.data);
   }
 
-  Future<ApiPageResult<WorkflowLogResult>> getRunLogs(
-    ServerModel server,
-    String runId,
-  ) async {
+  Future<ApiPageResult<WorkflowLogResult>> getRunLogs(String runId) async {
     final response = await dio.get(
-      "${server.host}/api/collections/workflow_logs/records",
+      "/api/collections/workflow_logs/records",
       queryParameters: {
         "page": 1,
         "perPage": 65535,
@@ -162,7 +147,7 @@ class WorkflowApi {
         "filter": "runRef='$runId'",
         "sort": "timestamp",
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiPageResult.fromJson(
       response.data,

@@ -8,7 +8,6 @@ import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:flutter/material.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
 
@@ -40,15 +39,13 @@ class ServerNotifier extends _$ServerNotifier {
 class ServerStatisticsNotifier extends _$ServerStatisticsNotifier {
   @override
   Future<StatisticsResult> build(int serverId) async {
-    // token 改变了，才重构
-    ref.watch(
-      serverProvider(serverId).select((item) => item.value?.token ?? ""),
+    final token = await ref.watch(
+      serverProvider(serverId).selectAsync((item) => item?.token ?? ""),
     );
-    final server = await ref.read(serverProvider(serverId).future);
-    if (server == null) {
+    if (token.isEmpty) {
       return const StatisticsResult();
     }
-    return await ref.watch(serverApiProvider).getStatistics(server);
+    return await ref.watch(serverApiProvider(serverId)).getStatistics();
   }
 }
 
@@ -56,15 +53,14 @@ class ServerStatisticsNotifier extends _$ServerStatisticsNotifier {
 class ServerWorkflowRunNotifier extends _$ServerWorkflowRunNotifier {
   @override
   Future<List<WorkflowRunResult>> build(int serverId) async {
-    // token 改变了，才重构
-    ref.watch(
-      serverProvider(serverId).select((item) => item.value?.token ?? ""),
+    final token = await ref.watch(
+      serverProvider(serverId).selectAsync((item) => item?.token ?? ""),
     );
-    final server = await ref.read(serverProvider(serverId).future);
-    if (server == null) {
+    if (token.isEmpty) {
       return const [];
     }
-    return (await ref.watch(workflowApiProvider).getRunRecords(server)).items;
+    return (await ref.watch(workflowApiProvider(serverId)).getRunRecords())
+        .items;
   }
 }
 
@@ -86,19 +82,16 @@ class ServerDataNotifier extends _$ServerDataNotifier {
   @override
   Future<ServerData> build(int serverId) async {
     if (state.isRefreshing) {
-      // 刷新依赖
-      final _ = ref.refresh(serverStatisticsProvider(serverId).future);
-      final _ = ref.refresh(serverWorkflowRunProvider(serverId).future);
+      // 失效旧值
+      ref.invalidate(serverStatisticsProvider(serverId));
+      ref.invalidate(serverWorkflowRunProvider(serverId));
     }
     try {
-      final resList = await Future.wait([
+      final (statistics, wrkflowRuns) = await wait2(
         ref.watch(serverStatisticsProvider(serverId).future),
         ref.watch(serverWorkflowRunProvider(serverId).future),
-      ]);
-      return ServerData(
-        resList[0] as StatisticsResult,
-        resList[1] as List<WorkflowRunResult>,
       );
+      return ServerData(statistics, wrkflowRuns);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
         // 有值的情况下，刷新失败只弹窗提示，保留之前的值
@@ -110,8 +103,8 @@ class ServerDataNotifier extends _$ServerDataNotifier {
   }
 
   Future<int> delete(BuildContext context) async {
-    final server = ref.read(serverProvider(serverId)).value;
-    if (server == null) {
+    final server = await ref.read(serverProvider(serverId).future);
+    if (server == null || !context.mounted) {
       return 0;
     }
     final s = context.s;

@@ -2,7 +2,6 @@ import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/api/certificate_api.dart";
 import "package:certimate/api/http.dart";
 import "package:certimate/extension/index.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:easy_refresh/easy_refresh.dart";
@@ -93,7 +92,6 @@ class CertificatesNotifier extends _$CertificatesNotifier
   }
 
   Future<ApiPageResult<CertificateResult>> loadData({int loadPage = 1}) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final filters = [
       "deleted=null",
       searchKey.isEmpty
@@ -102,9 +100,8 @@ class CertificatesNotifier extends _$CertificatesNotifier
       getFilter(),
     ];
     return await ref
-        .watch(certificateApiProvider)
+        .watch(certificateApiProvider(serverId))
         .getRecords(
-          server,
           page: loadPage,
           sort: getSort(),
           filter: filters.where((filter) => filter.isNotEmpty).join("&&"),
@@ -128,8 +125,7 @@ class CertificatesNotifier extends _$CertificatesNotifier
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(certificateApiProvider).revoke(server, cert.id ?? "");
+      await ref.watch(certificateApiProvider(serverId)).revoke(cert.id ?? "");
       updateCertificateRevoked(cert.id ?? "");
       return true;
     }
@@ -162,8 +158,7 @@ class CertificatesNotifier extends _$CertificatesNotifier
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(certificateApiProvider).delete(server, cert.id ?? "");
+      await ref.watch(certificateApiProvider(serverId)).delete(cert.id ?? "");
       return true;
     }
     return false;

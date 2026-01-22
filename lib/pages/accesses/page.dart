@@ -3,7 +3,6 @@ import "package:certimate/extension/index.dart";
 import "package:certimate/hooks/easy_refresh.dart";
 import "package:certimate/pages/accesses/provider.dart";
 import "package:certimate/pages/accesses/widgets/access.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
@@ -70,13 +69,12 @@ class AccessesPage extends HookConsumerWidget {
           searchPlaceholder: s.credentialsSearchPlaceholder.capitalCase,
           provider: provider,
           itemBuilder: (context, data, index) {
-            final server = ref.read(serverProvider(serverId));
             final item = data.list[index];
             return AccessWidget(
               key: ValueKey(item.id),
               data: item,
               serverId: serverId,
-              serverHost: server.value?.host ?? "",
+              serverHost: data.host,
               onDelete: () async {
                 if (await ref.read(provider.notifier).delete(context, item)) {
                   refreshController.callRefresh(

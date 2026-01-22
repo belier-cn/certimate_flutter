@@ -1,5 +1,4 @@
 import "package:certimate/api/http.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -8,25 +7,26 @@ part "access_api.freezed.dart";
 part "access_api.g.dart";
 
 @Riverpod(keepAlive: true)
-AccessApi accessApi(Ref ref) {
+AccessApi accessApi(Ref ref, int serverId) {
   final dio = ref.read(dioProvider);
-  return AccessApi(dio: dio);
+  return AccessApi(dio: dio, serverId: serverId);
 }
 
 class AccessApi {
   final Dio dio;
 
-  AccessApi({required this.dio});
+  final int serverId;
 
-  Future<ApiPageResult<AccessResult>> getRecords(
-    ServerModel server, {
+  AccessApi({required this.dio, required this.serverId});
+
+  Future<ApiPageResult<AccessResult>> getRecords({
     int page = 1,
     int perPage = 15,
     String sort = "-created",
     String filter = "",
   }) async {
     final response = await dio.get(
-      "${server.host}/api/collections/access/records",
+      "/api/collections/access/records",
       queryParameters: {
         "page": page,
         "perPage": perPage,
@@ -34,7 +34,7 @@ class AccessApi {
         "fields": "id,name,provider,reserve,created",
         "filter": filter,
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiPageResult.fromJson(
       response.data,
@@ -42,45 +42,40 @@ class AccessApi {
     );
   }
 
-  Future<AccessDetailResult> getDetail(ServerModel server, String id) async {
+  Future<AccessDetailResult> getDetail(String id) async {
     final response = await dio.get(
-      "${server.host}/api/collections/access/records/$id",
-      options: server.getOptions(),
+      "/api/collections/access/records/$id",
+      options: Options(extra: {"serverId": serverId}),
     );
     return AccessDetailResult.fromJson(response.data);
   }
 
-  Future<ApiResult> update(
-    ServerModel server,
-    String id,
-    String name,
-    dynamic config,
-  ) async {
+  Future<ApiResult> update(String id, String name, dynamic config) async {
     final response = await dio.patch(
-      "${server.host}/api/collections/access/records/$id",
+      "/api/collections/access/records/$id",
       data: {"name": name, "config": config},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiResult.fromJson(response.data, (json) => json);
   }
 
-  Future<void> copy(ServerModel server, String accessId) async {
-    final accessRes = await getDetail(server, accessId);
+  Future<void> copy(String accessId) async {
+    final accessRes = await getDetail(accessId);
     await dio.post<Map<String, dynamic>>(
-      "${server.host}/api/collections/access/records",
+      "/api/collections/access/records",
       data: {
         "name": "${accessRes.name}-copy",
         "provider": accessRes.provider,
         "config": accessRes.config,
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
-  Future<void> delete(ServerModel server, String id) async {
+  Future<void> delete(String id) async {
     await dio.delete(
-      "${server.host}/api/collections/access/records/$id",
-      options: server.getOptions(),
+      "/api/collections/access/records/$id",
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 }

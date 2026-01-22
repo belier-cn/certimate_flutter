@@ -30,7 +30,9 @@ class AccessesData extends RefreshData<AccessResult> {
   @override
   final List<AccessResult> list;
 
-  const AccessesData(this.list);
+  final String host;
+
+  const AccessesData(this.host, this.list);
 }
 
 @riverpod
@@ -45,7 +47,10 @@ class AccessesNotifier extends _$AccessesNotifier
   @override
   Future<AccessesData> build(int serverId) async {
     try {
-      return AccessesData((await loadData(1)).items);
+      final host = await ref.watch(
+        serverProvider(serverId).selectAsync((val) => val?.host ?? ""),
+      );
+      return AccessesData(host, (await loadData(1)).items);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
         SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
@@ -75,16 +80,14 @@ class AccessesNotifier extends _$AccessesNotifier
   }
 
   Future<ApiPageResult<AccessResult>> loadData(int loadPage) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final filters = [
       "deleted=null",
       searchKey.isEmpty ? "" : "name='$searchKey'",
       getFilter(),
     ];
     return await ref
-        .watch(accessApiProvider)
+        .watch(accessApiProvider(serverId))
         .getRecords(
-          server,
           page: loadPage,
           filter: filters.where((filter) => filter.isNotEmpty).join("&&"),
         )
@@ -106,8 +109,7 @@ class AccessesNotifier extends _$AccessesNotifier
       defaultType: OkCancelAlertDefaultType.cancel,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(accessApiProvider).copy(server, access.id ?? "");
+      await ref.watch(accessApiProvider(serverId)).copy(access.id ?? "");
       return true;
     }
     return false;
@@ -124,8 +126,7 @@ class AccessesNotifier extends _$AccessesNotifier
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(accessApiProvider).delete(server, access.id ?? "");
+      await ref.watch(accessApiProvider(serverId)).delete(access.id ?? "");
       return true;
     }
     return false;

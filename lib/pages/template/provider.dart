@@ -1,5 +1,4 @@
 import "package:certimate/api/setting_api.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -49,10 +48,9 @@ class TemplateListNotifier extends _$TemplateListNotifier {
     required ContentT Function(Map<String, Object?> json) fromJson,
     required List<ItemT>? Function(ContentT? content) getTemplates,
   }) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final res = await ref
-        .watch(settingApiProvider)
-        .getSettings<ContentT>(server, settingName, fromJson);
+        .watch(settingApiProvider(serverId))
+        .getSettings<ContentT>(settingName, fromJson);
     return getTemplates(res.content) ?? List<ItemT>.empty(growable: false);
   }
 }

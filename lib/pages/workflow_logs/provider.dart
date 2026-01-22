@@ -1,5 +1,4 @@
 import "package:certimate/api/workflow_api.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
@@ -25,13 +24,12 @@ class WorkflowLogsNotifier extends _$WorkflowLogsNotifier {
   @override
   Future<WorkflowLogsData> build(int serverId, String runId) async {
     try {
-      final server = ref.watch(serverProvider(serverId)).value!;
       final detail = await ref
-          .read(workflowApiProvider)
-          .getRunDetail(server, runId);
+          .read(workflowApiProvider(serverId))
+          .getRunDetail(runId);
       final logsRes = await ref
-          .watch(workflowApiProvider)
-          .getRunLogs(server, runId);
+          .watch(workflowApiProvider(serverId))
+          .getRunLogs(runId);
       return WorkflowLogsData(detail, logsRes.items);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {

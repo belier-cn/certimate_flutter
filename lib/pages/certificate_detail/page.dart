@@ -1,7 +1,6 @@
 import "package:certimate/extension/index.dart";
 import "package:certimate/pages/certificate_detail/provider.dart";
 import "package:certimate/pages/certificate_detail/widgets/certificate_detail.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
@@ -59,12 +58,11 @@ class CertificateDetailPage extends HookConsumerWidget {
           searchPlaceholder: s.credentialsSearchPlaceholder.capitalCase,
           provider: certificateDetailProvider(serverId, certId),
           itemBuilder: (context, data, index) {
-            final server = ref.read(serverProvider(serverId));
             final item = data.list[index];
             return CertificateDetailWidget(
               key: ValueKey(item.id),
               data: item,
-              serverHost: server.value?.host ?? "",
+              serverHost: data.host,
             );
           },
         ),

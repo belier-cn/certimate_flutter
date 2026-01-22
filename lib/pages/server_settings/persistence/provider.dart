@@ -1,6 +1,5 @@
 import "package:certimate/api/setting_api.dart";
 import "package:certimate/extension/index.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
@@ -25,11 +24,9 @@ class ServerPersistenceNotifier extends _$ServerPersistenceNotifier
   FutureOr<SubmitRefreshData<SettingResult<PersistenceContent>>> build(
     int serverId,
   ) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final data = await ref
-        .watch(settingApiProvider)
+        .watch(settingApiProvider(serverId))
         .getSettings<PersistenceContent>(
-          server,
           "persistence",
           PersistenceContent.fromJson,
         );
@@ -38,11 +35,9 @@ class ServerPersistenceNotifier extends _$ServerPersistenceNotifier
 
   @override
   Future submit(context, data) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final newData = await ref
-        .watch(settingApiProvider)
+        .watch(settingApiProvider(serverId))
         .updateSettings<PersistenceContent>(
-          server,
           state.requireValue.value.copyWith(
             content: PersistenceContent(
               workflowRunsMaxDaysRetention:

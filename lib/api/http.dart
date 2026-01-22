@@ -1,4 +1,4 @@
-import "package:certimate/api/error_interceptor.dart";
+import "package:certimate/api/http_interceptor.dart";
 import "package:certimate/logger/logger.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
@@ -20,7 +20,7 @@ Dio dio(Ref ref) => Dio()
         printResponseTime: true,
       ),
     ),
-    ErrorInterceptor(ref),
+    HttpInterceptor(ref),
   ]);
 
 @Freezed(genericArgumentFactories: true)

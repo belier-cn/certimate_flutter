@@ -2,7 +2,6 @@ import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/api/http.dart";
 import "package:certimate/api/workflow_api.dart";
 import "package:certimate/extension/index.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:easy_refresh/easy_refresh.dart";
@@ -56,14 +55,9 @@ class WorkflowRunsNotifier extends _$WorkflowRunsNotifier with LoadMoreMixin {
   }
 
   Future<ApiPageResult<WorkflowRunResult>> loadData({int loadPage = 1}) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     return await ref
-        .watch(workflowApiProvider)
-        .getRunRecords(
-          server,
-          page: loadPage,
-          filter: "workflowRef='$workflowId'",
-        )
+        .watch(workflowApiProvider(serverId))
+        .getRunRecords(page: loadPage, filter: "workflowRef='$workflowId'")
         .then((res) {
           hasMore = res.totalPages > res.page;
           page = loadPage;
@@ -86,10 +80,9 @@ class WorkflowRunsNotifier extends _$WorkflowRunsNotifier with LoadMoreMixin {
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
       await ref
-          .watch(workflowApiProvider)
-          .deleteRun(server, workflowRun.id ?? "");
+          .watch(workflowApiProvider(serverId))
+          .deleteRun(workflowRun.id ?? "");
       return true;
     }
     return false;
@@ -108,11 +101,9 @@ class WorkflowRunsNotifier extends _$WorkflowRunsNotifier with LoadMoreMixin {
       defaultType: OkCancelAlertDefaultType.cancel,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
       await ref
-          .watch(workflowApiProvider)
+          .watch(workflowApiProvider(serverId))
           .cancel(
-            server,
             workflowRun.expand?.workflowRef?.id ?? "",
             workflowRun.id ?? "",
           );

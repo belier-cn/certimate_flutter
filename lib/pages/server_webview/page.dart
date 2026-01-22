@@ -4,6 +4,7 @@ import "package:certimate/widgets/index.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_inappwebview/flutter_inappwebview.dart";
+import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
 import "package:intl/intl.dart";
 
@@ -19,7 +20,30 @@ class ServerWebViewPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final server = ref.read(serverProvider(serverId));
+    final serverAsync = ref.read(serverProvider(serverId));
+    final server = serverAsync.value;
+    final errMsg = serverAsync.hasError
+        ? serverAsync.error?.toString()
+        : (server == null ? "Server not found" : "");
+    if (errMsg?.isEmpty != true) {
+      return Scaffold(
+        appBar: PlatformAppBar(
+          title: const Text("Certimate"),
+          cupertino: (context, _) {
+            return CupertinoNavigationBarData(
+              border: const Border(),
+              padding: EdgeInsetsDirectional.zero,
+            );
+          },
+        ).getAppBar(context),
+        body: Center(
+          child: EmptyWidget(
+            msg: errMsg,
+            onReload: () => ref.refresh(serverProvider(serverId).future),
+          ),
+        ),
+      );
+    }
     final theme = Theme.of(context);
     final language = Intl.message("en", name: "_locale").split("-")[0];
     final safeBottom = MediaQuery.of(context).padding.bottom;
@@ -38,19 +62,19 @@ class ServerWebViewPage extends HookConsumerWidget {
         : "";
     return WebviewWidget(
       serverId: serverId,
-      url: url.startsWith("http") ? url : "${server.value?.host}$url",
+      url: url.startsWith("http") ? url : "${server?.host}$url",
       onWebViewCreated: (controller) {
         if (!kIsWeb) {
           controller.addJavaScriptHandler(
             handlerName: "onFetchRequest",
             callback: (args) {
-              final String url = args[0]["url"];
+              final String requestUrl = args[0]["url"];
               final method = args[0]["method"];
               final status = args[0]["status"];
               if (method == "POST" &&
                   status == 200 &&
-                  url.startsWith(
-                    "${server.value?.host}/api/collections/access/records",
+                  requestUrl.startsWith(
+                    "${server?.host}/api/collections/access/records",
                   )) {
                 Navigator.of(
                   context,
@@ -66,7 +90,7 @@ class ServerWebViewPage extends HookConsumerWidget {
               """
             localStorage.setItem("certimate-ui-lang", "$language");
             localStorage.setItem("certimate-ui-theme", "${theme.brightness.name}");
-            localStorage.setItem("pocketbase_auth", JSON.stringify({ "token": "${server.value?.token ?? ""}" }));
+            localStorage.setItem("pocketbase_auth", JSON.stringify({ "token": "${server?.token}" }));
             document.addEventListener("DOMContentLoaded", function() {
               var style = document.createElement("style");
               style.type = "text/css";

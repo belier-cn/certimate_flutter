@@ -30,19 +30,22 @@ class ServerAccountNotifier extends _$ServerAccountNotifier with SubmitMixin {
   Mutation get submitMutation => submitLoading(serverId);
 
   @override
-  FutureOr<ServerAccountData> build(int serverId) {
-    final server = ref.read(serverProvider(serverId));
-    return ServerAccountData([server.value?.username]);
+  Future<ServerAccountData> build(int serverId) async {
+    final server = await ref.read(serverProvider(serverId).future);
+    return ServerAccountData([server?.username]);
   }
 
   @override
   Future submit(context, data) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
+    final server = await ref.read(serverProvider(serverId).future);
+    if (server == null) {
+      throw "Server not found";
+    }
     final email = data["email"];
     // 调用接口
     await ref
         .read(authApiProvider)
-        .updateEmail(server, userId: server.userId, email: email);
+        .updateEmail(serverId, userId: server.userId, email: email);
     var newToken = "";
     if (server.passwordId.isNotEmpty) {
       final password = await secureStorage.read(key: server.passwordId);

@@ -2,7 +2,6 @@ import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/api/http.dart";
 import "package:certimate/api/workflow_api.dart";
 import "package:certimate/extension/index.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:easy_refresh/easy_refresh.dart";
@@ -85,15 +84,13 @@ class WorkflowsNotifier extends _$WorkflowsNotifier
   }
 
   Future<ApiPageResult<WorkflowResult>> loadData({int loadPage = 1}) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final filters = [
       searchKey.isEmpty ? "" : "(id='$searchKey' || name~'$searchKey')",
       getFilter(),
     ];
     return await ref
-        .watch(workflowApiProvider)
+        .watch(workflowApiProvider(serverId))
         .getRecords(
-          server,
           page: loadPage,
           sort: getSort(),
           filter: filters.where((filter) => filter.isNotEmpty).join("&&"),
@@ -117,8 +114,7 @@ class WorkflowsNotifier extends _$WorkflowsNotifier
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(workflowApiProvider).delete(server, workflow.id ?? "");
+      await ref.watch(workflowApiProvider(serverId)).delete(workflow.id ?? "");
       return true;
     }
     return false;
@@ -134,8 +130,7 @@ class WorkflowsNotifier extends _$WorkflowsNotifier
       defaultType: OkCancelAlertDefaultType.cancel,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(workflowApiProvider).copy(server, workflow.id ?? "");
+      await ref.watch(workflowApiProvider(serverId)).copy(workflow.id ?? "");
       return true;
     }
     return false;
@@ -151,8 +146,7 @@ class WorkflowsNotifier extends _$WorkflowsNotifier
       defaultType: OkCancelAlertDefaultType.cancel,
     );
     if (res == OkCancelResult.ok) {
-      final server = ref.watch(serverProvider(serverId)).value!;
-      await ref.watch(workflowApiProvider).run(server, workflow.id ?? "");
+      await ref.watch(workflowApiProvider(serverId)).run(workflow.id ?? "");
       if (context.mounted) {
         showOkAlertDialog(context: context, message: s.executeWorkflowSuccess);
       }
@@ -165,10 +159,9 @@ class WorkflowsNotifier extends _$WorkflowsNotifier
       showOkAlertDialog(context: context, message: context.s.unpublishedTip);
       return enabled;
     }
-    final server = ref.watch(serverProvider(serverId)).value!;
     await ref
-        .watch(workflowApiProvider)
-        .enabled(server, workflow.id ?? "", !enabled);
+        .watch(workflowApiProvider(serverId))
+        .enabled(workflow.id ?? "", !enabled);
     return !enabled;
   }
 }

@@ -1,5 +1,4 @@
 import "package:certimate/database/database.dart";
-import "package:dio/dio.dart";
 import "package:drift/drift.dart" hide JsonKey;
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -97,9 +96,4 @@ extension ServerConvert on Server {
       createdAt: createdAt,
     );
   }
-}
-
-extension ServerDio on ServerModel {
-  Options getOptions() =>
-      Options(headers: {"Authorization": token}, extra: {"serverId": id});
 }

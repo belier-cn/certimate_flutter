@@ -1,6 +1,5 @@
 import "package:certimate/api/http.dart";
 import "package:certimate/api/workflow_api.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -9,25 +8,26 @@ part "certificate_api.freezed.dart";
 part "certificate_api.g.dart";
 
 @Riverpod(keepAlive: true)
-CertificateApi certificateApi(Ref ref) {
+CertificateApi certificateApi(Ref ref, int serverId) {
   final dio = ref.read(dioProvider);
-  return CertificateApi(dio: dio);
+  return CertificateApi(dio: dio, serverId: serverId);
 }
 
 class CertificateApi {
   final Dio dio;
 
-  CertificateApi({required this.dio});
+  final int serverId;
 
-  Future<ApiPageResult<CertificateResult>> getRecords(
-    ServerModel server, {
+  CertificateApi({required this.dio, required this.serverId});
+
+  Future<ApiPageResult<CertificateResult>> getRecords({
     int page = 1,
     int perPage = 15,
     String sort = "-created",
     String filter = "",
   }) async {
     final response = await dio.get(
-      "${server.host}/api/collections/certificate/records",
+      "/api/collections/certificate/records",
       queryParameters: {
         "page": page,
         "perPage": perPage,
@@ -37,7 +37,7 @@ class CertificateApi {
             "id,source,subjectAltNames,isRevoked,issuerOrg,keyAlgorithm,validityNotBefore,validityNotAfter,workflowRef,created,expand.workflowRef.id,expand.workflowRef.name",
         "filter": filter,
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiPageResult.fromJson(
       response.data,
@@ -45,46 +45,42 @@ class CertificateApi {
     );
   }
 
-  Future<CertificateDetailResult> getDetail(
-    ServerModel server,
-    String id,
-  ) async {
+  Future<CertificateDetailResult> getDetail(String id) async {
     final response = await dio.get(
-      "${server.host}/api/collections/certificate/records/$id",
+      "/api/collections/certificate/records/$id",
       queryParameters: {
         "fields":
             "id,issuerOrg,privateKey,certificate,serialNumber,keyAlgorithm,subjectAltNames,created,validityNotAfter,validityNotBefore",
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return CertificateDetailResult.fromJson(response.data);
   }
 
-  Future<ApiResult> revoke(ServerModel server, String id) async {
+  Future<ApiResult> revoke(String id) async {
     final response = await dio.post(
-      "${server.host}/api/certificates/$id/revoke",
-      options: server.getOptions(),
+      "/api/certificates/$id/revoke",
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiResult.fromJson(response.data, (json) => json);
   }
 
-  Future<void> delete(ServerModel server, String id) async {
+  Future<void> delete(String id) async {
     await dio.delete(
-      "${server.host}/api/certificates/$id",
+      "/api/certificates/$id",
       data: {"deleted": DateTime.now().toIso8601String()},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 
   Future<ApiResult<CertificateArchiveResult>> archive(
-    ServerModel server,
     String id,
     String format,
   ) async {
     final response = await dio.post(
-      "${server.host}/api/certificates/$id/archive",
+      "/api/certificates/$id/archive",
       data: {"format": format},
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     return ApiResult.fromJson(
       response.data,

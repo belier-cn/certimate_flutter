@@ -2,7 +2,6 @@ import "package:certimate/extension/index.dart";
 import "package:certimate/hooks/index.dart";
 import "package:certimate/pages/access_edit/provider.dart";
 import "package:certimate/pages/accesses/provider.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
@@ -83,7 +82,6 @@ class AccessEditPage extends HookConsumerWidget {
             provider: accessDetailProvider(serverId, accessId),
             scrollController: scrollController,
             itemBuilder: (context, data, index) {
-              final server = ref.read(serverProvider(serverId));
               final item = data.list[index];
               final notifier = ref.read(
                 accessDetailProvider(serverId, accessId).notifier,
@@ -130,9 +128,7 @@ class AccessEditPage extends HookConsumerWidget {
                           ? Padding(
                               padding: const EdgeInsets.only(left: 6),
                               child: SvgPicture.network(
-                                item.provider!.providerSvg(
-                                  server.value?.host ?? "",
-                                ),
+                                item.provider!.providerSvg(data.host),
                               ),
                             )
                           : null,

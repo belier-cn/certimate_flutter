@@ -1,5 +1,4 @@
 import "package:certimate/api/http.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -21,38 +20,59 @@ class AuthApi {
   Future<AuthResult> login(
     String host,
     String username,
-    String password, {
-    bool retryRequest = false,
-  }) async {
+    String password,
+  ) async {
     final response = await dio.post(
       "$host/api/collections/_superusers/auth-with-password",
       data: {"identity": username, "password": password},
-      options: retryRequest ? Options(extra: {"retryRequest": 1}) : null,
+      options: Options(extra: {"skipAuth": 1}),
+    );
+    return AuthResult.fromJson(response.data);
+  }
+
+  Future<AuthResult> loginByServer(
+    int serverId,
+    String username,
+    String password,
+  ) async {
+    final response = await dio.post(
+      "/api/collections/_superusers/auth-with-password",
+      data: {"identity": username, "password": password},
+      options: Options(
+        extra: {"skipAuth": 1, "retryRequest": 1, "serverId": serverId},
+      ),
     );
     return AuthResult.fromJson(response.data);
   }
 
   Future<void> updatePassword(
-    ServerModel server, {
+    int serverId, {
     required String userId,
     required String password,
     required String passwordConfirm,
+    String? authorization,
   }) async {
     await dio.patch(
-      "${server.host}/api/collections/_superusers/records/$userId",
+      "/api/collections/_superusers/records/$userId",
       data: {"passwordConfirm": passwordConfirm, "password": password},
-      options: server.getOptions(),
+      options: Options(
+        extra: {"serverId": serverId},
+        headers: authorization == null
+            ? null
+            : {"Authorization": authorization},
+      ),
     );
   }
 
   Future<void> updateEmail(
-    ServerModel server, {
+    int serverId, {
     required String userId,
     required String email,
   }) async {
     await dio.patch(
-      "${server.host}/api/collections/_superusers/records/$userId",
+      "/api/collections/_superusers/records/$userId",
       data: {"email": email},
+      options: Options(extra: {"serverId": serverId}),
     );
   }
 }

@@ -19,7 +19,9 @@ class CertificateDetailData extends RefreshData<CertificateDetailResult> {
   @override
   final List<CertificateDetailResult> list;
 
-  const CertificateDetailData(this.list);
+  final String host;
+
+  const CertificateDetailData(this.host, this.list);
 }
 
 @riverpod
@@ -27,7 +29,10 @@ class CertificateDetailNotifier extends _$CertificateDetailNotifier {
   @override
   Future<CertificateDetailData> build(int serverId, String certId) async {
     try {
-      return CertificateDetailData([await loadData()]);
+      final host = await ref.watch(
+        serverProvider(serverId).selectAsync((val) => val?.host ?? ""),
+      );
+      return CertificateDetailData(host, [await loadData()]);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
         SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
@@ -38,15 +43,13 @@ class CertificateDetailNotifier extends _$CertificateDetailNotifier {
   }
 
   Future<CertificateDetailResult> loadData() async {
-    final server = ref.watch(serverProvider(serverId)).value!;
-    return await ref.watch(certificateApiProvider).getDetail(server, certId);
+    return await ref.watch(certificateApiProvider(serverId)).getDetail(certId);
   }
 
   Future<void> archive(String format) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final res = await ref
-        .watch(certificateApiProvider)
-        .archive(server, certId, format);
+        .watch(certificateApiProvider(serverId))
+        .archive(certId, format);
     final name =
         state.value?.list.first.subjectAltNames?.replaceFirst("*", "_") ?? "";
     final fileName =

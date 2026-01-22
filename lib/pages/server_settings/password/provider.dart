@@ -29,7 +29,10 @@ class ServerPasswordNotifier extends _$ServerPasswordNotifier with SubmitMixin {
 
   @override
   Future submit(context, data) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
+    final server = await ref.read(serverProvider(serverId).future);
+    if (server == null) {
+      throw "Server not found";
+    }
     // 先判断旧密码是否正确
     final oldPassword = data["password"];
     final loginRes = await ref
@@ -38,13 +41,15 @@ class ServerPasswordNotifier extends _$ServerPasswordNotifier with SubmitMixin {
     // 调用修改密码的接口
     final password = data["newPassword"];
     final passwordConfirm = data["passwordConfirm"];
+    final token = loginRes.token;
     await ref
         .read(authApiProvider)
         .updatePassword(
-          server.copyWith(token: loginRes.token ?? ""),
+          serverId,
           userId: server.userId,
           password: password,
           passwordConfirm: passwordConfirm,
+          authorization: token.isNotEmptyOrNull ? token : null,
         );
     var newToken = "";
     try {

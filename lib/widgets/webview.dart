@@ -53,7 +53,9 @@ class WebviewWidget extends HookConsumerWidget {
             );
           },
         ).getAppBar(context),
-        body: const EmptyWidget(msg: "WebView is not supported on Linux"),
+        body: const Center(
+          child: EmptyWidget(msg: "WebView is not supported on Linux"),
+        ),
       );
     }
     final webviewController = useRef<InAppWebViewController?>(null);

@@ -4,7 +4,6 @@ import "dart:io";
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/api/auth_api.dart";
 import "package:certimate/api/http.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/pages/server/provider.dart";
 import "package:certimate/provider/security.dart";
@@ -13,7 +12,7 @@ import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
 import "package:safemap/safemap.dart";
 
-part "error_interceptor.g.dart";
+part "http_interceptor.g.dart";
 
 @Riverpod(keepAlive: true)
 class RefreshTokenCompleter extends _$RefreshTokenCompleter {
@@ -46,10 +45,39 @@ class ApiError {
   }
 }
 
-class ErrorInterceptor extends Interceptor {
+class HttpInterceptor extends Interceptor {
   final Ref ref;
 
-  const ErrorInterceptor(this.ref);
+  const HttpInterceptor(this.ref);
+
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final serverId = options.extra["serverId"];
+    if (serverId is int) {
+      final needsBaseUrl = options.baseUrl.isEmpty;
+      final authorization = options.headers["Authorization"];
+      final needsAuth =
+          options.headers["skipAuth"] == null &&
+          (authorization == null || authorization == "");
+      if (needsBaseUrl || needsAuth) {
+        final server = await ref.read(serverProvider(serverId).future);
+        if (server == null) {
+          handler.next(options);
+          return;
+        }
+        if (needsBaseUrl) {
+          options.baseUrl = server.host;
+        }
+        if (needsAuth) {
+          options.headers["Authorization"] = server.token;
+        }
+      }
+    }
+    handler.next(options);
+  }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
@@ -80,36 +108,60 @@ class ErrorInterceptor extends Interceptor {
         err.requestOptions.extra["retryRequest"] == null) {
       final serverId = err.requestOptions.extra["serverId"];
       if (serverId is int) {
-        final server = ref.read(serverProvider(serverId)).value!;
-        final newServer = await _getNewTokenServer(
-          server,
-          inputAccount: server.passwordId.isEmpty,
-        );
-        if (newServer != null) {
-          ref
-              .read(serverProvider(server.id).notifier)
-              .updateServer(newServer, syncDatabase: true);
-          try {
-            final retryResponse = await _retryRequest(
-              err.requestOptions,
-              newServer,
-            );
-            handler.resolve(retryResponse);
-          } catch (retryError, stackTrace) {
-            if (retryError is DioException) {
-              handler.reject(retryError);
-            } else {
-              handler.reject(
-                DioException(
-                  requestOptions: err.requestOptions,
-                  error: retryError,
-                  stackTrace: stackTrace,
-                  message: retryError.toString(),
-                ),
+        final server = await ref.read(serverProvider(serverId).future);
+        if (server != null) {
+          final passwordId = server.passwordId;
+          String password = "";
+          if (passwordId.isNotEmpty) {
+            password = (await secureStorage.read(key: passwordId)) ?? "";
+          }
+          final newTokenInfo = await _getNewToken(
+            serverId,
+            server.username,
+            password,
+            inputAccount: password.isEmpty || server.username.isEmpty,
+          );
+          if (newTokenInfo != null) {
+            if (passwordId.isNotEmpty &&
+                newTokenInfo.password.isNotEmpty &&
+                newTokenInfo.password != password) {
+              // 保存最新密码
+              secureStorage.write(
+                key: passwordId,
+                value: newTokenInfo.password,
               );
             }
+            await ref
+                .read(serverProvider(serverId).notifier)
+                .updateServer(
+                  server.copyWith(
+                    token: newTokenInfo.token,
+                    username: newTokenInfo.username,
+                  ),
+                  syncDatabase: true,
+                );
+            try {
+              final retryResponse = await _retryRequest(
+                err.requestOptions,
+                newTokenInfo.token,
+              );
+              handler.resolve(retryResponse);
+            } catch (retryError, stackTrace) {
+              if (retryError is DioException) {
+                handler.reject(retryError);
+              } else {
+                handler.reject(
+                  DioException(
+                    requestOptions: err.requestOptions,
+                    error: retryError,
+                    stackTrace: stackTrace,
+                    message: retryError.toString(),
+                  ),
+                );
+              }
+            }
+            return;
           }
-          return;
         }
       }
     }
@@ -155,59 +207,55 @@ class ErrorInterceptor extends Interceptor {
     return "$err";
   }
 
-  Future<ServerModel?> _getNewTokenServer(
-    ServerModel server, {
+  Future<_NewTokenInfo?> _getNewToken(
+    int serverId,
+    String username,
+    String password, {
     inputAccount = false,
   }) async {
-    String? password;
     if (inputAccount) {
-      final accountInfo = await _inputAccount(server);
+      final accountInfo = await _inputAccount(serverId, username);
       if (accountInfo.isEmpty) {
         return null;
       }
+      username = accountInfo[0];
       password = accountInfo[1];
-      if (server.passwordId.isNotEmpty) {
-        // 保存最新密码
-        await secureStorage.write(key: server.passwordId, value: password);
-      }
-      if (accountInfo.isNotEmpty) {
-        server = server.copyWith(username: accountInfo[0]);
-      } else {
-        return null;
-      }
     }
     try {
-      final newToken = await _refreshToken(server, password);
-      return server.copyWith(token: newToken);
+      final newToken = await _refreshToken(serverId, username, password);
+      return _NewTokenInfo(
+        token: newToken,
+        username: username,
+        password: password,
+      );
     } catch (err) {
       if (!inputAccount &&
           err is DioException &&
           err.response?.statusCode == 400) {
-        return _getNewTokenServer(server, inputAccount: true);
+        return _getNewToken(serverId, username, "", inputAccount: true);
       }
     }
     return null;
   }
 
-  Future<String> _refreshToken(ServerModel server, String? password) async {
-    final currentCompleter = ref.read(refreshTokenCompleterProvider(server.id));
+  Future<String> _refreshToken(
+    int serverId,
+    String username,
+    String password,
+  ) async {
+    final currentCompleter = ref.read(refreshTokenCompleterProvider(serverId));
     if (currentCompleter != null) {
       return currentCompleter.future;
     }
     final completer = Completer<String>();
     final completerNotifier = ref.read(
-      refreshTokenCompleterProvider(server.id).notifier,
+      refreshTokenCompleterProvider(serverId).notifier,
     );
     completerNotifier.updateCompleter(completer);
     try {
       final loginRes = await ref
           .read(authApiProvider)
-          .login(
-            server.host,
-            server.username,
-            password ?? "",
-            retryRequest: true,
-          );
+          .loginByServer(serverId, username, password);
       final newToken = loginRes.token ?? "";
       completer.complete(newToken);
       completerNotifier.updateCompleter(null);
@@ -219,18 +267,18 @@ class ErrorInterceptor extends Interceptor {
     }
   }
 
-  Future<List<String>> _inputAccount(ServerModel server) async {
-    final currentCompleter = ref.read(inputAccountCompleterProvider(server.id));
+  Future<List<String>> _inputAccount(int serverId, String username) async {
+    final currentCompleter = ref.read(inputAccountCompleterProvider(serverId));
     if (currentCompleter != null) {
       return currentCompleter.future;
     }
     final completer = Completer<List<String>>();
     final completerNotifier = ref.read(
-      inputAccountCompleterProvider(server.id).notifier,
+      inputAccountCompleterProvider(serverId).notifier,
     );
     completerNotifier.updateCompleter(completer);
     try {
-      final tag = "refreshTokenInputAccount:${server.id}";
+      final tag = "refreshTokenInputAccount:$serverId";
       final accountInfo =
           (await SmartDialog.show<List<String>?>(
             tag: tag,
@@ -242,10 +290,7 @@ class ErrorInterceptor extends Interceptor {
                 title: s.loginInvalid.capitalCase,
                 message: s.pleaseEnterAccountInfo,
                 textFields: [
-                  DialogTextField(
-                    initialText: server.username,
-                    hintText: s.username,
-                  ),
+                  DialogTextField(initialText: username, hintText: s.username),
                   DialogTextField(obscureText: true, hintText: s.password),
                 ],
                 onCancel: () => SmartDialog.dismiss(tag: tag),
@@ -276,7 +321,7 @@ class ErrorInterceptor extends Interceptor {
 
   Future<Response> _retryRequest(
     RequestOptions requestOptions,
-    ServerModel newServer,
+    String newToken,
   ) async {
     return ref
         .read(dioProvider)
@@ -293,7 +338,7 @@ class ErrorInterceptor extends Interceptor {
             receiveTimeout: requestOptions.receiveTimeout,
             extra: requestOptions.extra..addAll({"retryRequest": 1}),
             headers: requestOptions.headers
-              ..addAll(newServer.getOptions().headers ?? {}),
+              ..addAll({"Authorization": newToken}),
             responseType: requestOptions.responseType,
             preserveHeaderCase: requestOptions.preserveHeaderCase,
             contentType: requestOptions.contentType,
@@ -309,4 +354,16 @@ class ErrorInterceptor extends Interceptor {
           ),
         );
   }
+}
+
+class _NewTokenInfo {
+  final String token;
+  final String username;
+  final String password;
+
+  _NewTokenInfo({
+    required this.token,
+    required this.username,
+    required this.password,
+  });
 }

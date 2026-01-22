@@ -1,9 +1,7 @@
 import "dart:async";
 
 import "package:certimate/api/setting_api.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
-import "package:certimate/pages/server/provider.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter_form_builder/flutter_form_builder.dart";
@@ -33,9 +31,8 @@ class TemplateEditNotifier extends _$TemplateEditNotifier with SubmitMixin {
     String settingName,
     int? templateIndex,
   ) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final adapter = _TemplateEditAdapter.fromSettingName(settingName);
-    final settings = await adapter.getSettings(ref, server, settingName);
+    final settings = await adapter.getSettings(ref, serverId, settingName);
     _settings = settings;
     final list = adapter.getTemplates(settings);
     final item =
@@ -48,7 +45,6 @@ class TemplateEditNotifier extends _$TemplateEditNotifier with SubmitMixin {
   }
 
   Future<Object?> _submit(Map<String, dynamic> data) async {
-    final server = ref.watch(serverProvider(serverId)).value!;
     final adapter = _TemplateEditAdapter.fromSettingName(settingName);
     final list = [...adapter.getTemplates(_settings)];
     final newTemplate = adapter.fromForm(data);
@@ -62,7 +58,7 @@ class TemplateEditNotifier extends _$TemplateEditNotifier with SubmitMixin {
     final nextList = _upsertByIndex(list, templateIndex, newTemplate);
     final next = await adapter.updateSettings(
       ref,
-      server,
+      serverId,
       settingName,
       _settings,
       nextList,
@@ -129,7 +125,7 @@ abstract class _TemplateEditAdapter {
 
   Future<SettingResult<dynamic>> getSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
   );
 
@@ -137,7 +133,7 @@ abstract class _TemplateEditAdapter {
 
   Future<SettingResult<dynamic>> updateSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
     SettingResult<dynamic> settings,
     List<Object> templates,
@@ -165,13 +161,12 @@ class _NotifyTemplateAdapter extends _TemplateEditAdapter {
   @override
   Future<SettingResult<dynamic>> getSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
   ) {
     return ref
-        .read(settingApiProvider)
+        .read(settingApiProvider(serverId))
         .getSettings<NotifyTemplateContent>(
-          server,
           settingName,
           NotifyTemplateContent.fromJson,
         );
@@ -187,16 +182,15 @@ class _NotifyTemplateAdapter extends _TemplateEditAdapter {
   @override
   Future<SettingResult<dynamic>> updateSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
     SettingResult<dynamic> settings,
     List<Object> templates,
   ) {
     final realSettings = settings as SettingResult<NotifyTemplateContent>;
     return ref
-        .read(settingApiProvider)
+        .read(settingApiProvider(serverId))
         .updateSettings<NotifyTemplateContent>(
-          server,
           realSettings.copyWith(
             content: NotifyTemplateContent(
               templates: templates.cast<NotifyTemplate>(),
@@ -228,13 +222,12 @@ class _ScriptTemplateAdapter extends _TemplateEditAdapter {
   @override
   Future<SettingResult<dynamic>> getSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
   ) {
     return ref
-        .read(settingApiProvider)
+        .read(settingApiProvider(serverId))
         .getSettings<ScriptTemplateContent>(
-          server,
           settingName,
           ScriptTemplateContent.fromJson,
         );
@@ -250,16 +243,15 @@ class _ScriptTemplateAdapter extends _TemplateEditAdapter {
   @override
   Future<SettingResult<dynamic>> updateSettings(
     Ref ref,
-    ServerModel server,
+    int serverId,
     String settingName,
     SettingResult<dynamic> settings,
     List<Object> templates,
   ) {
     final realSettings = settings as SettingResult<ScriptTemplateContent>;
     return ref
-        .read(settingApiProvider)
+        .read(settingApiProvider(serverId))
         .updateSettings<ScriptTemplateContent>(
-          server,
           realSettings.copyWith(
             content: ScriptTemplateContent(
               templates: templates.cast<ScriptTemplate>(),

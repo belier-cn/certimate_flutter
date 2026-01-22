@@ -1,5 +1,4 @@
 import "package:certimate/api/http.dart";
-import "package:certimate/database/servers_dao.dart";
 import "package:dio/dio.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
@@ -8,30 +7,31 @@ part "setting_api.freezed.dart";
 part "setting_api.g.dart";
 
 @Riverpod(keepAlive: true)
-SettingApi settingApi(Ref ref) {
+SettingApi settingApi(Ref ref, int serverId) {
   final dio = ref.read(dioProvider);
-  return SettingApi(dio: dio);
+  return SettingApi(dio: dio, serverId: serverId);
 }
 
 class SettingApi {
   final Dio dio;
 
-  SettingApi({required this.dio});
+  final int serverId;
+
+  SettingApi({required this.dio, required this.serverId});
 
   Future<SettingResult<T>> getSettings<T>(
-    ServerModel server,
     String settingName,
     T Function(Map<String, Object?> json) fromJsonT,
   ) async {
     final response = await dio.get(
-      "${server.host}/api/collections/settings/records",
+      "/api/collections/settings/records",
       queryParameters: {
         "page": 1,
         "perPage": 1,
         "skipTotal": 1,
         "filter": "name='$settingName'",
       },
-      options: server.getOptions(),
+      options: Options(extra: {"serverId": serverId}),
     );
     final data = ApiPageResult.fromJson(
       response.data,
@@ -45,7 +45,6 @@ class SettingApi {
   }
 
   Future<SettingResult<T>> updateSettings<T>(
-    ServerModel server,
     SettingResult<T> settings,
     T Function(Map<String, Object?> json) fromJsonT,
     Object? Function(T) toJsonT,
@@ -53,18 +52,18 @@ class SettingApi {
     Response response;
     if (settings.id?.isNotEmpty == true) {
       response = await dio.patch(
-        "${server.host}/api/collections/settings/records/${settings.id}",
+        "/api/collections/settings/records/${settings.id}",
         data: settings.toJson(toJsonT),
-        options: server.getOptions(),
+        options: Options(extra: {"serverId": serverId}),
       );
     } else {
       final Object? content = settings.content == null
           ? null
           : toJsonT(settings.content as T);
       response = await dio.post(
-        "${server.host}/api/collections/settings/records",
+        "/api/collections/settings/records",
         data: {"name": settings.name, if (content != null) "content": content},
-        options: server.getOptions(),
+        options: Options(extra: {"serverId": serverId}),
       );
     }
     return SettingResult.fromJson(
