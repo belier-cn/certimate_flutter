@@ -1,12 +1,14 @@
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/generated/l10n.dart";
+import "package:certimate/hooks/lucide_icon.dart";
 import "package:certimate/provider/platform.dart";
 import "package:certimate/router/router.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
+import "package:flutter_lucide_animated/flutter_lucide_animated.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:flutter_tabler_icons/flutter_tabler_icons.dart";
 import "package:go_router/go_router.dart";
@@ -46,25 +48,44 @@ class ScaffoldWithNavbar extends HookConsumerWidget {
       };
     }, []);
     final s = context.s;
-
+    final navigationRailTheme = NavigationRailTheme.of(context);
     final currentIndex = navigationShell.currentIndex > 1
         ? 1
         : navigationShell.currentIndex;
+    final homeIconController = useLucideIconController();
+    final settingIconController = useLucideIconController();
     if (RunPlatform.isDesktopUi) {
       final navigationRail = NavigationRail(
         selectedIndex: currentIndex,
-        onDestinationSelected: _onChange,
+        onDestinationSelected: (index) => _onChange(
+          index,
+          controllerList: [homeIconController, settingIconController],
+        ),
         labelType: NavigationRailLabelType.selected,
         leading: context.isCupertinoStyle
             ? const SizedBox(height: 28)
             : const SizedBox(height: 52),
         destinations: [
           NavigationRailDestination(
-            icon: Icon(context.platformIcons.home),
+            icon: LucideAnimatedIcon(
+              icon: home,
+              controller: homeIconController,
+              onTap: () => _onChange(0),
+              color: currentIndex == 0
+                  ? navigationRailTheme.selectedIconTheme!.color!
+                  : navigationRailTheme.unselectedIconTheme!.color!,
+            ),
             label: Text(s.home.titleCase),
           ),
           NavigationRailDestination(
-            icon: Icon(context.platformIcons.settings),
+            icon: LucideAnimatedIcon(
+              icon: settings,
+              controller: settingIconController,
+              onTap: () => _onChange(1),
+              color: currentIndex == 1
+                  ? navigationRailTheme.selectedIconTheme!.color!
+                  : navigationRailTheme.unselectedIconTheme!.color!,
+            ),
             label: Text(s.settings.titleCase),
           ),
         ],
@@ -116,9 +137,15 @@ class ScaffoldWithNavbar extends HookConsumerWidget {
     );
   }
 
-  void _onChange(int index) {
+  void _onChange(
+    int index, {
+    List<LucideAnimatedIconController> controllerList = const [],
+  }) {
     if (index == navigationShell.currentIndex) {
       return;
+    }
+    if (controllerList.length > index) {
+      controllerList[index].animate();
     }
     navigationShell.goBranch(index);
   }
