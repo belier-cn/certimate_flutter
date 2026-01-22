@@ -1,13 +1,18 @@
+import "dart:async";
+
 import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/api/server_api.dart";
 import "package:certimate/api/workflow_api.dart";
+import "package:certimate/database/database.dart";
 import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/pages/home/provider.dart";
 import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
+import "package:drift/drift.dart";
 import "package:flutter/material.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
 
@@ -32,6 +37,17 @@ class ServerNotifier extends _$ServerNotifier {
           .updateById(newServer.id, newServer.toUpdateCompanion());
     }
     return Future.value(newServer);
+  }
+
+  Future<void> setAutoStart(bool autoStart) async {
+    state = AsyncValue.data(state.value?.copyWith(autoStart: autoStart));
+    try {
+      await ref
+          .read(serversDaoProvider)
+          .updateById(serverId, ServersCompanion(autoStart: Value(autoStart)));
+    } catch (e) {
+      SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
+    }
   }
 }
 
@@ -70,11 +86,15 @@ class ServerData extends RefreshData<WorkflowRunResult> {
   final List<WorkflowRunResult> list;
 
   @override
-  int get topItemCount => 3;
+  int get topItemCount => 4;
 
   final StatisticsResult statistics;
 
-  const ServerData(this.statistics, this.list);
+  final ServerModel? server;
+
+  final bool isRunning;
+
+  const ServerData(this.isRunning, this.server, this.statistics, this.list);
 }
 
 @riverpod
@@ -87,11 +107,23 @@ class ServerDataNotifier extends _$ServerDataNotifier {
       ref.invalidate(serverWorkflowRunProvider(serverId));
     }
     try {
-      final (statistics, wrkflowRuns) = await wait2(
+      final server = await ref.read(serverProvider(serverId).future);
+      if (server == null) {
+        return const ServerData(false, null, StatisticsResult(), []);
+      }
+      if (server.localId.isNotEmpty) {
+        final isRunning = ref.watch(
+          localServerControlProvider(serverId).select((val) => val.isRunning),
+        );
+        if (!isRunning) {
+          return ServerData(false, server, const StatisticsResult(), []);
+        }
+      }
+      final (statistics, workflowRuns) = await wait2(
         ref.watch(serverStatisticsProvider(serverId).future),
         ref.watch(serverWorkflowRunProvider(serverId).future),
       );
-      return ServerData(statistics, wrkflowRuns);
+      return ServerData(true, server, statistics, workflowRuns);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
         // 有值的情况下，刷新失败只弹窗提示，保留之前的值
@@ -117,12 +149,89 @@ class ServerDataNotifier extends _$ServerDataNotifier {
       isDestructiveAction: true,
     );
     if (res == OkCancelResult.ok) {
-      final deleted = await ref.read(serversDaoProvider).deleteById(server.id);
-      if (deleted > 0 && server.localId.isNotEmpty) {
+      if (server.localId.isNotEmpty) {
         await ref.read(localCertimateManagerProvider).stopLocalServer(server);
       }
-      return deleted;
+      return await ref.read(serversDaoProvider).deleteById(server.id);
     }
     return 0;
+  }
+}
+
+@CopyWith()
+class LocalServerControlState {
+  final bool isRunning;
+  final bool isBusy;
+
+  const LocalServerControlState({required this.isRunning, this.isBusy = false});
+}
+
+@riverpod
+class LocalServerControlNotifier extends _$LocalServerControlNotifier {
+  @override
+  LocalServerControlState build(int serverId) {
+    unawaited(refresh());
+    return const LocalServerControlState(isRunning: false);
+  }
+
+  Future<ServerModel?> _getServer() {
+    return ref.read(serverProvider(serverId).future);
+  }
+
+  Future<void> refresh() async {
+    final server = await _getServer();
+    if (server == null || server.localId.isEmpty) {
+      state = state.copyWith(isRunning: false);
+      return;
+    }
+    final isRunning = await ref
+        .read(localCertimateManagerProvider)
+        .isLocalServerRunning(server);
+    state = state.copyWith(isRunning: isRunning);
+  }
+
+  Future<void> start() async {
+    final server = await _getServer();
+    if (server == null || server.localId.isEmpty) {
+      return;
+    }
+    state = state.copyWith(isBusy: true);
+    try {
+      await ref.read(localCertimateManagerProvider).startLocalServer(server);
+    } catch (e) {
+      SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
+    }
+    await refresh();
+    state = state.copyWith(isBusy: false);
+  }
+
+  Future<void> stop() async {
+    final server = await _getServer();
+    if (server == null || server.localId.isEmpty) {
+      return;
+    }
+    state = state.copyWith(isBusy: true);
+    try {
+      await ref.read(localCertimateManagerProvider).stopLocalServer(server);
+    } catch (e) {
+      SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
+    }
+    await refresh();
+    state = state.copyWith(isBusy: false);
+  }
+
+  Future<void> restart() async {
+    final server = await _getServer();
+    if (server == null || server.localId.isEmpty) {
+      return;
+    }
+    state = state.copyWith(isBusy: true);
+    try {
+      await ref.read(localCertimateManagerProvider).restartLocalServer(server);
+    } catch (e) {
+      SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
+    }
+    await refresh();
+    state = state.copyWith(isBusy: false);
   }
 }

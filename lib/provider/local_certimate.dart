@@ -30,18 +30,12 @@ class LocalCertimateManager {
 
   final Dio dio;
   final ServersDao serversDao;
-  final Map<String, Process> _runningProcesses = {};
   final Map<String, Future<ReleaseInfo>> _releaseInfoCache = {};
   Directory? _baseDir;
 
-  void dispose() {
-    for (final process in _runningProcesses.values) {
-      process.kill();
-    }
-    _runningProcesses.clear();
-  }
+  void dispose() {}
 
-  Future<String> createLocalServer({
+  Future<LocalServerCreateResult> createLocalServer({
     required String host,
     required String displayName,
     required String username,
@@ -66,8 +60,10 @@ class LocalCertimateManager {
     );
     try {
       await _waitForServerReady(host, process);
-      _runningProcesses[listenHost] = process;
-      return releaseInfo.version;
+      return LocalServerCreateResult(
+        version: releaseInfo.version,
+        pid: process.pid.toString(),
+      );
     } catch (e) {
       process.kill();
       rethrow;
@@ -78,9 +74,11 @@ class LocalCertimateManager {
     if (kIsWeb || !RunPlatform.isDesktop) {
       return;
     }
-    final servers = await serversDao.getAll();
-    for (final server in servers.where((item) => item.localId.isNotEmpty)) {
-      if (_runningProcesses.containsKey(_getListenHost(server.host))) {
+    final servers = (await serversDao.getAll()).where(
+      (item) => (item.localId).isNotEmpty,
+    );
+    for (final server in servers) {
+      if (server.autoStart != true) {
         continue;
       }
       final isAlive = await _isPortActive(server.host);
@@ -95,17 +93,59 @@ class LocalCertimateManager {
     }
   }
 
+  Future<bool> isLocalServerRunning(ServerModel server) {
+    return _isPortActive(server.host);
+  }
+
+  Future<void> startLocalServer(ServerModel server) async {
+    if (server.localId.isEmpty) {
+      return;
+    }
+    if (await _isPortActive(server.host)) {
+      return;
+    }
+    await _startExistingServer(server);
+  }
+
+  Future<void> restartLocalServer(ServerModel server) async {
+    await stopLocalServer(server);
+    await startLocalServer(server);
+  }
+
   Future<void> stopLocalServer(ServerModel server) async {
-    final process = _runningProcesses.remove(_getListenHost(server.host));
-    if (process != null) {
-      process.kill();
+    if (server.localId.isEmpty) {
+      return;
+    }
+    // 获取最新的 pid
+    final row = await serversDao.getRowById(server.id);
+    final pidStr = row?.pid ?? "";
+    bool stopped = false;
+    final pid = int.tryParse(pidStr);
+    if (pid != null) {
+      try {
+        Process.killPid(pid);
+      } catch (_) {
+        // ignore
+      }
+
+      for (int i = 0; i < 6; i++) {
+        await Future.delayed(const Duration(seconds: 1));
+        if (!await _isPortActive(server.host)) {
+          stopped = true;
+          break;
+        }
+      }
+    }
+
+    if (stopped) {
+      await serversDao.updatePidById(server.id, null);
     }
   }
 
   Future<void> _startExistingServer(ServerModel server) async {
     final serverDir = await _getServerDir(server.localId);
     final binaryPath = _getBinaryPath(serverDir);
-    final version = server.version?.trim();
+    final version = server.version.trim();
     final releaseInfo = await _getReleaseInfo(version: version);
     if (!await File(binaryPath).exists()) {
       await _downloadBinary(releaseInfo, binaryPath);
@@ -119,7 +159,7 @@ class LocalCertimateManager {
     );
     try {
       await _waitForServerReady(host, process);
-      _runningProcesses[listenHost] = process;
+      await serversDao.updatePidById(server.id, process.pid.toString());
     } catch (e) {
       process.kill();
       rethrow;
@@ -433,4 +473,11 @@ class ReleaseInfo {
     required this.downloadUrl,
     required this.checksumsDownloadUrl,
   });
+}
+
+class LocalServerCreateResult {
+  final String version;
+  final String pid;
+
+  LocalServerCreateResult({required this.version, required this.pid});
 }

@@ -3,16 +3,17 @@ import "package:certimate/extension/index.dart";
 import "package:certimate/hooks/easy_refresh.dart";
 import "package:certimate/pages/home/provider.dart";
 import "package:certimate/pages/server/provider.dart";
+import "package:certimate/pages/server/widgets/controls.dart";
 import "package:certimate/pages/server/widgets/shortcuts.dart";
 import "package:certimate/pages/server/widgets/statistics.dart";
 import "package:certimate/pages/workflow_runs/widgets/workflow_run.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
-import "package:material_design/material_design.dart";
 
 class ServerPage extends HookConsumerWidget {
   final int serverId;
@@ -114,25 +115,40 @@ class ServerPage extends HookConsumerWidget {
           refreshController: refreshController,
           scrollController: scrollController,
           itemBuilder: (context, data, index) {
+            final showControls =
+                !kIsWeb &&
+                RunPlatform.isDesktop &&
+                data.server?.localId.isNotEmpty == true;
             if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: M3Margins.compactScreen),
-                child: TitleCard(
-                  title: s.statistics.capitalCase,
-                  child: StatisticsWidget(
-                    serverId: serverId,
-                    data: data.statistics,
-                  ),
+              return showControls
+                  ? TitleCard(
+                      title: s.localServerControls.capitalCase,
+                      child: ControlsWidget(
+                        serverId: serverId,
+                        server: data.server,
+                      ),
+                    )
+                  : null;
+            }
+            if (index > 0 && showControls && !data.isRunning) {
+              return null;
+            }
+            if (index == 1) {
+              return TitleCard(
+                title: s.statistics.capitalCase,
+                child: StatisticsWidget(
+                  serverId: serverId,
+                  data: data.statistics,
                 ),
               );
             }
-            if (index == 1) {
+            if (index == 2) {
               return TitleCard(
                 title: s.shortcuts.capitalCase,
                 child: ShortcutsWidget(serverId: serverId),
               );
             }
-            if (index == 2) {
+            if (index == 3) {
               return TitleCard(
                 title: s.latestWorkflowRuns.capitalCase,
                 card: false,

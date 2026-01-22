@@ -47,6 +47,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
     String userId = "";
     String tokenValue = "";
     String? localVersion;
+    String? localPid;
     final passwordId = server?.passwordId.isNotEmpty == true
         ? server!.passwordId
         : const UuidV4().generate().replaceAll("-", "");
@@ -54,7 +55,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
         ? server!.passwordId
         : const UuidV4().generate().replaceAll("-", "");
     if (isLocal && serverId == null) {
-      localVersion = await ref
+      final result = await ref
           .read(localCertimateManagerProvider)
           .createLocalServer(
             host: host,
@@ -63,6 +64,8 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
             password: password,
             localId: localId,
           );
+      localVersion = result.version;
+      localPid = result.pid;
     }
     if (serverId == null ||
         host != server?.host ||
@@ -98,7 +101,9 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
           token: tokenValue,
           createdAt: DateTime.now(),
           localId: Value.absentIfNull(localId),
+          autoStart: Value.absentIfNull(isLocal ? true : null),
           version: Value.absentIfNull(localVersion),
+          pid: Value.absentIfNull(localPid),
         ),
       );
     } else {

@@ -16,6 +16,15 @@ ServersDao serversDao(Ref ref) {
 class ServersDao extends DatabaseAccessor<AppDatabase> with _$ServersDaoMixin {
   ServersDao(super.db);
 
+  Future<Server?> getRowById(int id) async {
+    final query = select(servers)..where((t) => t.id.equals(id));
+    return query.getSingleOrNull();
+  }
+
+  Future<void> updatePidById(int id, String? pid) async {
+    await updateById(id, ServersCompanion(pid: Value(pid)));
+  }
+
   Future<List<ServerModel>> getAll({String displayName = ""}) async {
     final query = select(servers);
     if (displayName.isNotEmpty) {
@@ -62,8 +71,9 @@ abstract class ServerModel with _$ServerModel {
     required String passwordId,
     required String token,
     required String localId,
-    String? version,
     required DateTime createdAt,
+    required String version,
+    required bool autoStart,
   }) = _ServerModel;
 }
 
@@ -92,8 +102,9 @@ extension ServerConvert on Server {
       passwordId: passwordId,
       token: token,
       localId: localId ?? "",
-      version: version,
+      version: version ?? "",
       createdAt: createdAt,
+      autoStart: autoStart ?? false,
     );
   }
 }

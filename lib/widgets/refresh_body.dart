@@ -370,7 +370,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                     data.requireValue,
                     index - (isFilterMixin ? 1 : 0),
                   );
-                  if (itemSpacing > 0 && index > totalLength - list.length) {
+                  if (itemWidget != null && itemSpacing > 0 && index > 0) {
                     return Padding(
                       padding: EdgeInsets.only(top: itemSpacing),
                       child: itemWidget,

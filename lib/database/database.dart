@@ -22,7 +22,11 @@ class Servers extends Table {
 
   TextColumn get localId => text().nullable()();
 
+  BoolColumn get autoStart => boolean().nullable()();
+
   TextColumn get version => text().nullable()();
+
+  TextColumn get pid => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
 }
@@ -37,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -45,6 +49,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.addColumn(servers, servers.localId);
         await m.addColumn(servers, servers.version);
+      }
+      if (from < 3) {
+        await m.addColumn(servers, servers.autoStart);
+        await m.addColumn(servers, servers.pid);
       }
     },
   );
