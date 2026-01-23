@@ -52,7 +52,7 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
         ? server!.passwordId
         : const UuidV4().generate().replaceAll("-", "");
     final localId = server?.localId.isNotEmpty == true
-        ? server!.passwordId
+        ? server!.localId
         : const UuidV4().generate().replaceAll("-", "");
     if (isLocal && serverId == null) {
       final result = await ref
@@ -100,8 +100,8 @@ class ServerEditNotifier extends _$ServerEditNotifier with SubmitMixin {
           passwordId: savePassword ? passwordId : "",
           token: tokenValue,
           createdAt: DateTime.now(),
-          localId: Value.absentIfNull(localId),
-          autoStart: Value.absentIfNull(isLocal ? true : null),
+          localId: Value.absentIfNull(isLocal ? localId : null),
+          autoStart: Value.absentIfNull(isLocal),
           version: Value.absentIfNull(localVersion),
           pid: Value.absentIfNull(localPid),
         ),
