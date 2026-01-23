@@ -158,6 +158,8 @@
   "localServerAutoStart": "launch at login",
   "localServerRunning": "server is running",
   "localServerNotRunning": "server is not running",
+  "localServerUpgradeAvailable": "upgrade new version",
+  "upgrade": "upgrade",
   "certificatesWarningDaysBeforeExpire": "certificate expiration warning threshold",
   "certificatesWarningDaysBeforeExpireHelper": "this option determines how long before expiration a certificate is considered \"expiring soon\"",
   "workflowRunsMaxDaysRetentionHelper": "set to 0 to keep forever and never clean up automatically",

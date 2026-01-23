@@ -1,6 +1,8 @@
+import "package:adaptive_dialog/adaptive_dialog.dart";
 import "package:certimate/database/servers_dao.dart";
 import "package:certimate/extension/index.dart";
 import "package:certimate/pages/server/provider.dart";
+import "package:certimate/widgets/index.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:material_design/material_design.dart";
@@ -40,24 +42,71 @@ class ControlsWidget extends ConsumerWidget {
               size: 18,
               color: statusColor,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 8, height: 32),
             Expanded(
               child: Text(
                 statusText,
                 style: theme.textTheme.bodyMedium?.copyWith(color: statusColor),
               ),
             ),
-            if (control.isBusy) ...[
-              const SizedBox(width: 8),
-              const SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ],
+            Consumer(
+              builder: (context, ref, _) {
+                final currentVersion = ref.watch(
+                  serverProvider(
+                    serverId,
+                  ).select((v) => v.value?.version ?? ""),
+                );
+                final latestVersion =
+                    ref.watch(localServerUpdateProvider).asData?.value ?? "";
+                final hasUpdate = ref
+                    .read(localServerUpdateProvider.notifier)
+                    .isUpdateAvailable(
+                      currentVersion: currentVersion,
+                      latestVersion: latestVersion,
+                    );
+                if (!hasUpdate) {
+                  return const SizedBox.shrink();
+                }
+
+                Future<void> upgrade() async {
+                  final res = await showOkCancelAlertDialog(
+                    context: context,
+                    title: s.tip.capitalCase,
+                    message:
+                        "${s.localServerUpgradeAvailable}\n$currentVersion -> $latestVersion",
+                    okLabel: s.upgrade.capitalCase,
+                    cancelLabel: s.cancel.capitalCase,
+                  );
+                  if (res != OkCancelResult.ok) {
+                    return;
+                  }
+                  await ref
+                      .read(localServerControlProvider(serverId).notifier)
+                      .upgrade(latestVersion);
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: TextButton(
+                    onPressed: control.isBusy ? null : upgrade,
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      textStyle: theme.textTheme.labelSmall,
+                      foregroundColor: theme.colorScheme.error,
+                      disabledForegroundColor: theme.colorScheme.error
+                          .withValues(alpha: 0.38),
+                    ),
+                    child: Text(s.localServerUpgradeAvailable),
+                  ),
+                );
+              },
+            ),
+            if (control.isBusy) const SizedBox(width: 8),
+            if (control.isBusy) const PlatformCircularIndicator(size: 12),
           ],
         ),
-        const SizedBox(height: M3Spacings.space16),
+        const SizedBox(height: M3Spacings.space8),
         Wrap(
           direction: Axis.horizontal,
           spacing: M3Spacings.space12,
@@ -92,7 +141,7 @@ class ControlsWidget extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: M3Spacings.space16),
+        const SizedBox(height: M3Spacings.space8),
         Row(
           children: [
             Expanded(

@@ -158,6 +158,8 @@
   "localServerAutoStart": "服务自启动",
   "localServerRunning": "服务运行中",
   "localServerNotRunning": "服务未启动",
+  "localServerUpgradeAvailable": "升级到新版本",
+  "upgrade": "升级",
   "certificatesWarningDaysBeforeExpire": "证书即将过期预警阈值",
   "certificatesWarningDaysBeforeExpireHelper": "该选项将决定将证书过期前多久视为「即将过期」",
   "workflowRunsMaxDaysRetentionHelper": "设置为 0 表示永久保留，不会自动清理",

@@ -25,6 +25,17 @@ class ServersDao extends DatabaseAccessor<AppDatabase> with _$ServersDaoMixin {
     await updateById(id, ServersCompanion(pid: Value(pid)));
   }
 
+  Future<void> updatePidAndVersionById(
+    int id,
+    String? pid,
+    String? version,
+  ) async {
+    await updateById(
+      id,
+      ServersCompanion(pid: Value(pid), version: Value(version)),
+    );
+  }
+
   Future<List<ServerModel>> getAll({String displayName = ""}) async {
     final query = select(servers);
     if (displayName.isNotEmpty) {

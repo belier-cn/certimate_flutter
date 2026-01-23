@@ -142,6 +142,24 @@ class LocalCertimateManager {
     }
   }
 
+  Future<ReleaseInfo> getLatestReleaseInfo({bool forceRefresh = false}) {
+    if (forceRefresh) {
+      _releaseInfoCache.remove("latest");
+    }
+    return _getReleaseInfo();
+  }
+
+  Future<void> upgradeLocalServer(ServerModel server, String newVersion) async {
+    if (kIsWeb || !RunPlatform.isDesktop || server.localId.isEmpty) {
+      return;
+    }
+    final isRunning = await _isPortActive(server.host);
+    if (isRunning) {
+      await stopLocalServer(server);
+    }
+    await _startExistingServer(server.copyWith(version: newVersion));
+  }
+
   Future<void> _startExistingServer(ServerModel server) async {
     final serverDir = await _getServerDir(server.localId);
     final binaryPath = _getBinaryPath(serverDir);
@@ -159,7 +177,11 @@ class LocalCertimateManager {
     );
     try {
       await _waitForServerReady(host, process);
-      await serversDao.updatePidById(server.id, process.pid.toString());
+      await serversDao.updatePidAndVersionById(
+        server.id,
+        process.pid.toString(),
+        releaseInfo.version,
+      );
     } catch (e) {
       process.kill();
       rethrow;

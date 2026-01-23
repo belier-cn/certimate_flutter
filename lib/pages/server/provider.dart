@@ -11,10 +11,12 @@ import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/widgets/refresh_body.dart";
 import "package:copy_with_extension/copy_with_extension.dart";
 import "package:drift/drift.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_smart_dialog/flutter_smart_dialog.dart";
 import "package:riverpod_annotation/riverpod_annotation.dart";
+import "package:version/version.dart";
 
 part "provider.g.dart";
 
@@ -48,6 +50,10 @@ class ServerNotifier extends _$ServerNotifier {
     } catch (e) {
       SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
     }
+  }
+
+  void setLocalVersion(String version) {
+    state = AsyncValue.data(state.value?.copyWith(version: version));
   }
 }
 
@@ -233,5 +239,64 @@ class LocalServerControlNotifier extends _$LocalServerControlNotifier {
     }
     await refresh();
     state = state.copyWith(isBusy: false);
+  }
+
+  Future<void> upgrade(String newVersion) async {
+    final server = await _getServer();
+    if (server == null || server.localId.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(isBusy: true);
+    try {
+      await ref
+          .read(localCertimateManagerProvider)
+          .upgradeLocalServer(server, newVersion);
+      // 同步数据
+      ref.read(serverProvider(serverId).notifier).setLocalVersion(newVersion);
+    } catch (e) {
+      SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
+    }
+    await refresh();
+    state = state.copyWith(isBusy: false);
+  }
+}
+
+@Riverpod(keepAlive: true)
+class LocalServerUpdateNotifier extends _$LocalServerUpdateNotifier {
+  @override
+  Future<String?> build() async {
+    if (kIsWeb || !RunPlatform.isDesktop) {
+      return null;
+    }
+
+    final latest = await ref
+        .read(localCertimateManagerProvider)
+        .getLatestReleaseInfo(forceRefresh: true);
+    return latest.version;
+  }
+
+  bool isUpdateAvailable({
+    required String currentVersion,
+    required String latestVersion,
+  }) {
+    final current = _normalizeTagVersion(currentVersion);
+    final latest = _normalizeTagVersion(latestVersion);
+    if (latest.isEmpty) {
+      return false;
+    }
+    if (current.isEmpty) {
+      return false;
+    }
+    try {
+      return Version.parse(latest) > Version.parse(current);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  String _normalizeTagVersion(String input) {
+    final trimmed = input.trim();
+    return trimmed.replaceFirst(RegExp(r"^[vV]"), "");
   }
 }
