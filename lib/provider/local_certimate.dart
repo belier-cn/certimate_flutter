@@ -293,7 +293,22 @@ class LocalCertimateManager {
     if (tag is! String || tag.isEmpty) {
       throw Exception("Unable to fetch the latest certimate version.");
     }
-    final arch = web.getCurrentAbi().replaceFirst("macos", "darwin");
+    final abiMap = {
+      "windows_x64": "windows_amd64",
+      "windows_ia32": "windows_386",
+      "windows_arm64": "windows_arm64",
+      "macos_x64": "darwin_amd64",
+      "macos_arm64": "darwin_arm64",
+      "linux_x64": "linux_amd64",
+      "linux_arm64": "linux_arm64",
+      "linux_arm": "linux_armv7",
+    };
+    final arch = abiMap[web.getCurrentAbi()];
+    if (arch?.isNotEmpty != true) {
+      throw Exception(
+        "Unsupported platform/architecture (abi=${web.getCurrentAbi()}).",
+      );
+    }
     final expectedName = "certimate_${tag}_$arch.zip";
     final checksumsName = "checksums.txt";
     final assets = response.data["assets"];
