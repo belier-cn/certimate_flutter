@@ -72,7 +72,6 @@ dependencies:
   flutter_smart_dialog: ^4.9.8+9
   flutter_native_splash: ^2.4.7
   flutter_secure_storage: ^10.0.0
-  flutter_lucide_animated: ^0.0.4
   form_builder_validators: ^11.2.0
   flutter_platform_widgets: ^10.0.1
   extended_nested_scroll_view: ^6.2.1
@@ -92,6 +91,8 @@ dependencies:
     git:
       url: https://github.com/belier-cn/flutter_ohos_packages
       path: flutter_secure_storage_ohos
+  flutter_lucide_animated:
+    git: https://github.com/belier-cn/flutter-lucide-animated
 
 dev_dependencies:
   freezed: ^3.2.3

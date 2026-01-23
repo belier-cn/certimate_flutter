@@ -616,10 +616,11 @@ packages:
   flutter_lucide_animated:
     dependency: "direct main"
     description:
-      name: flutter_lucide_animated
-      sha256: fa27f8289befe5a2028dc1aa2ec825a9db29d1c691650749a637291cfa92d6a4
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: b01dee81bcd0c98cf37e5669d6bd9e101b570d61
+      url: "https://github.com/belier-cn/flutter-lucide-animated"
+    source: git
     version: "0.0.4"
   flutter_native_splash:
     dependency: "direct main"
