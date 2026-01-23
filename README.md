@@ -4,10 +4,10 @@
 
 <h1>Certimate Flutter</h1>
 
-<a href="https://opensource.org/license/agpl-v3" target="_blank"><img alt="License: AGPL" src="https://img.shields.io/badge/License-AGPL-purple.svg" /></a>
-<a href="https://github.com/belier-cn/certimate_flutter/releases" target="_blank"><img alt="Release" src="https://img.shields.io/github/v/release/belier-cn/certimate_flutter?sort=semver&amp;label=Release" /></a>
-<a href="https://github.com/certimate-go/certimate" target="_blank"><img alt="Certimate" src="https://img.shields.io/badge/Certimate-0.4%2B-F97318.svg" /></a>
-<a href="https://flutter.dev" target="_blank"><img alt="Flutter" src="https://img.shields.io/badge/Flutter-3.38%2B-02569B.svg" /></a>
+<a href="https://opensource.org/license/agpl-v3" target="_blank" rel="noopener noreferrer"><img alt="License: AGPL" src="https://img.shields.io/badge/License-AGPL-purple.svg" /></a>
+<a href="https://github.com/belier-cn/certimate_flutter/releases" target="_blank" rel="noopener noreferrer"><img alt="Release" src="https://img.shields.io/github/v/release/belier-cn/certimate_flutter?sort=semver&amp;label=Release" /></a>
+<a href="https://github.com/certimate-go/certimate" target="_blank" rel="noopener noreferrer"><img alt="Certimate" src="https://img.shields.io/badge/Certimate-0.4%2B-F97318.svg" /></a>
+<a href="https://flutter.dev" target="_blank" rel="noopener noreferrer"><img alt="Flutter" src="https://img.shields.io/badge/Flutter-3.38%2B-02569B.svg" /></a>
 
 本项目是 Certimate 的跨平台客户端，支持通过 API 接入并统一管理多个已有 Certimate 服务，也支持在本机部署并启动本地 Certimate 服务。
 
@@ -27,7 +27,7 @@
 
 ## ⭐ 运行界面
 
-<a href="https://belier-cn.github.io/certimate_flutter" target="_blank">在线预览</a>
+<a href="https://belier-cn.github.io/certimate_flutter" target="_blank" rel="noopener noreferrer">在线预览</a>
 
 | iOS                                                          | Android                                                          | Desktop                                                          |
 |--------------------------------------------------------------|------------------------------------------------------------------|------------------------------------------------------------------|
@@ -51,7 +51,7 @@
 
 ## ⏬ 下载地址
 
-可以通过右侧 <a href="https://github.com/belier-cn/certimate_flutter/releases" target="_blank">Releases</a> 进行下载。
+可以通过右侧 <a href="https://github.com/belier-cn/certimate_flutter/releases" target="_blank" rel="noopener noreferrer">Releases</a> 进行下载。
 
 > 如果在 macOS 上安装后无法打开（如提示无法验证开发者/应用已损坏等），可执行下面命令后再启动：
 > ```shell
@@ -60,16 +60,16 @@
 
 > 如果在 Windows 上打开某些页面闪退，请尝试更新 Microsoft Visual C++ 到最新版本
 >
-> 下载地址：<a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank">https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170</a>
+> 下载地址：<a href="https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" target="_blank" rel="noopener noreferrer">https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170</a>
 
 ## 🤝 参与贡献
 
 - 欢迎提交 Issue / PR 或参与协作开发。
-- 有任何功能建议或 bug，可以直接在 <a href="https://github.com/belier-cn/certimate_flutter/issues" target="_blank">Issues</a> 提交。
+- 有任何功能建议或 bug，可以直接在 <a href="https://github.com/belier-cn/certimate_flutter/issues" target="_blank" rel="noopener noreferrer">Issues</a> 提交。
 
 ## ⛔ 免责声明
 
-本项目遵循 <a href="https://opensource.org/license/agpl-v3" target="_blank">AGPL-3.0 License</a> 开源协议，应用完全免费，请在官方渠道下载使用。
+本项目遵循 <a href="https://opensource.org/license/agpl-v3" target="_blank" rel="noopener noreferrer">AGPL-3.0 License</a> 开源协议，应用完全免费，请在官方渠道下载使用。
 
 - 项目开发者对因使用本软件所产生的任何数据丢失、信息泄露、服务中断或其他直接、间接损失不承担任何责任。
 - 用户需自行负责账号与证书等敏感信息的安全配置与保管。
