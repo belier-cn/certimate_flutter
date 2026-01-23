@@ -537,10 +537,7 @@ class FilterWidget<FilterT extends Enum> extends StatelessWidget {
                   },
                 ),
               ...filterItems.mapIndexed((index, item) {
-                final name = item.toString().replaceFirst(
-                  "${item.runtimeType}.",
-                  "",
-                );
+                final name = item.toString().split(".").last;
                 return PullDownOption(
                   selected: filter == item,
                   label: Intl.message(name, name: name).capitalCase,
