@@ -354,7 +354,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                   ];
                 }
 
-                Widget? listItemBuilder(context, index) {
+                Widget listItemBuilder(context, index) {
                   if (isFilterMixin &&
                       index == data.requireValue.topItemCount) {
                     return filterWidget(index);
@@ -376,7 +376,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                       child: itemWidget,
                     );
                   }
-                  return itemWidget;
+                  return itemWidget ?? const SizedBox.shrink();
                 }
 
                 return [
@@ -393,9 +393,7 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                         ? SliverList.list(
                             children: List.generate(
                               totalLength,
-                              (index) =>
-                                  listItemBuilder(context, index) ??
-                                  const SizedBox.shrink(),
+                              (index) => listItemBuilder(context, index),
                             ),
                           )
                         : SliverList.builder(
