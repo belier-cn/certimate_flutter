@@ -61,7 +61,7 @@ class DateTimeConverter implements JsonConverter<DateTime?, dynamic> {
   @override
   @dateTimeConverter
   DateTime? fromJson(dynamic json) =>
-      json is String ? DateTime.tryParse(json) : null;
+      json is String ? DateTime.tryParse(json)?.toLocal() : null;
 
   @override
   dynamic toJson(@dateTimeConverter DateTime? object) =>
