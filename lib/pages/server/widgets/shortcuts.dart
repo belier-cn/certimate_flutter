@@ -73,6 +73,11 @@ class ShortcutsItemWidget extends StatelessWidget {
       onPressed: onPressed ?? () {},
       label: Text(title, style: theme.textTheme.bodyMedium),
       icon: icon!,
+      style: ButtonStyle(
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(horizontal: M3Spacings.space12),
+        ),
+      ),
     );
   }
 }
