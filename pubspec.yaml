@@ -93,6 +93,10 @@ dependencies:
       path: flutter_secure_storage_ohos
   flutter_lucide_animated:
     git: https://github.com/belier-cn/flutter-lucide-animated
+  tolyui_collapse:
+    git:
+      url: https://github.com/belier-cn/toly_ui
+      path: modules/data/tolyui_collapse
 
 dev_dependencies:
   freezed: ^3.2.3

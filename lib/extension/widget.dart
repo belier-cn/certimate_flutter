@@ -146,4 +146,7 @@ class AppIcons {
 
   IconData get share =>
       isMaterial(context) ? TablerIcons.share_2 : CupertinoIcons.share;
+
+  IconData get expandMore =>
+      isMaterial(context) ? Icons.expand_more : CupertinoIcons.chevron_down;
 }

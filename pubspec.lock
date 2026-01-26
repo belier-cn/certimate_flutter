@@ -1825,6 +1825,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.15"
+  tolyui_collapse:
+    dependency: "direct main"
+    description:
+      path: "modules/data/tolyui_collapse"
+      ref: HEAD
+      resolved-ref: c8b0bda273b1c09e877b17c45d5f00150df50e12
+      url: "https://github.com/belier-cn/toly_ui"
+    source: git
+    version: "0.0.1"
   typed_data:
     dependency: transitive
     description:

@@ -5,6 +5,8 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_platform_widgets/flutter_platform_widgets.dart";
 import "package:material_design/material_design.dart";
+import "package:sp_util/sp_util.dart";
+import "package:tolyui_collapse/tolyui_collapse.dart";
 
 class TitleCard extends StatelessWidget {
   final String title;
@@ -15,30 +17,60 @@ class TitleCard extends StatelessWidget {
 
   final bool horizontalPadding;
 
+  final bool? expanded;
+
+  final String expandedKey;
+
   const TitleCard({
     super.key,
     this.title = "",
     this.child,
     this.card = true,
     this.horizontalPadding = true,
+    this.expanded,
+    this.expandedKey = "",
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final realExpanded = (expandedKey.isNotEmpty
+        ? SpUtil.getBool(expandedKey, defValue: expanded)
+        : expanded);
     final widget = Padding(
       padding: horizontalPadding
           ? const EdgeInsets.all(M3Spacings.space16)
           : const EdgeInsets.symmetric(vertical: M3Spacings.space16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (title.isNotEmpty)
-            Text(title, style: theme.textTheme.headlineSmall),
-          if (child != null) const SizedBox(height: M3Spacings.space16),
-          if (child != null) child!,
-        ],
-      ),
+      child: realExpanded == null || child == null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty)
+                  Text(title, style: theme.textTheme.headlineSmall),
+                if (child != null) const SizedBox(height: M3Spacings.space16),
+                if (child != null) child!,
+              ],
+            )
+          : TolyCollapse(
+              expanded: realExpanded,
+              titlePadding: EdgeInsets.zero,
+              controller: CollapseController(),
+              contentPadding: const EdgeInsets.only(top: M3Spacings.space16),
+              title: Text(title, style: theme.textTheme.headlineSmall),
+              content: child!,
+              duration: const Duration(milliseconds: 300),
+              icon: Icon(context.appIcons.expandMore, size: 16),
+              onOpen: () {
+                if (expandedKey.isNotEmpty) {
+                  SpUtil.putBool(expandedKey, true);
+                }
+              },
+              onClose: () {
+                if (expandedKey.isNotEmpty) {
+                  SpUtil.putBool(expandedKey, false);
+                }
+              },
+            ),
     );
     if (!card) {
       return widget;

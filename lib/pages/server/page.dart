@@ -122,6 +122,8 @@ class ServerPage extends HookConsumerWidget {
             if (index == 0) {
               return showControls
                   ? TitleCard(
+                      expanded: true,
+                      expandedKey: "server-$serverId-controls-expanded",
                       title: s.localServerControls.capitalCase,
                       child: ControlsWidget(
                         serverId: serverId,
@@ -135,6 +137,8 @@ class ServerPage extends HookConsumerWidget {
             }
             if (index == 1) {
               return TitleCard(
+                expanded: true,
+                expandedKey: "server-$serverId-statistics-expanded",
                 title: s.statistics.capitalCase,
                 child: StatisticsWidget(
                   serverId: serverId,
@@ -144,6 +148,8 @@ class ServerPage extends HookConsumerWidget {
             }
             if (index == 2) {
               return TitleCard(
+                expanded: true,
+                expandedKey: "server-$serverId-shortcuts-expanded",
                 title: s.shortcuts.capitalCase,
                 child: ShortcutsWidget(serverId: serverId),
               );
