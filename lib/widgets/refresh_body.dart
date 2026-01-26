@@ -393,12 +393,19 @@ class RefreshBody<ValueT extends RefreshData> extends StatelessWidget {
                         ? SliverList.list(
                             children: List.generate(
                               totalLength,
-                              (index) => listItemBuilder(context, index),
+                              (index) => KeepAliveWrapper(
+                                child: listItemBuilder(context, index),
+                              ),
                             ),
                           )
                         : SliverList.builder(
                             itemCount: totalLength,
-                            itemBuilder: listItemBuilder,
+                            itemBuilder: (context, index) =>
+                                index < totalLength - list.length
+                                ? KeepAliveWrapper(
+                                    child: listItemBuilder(context, index),
+                                  )
+                                : listItemBuilder(context, index),
                           ),
                   ),
                 ];
