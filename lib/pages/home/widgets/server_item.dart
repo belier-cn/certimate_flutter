@@ -21,7 +21,10 @@ class ServerItemWidget extends StatelessWidget {
         selected: selected,
         title: Text(data.displayName),
         subtitle: Text(Uri.tryParse(data.host)?.host ?? data.host),
-        trailing: Icon(context.appIcons.arrowRight, size: 18),
+        trailing: Icon(
+          context.appIcons.arrowRight,
+          size: context.isMaterialStyle ? 24 : 16,
+        ),
       ),
     );
   }

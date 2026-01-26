@@ -59,7 +59,10 @@ class TitleCard extends StatelessWidget {
               title: Text(title, style: theme.textTheme.headlineSmall),
               content: child!,
               duration: const Duration(milliseconds: 300),
-              icon: Icon(context.appIcons.expandMore, size: 16),
+              icon: Icon(
+                context.appIcons.expandMore,
+                size: context.isMaterialStyle ? 24 : 16,
+              ),
               onOpen: () {
                 if (expandedKey.isNotEmpty) {
                   SpUtil.putBool(expandedKey, true);
