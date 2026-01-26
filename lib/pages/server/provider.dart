@@ -122,7 +122,10 @@ class ServerDataNotifier extends _$ServerDataNotifier {
           localServerControlProvider(serverId).select((val) => val.isRunning),
         );
         if (!isRunning) {
-          return ServerData(false, server, const StatisticsResult(), []);
+          return ServerData(false, server, const StatisticsResult(), const [
+            // 避免显示 EmptyWidget
+            WorkflowRunResult(),
+          ]);
         }
       }
       final (statistics, workflowRuns) = await wait2(
@@ -132,6 +135,10 @@ class ServerDataNotifier extends _$ServerDataNotifier {
       return ServerData(true, server, statistics, workflowRuns);
     } catch (e) {
       if (state.isRefreshing && state.hasValue) {
+        if (state.requireValue.server?.localId.isNotEmpty == true &&
+            !state.requireValue.isRunning) {
+          rethrow;
+        }
         // 有值的情况下，刷新失败只弹窗提示，保留之前的值
         SmartDialog.showNotify(msg: e.toString(), notifyType: NotifyType.error);
         return state.requireValue;
