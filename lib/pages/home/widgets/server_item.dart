@@ -20,7 +20,7 @@ class ServerItemWidget extends StatelessWidget {
       child: ListTile(
         selected: selected,
         title: Text(data.displayName),
-        subtitle: Text(Uri.tryParse(data.host)?.host ?? data.host),
+        subtitle: Text(data.host.fullHost),
         trailing: Icon(
           context.appIcons.arrowRight,
           size: context.isMaterialStyle ? 24 : 16,

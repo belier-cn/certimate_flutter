@@ -28,6 +28,17 @@ extension StringExt on String? {
   String _val(String value) => isNotEmptyOrNull ? this! : value;
 }
 
+extension StringUrlExt on String {
+  String get fullHost {
+    final uri = Uri.tryParse(this);
+    final origin = uri?.origin;
+    if (uri == null || origin == null || origin.isEmpty) {
+      return this;
+    }
+    return origin.replaceFirst("${uri.scheme}://", "");
+  }
+}
+
 extension DialogExt on String {
   Future<T?> showTip<T>() => tip.showTip<T>(content: this);
 }
