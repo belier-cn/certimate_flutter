@@ -14,6 +14,7 @@ import "package:flutter/material.dart";
 import "package:flutter_hooks/flutter_hooks.dart";
 import "package:go_router/go_router.dart";
 import "package:hooks_riverpod/hooks_riverpod.dart";
+import "package:url_launcher/url_launcher.dart";
 
 class ServerPage extends HookConsumerWidget {
   final int serverId;
@@ -67,9 +68,21 @@ class ServerPage extends HookConsumerWidget {
               PullDownOption(
                 label: s.systemSettings.capitalCase,
                 iconWidget: Icon(context.appIcons.settings),
-                withDivider: true,
                 onTap: (_) =>
                     ServerSettingsRoute(serverId: serverId).push(context),
+              ),
+              PullDownOption(
+                label: s.openInBrowser.capitalCase,
+                iconWidget: Icon(context.appIcons.world),
+                withDivider: true,
+                onTap: (_) {
+                  final host =
+                      ref.read(serverProvider(serverId)).value?.host ?? "";
+                  final url = Uri.tryParse(host);
+                  if (url != null) {
+                    launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
               ),
               PullDownOption(
                 label: s.edit.capitalCase,
