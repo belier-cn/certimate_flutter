@@ -42,6 +42,8 @@ class SettingsPage extends HookConsumerWidget {
     final biometric = ref.watch(biometricProvider);
 
     final launchAtLogin = useState(false);
+    final isCheckingUpdate = useState(false);
+    final isCupertinoStyle = context.isCupertinoStyle;
 
     useEffect(() {
       if (RunPlatform.isDesktop) {
@@ -229,8 +231,41 @@ class SettingsPage extends HookConsumerWidget {
                     position: badges.BadgePosition.topEnd(top: -2, end: -12),
                     child: Text(s.version.capitalCase),
                   ),
-                  value: packageInfo != null ? Text(packageInfo.version) : null,
-                  onPressed: (_) => showNewVersion(context, upgrader),
+                  value: Builder(
+                    builder: (_) {
+                      if (packageInfo == null && !isCheckingUpdate.value) {
+                        return const SizedBox.shrink();
+                      }
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 6,
+                        children: [
+                          if (isCupertinoStyle && isCheckingUpdate.value)
+                            const PlatformCircularIndicator(size: 16),
+                          if (packageInfo != null) Text(packageInfo.version),
+                          if (!isCupertinoStyle && isCheckingUpdate.value)
+                            const PlatformCircularIndicator(size: 12),
+                        ],
+                      );
+                    },
+                  ),
+                  onPressed: (_) async {
+                    if (kIsWeb) {
+                      SmartDialog.showToast(context.s.alreadyUpToDate);
+                      return;
+                    }
+                    if (isCheckingUpdate.value) {
+                      return;
+                    }
+                    isCheckingUpdate.value = true;
+                    try {
+                      await showNewVersion(context, upgrader);
+                    } finally {
+                      if (context.mounted) {
+                        isCheckingUpdate.value = false;
+                      }
+                    }
+                  },
                 ),
               ],
             ),
@@ -303,11 +338,7 @@ class SettingsPage extends HookConsumerWidget {
     }
   }
 
-  void showNewVersion(BuildContext context, Upgrader upgrader) async {
-    if (kIsWeb) {
-      SmartDialog.showToast(context.s.alreadyUpToDate);
-      return;
-    }
+  Future<void> showNewVersion(BuildContext context, Upgrader upgrader) async {
     await upgrader.initialize();
     await upgrader.updateVersionInfo();
     if (!context.mounted) {
