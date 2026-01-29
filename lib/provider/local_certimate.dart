@@ -97,6 +97,13 @@ class LocalCertimateManager {
     return _isPortActive(server.host);
   }
 
+  Future<Directory?> getLocalServerDir(String localId) async {
+    if (kIsWeb || !RunPlatform.isDesktop || localId.isEmpty) {
+      return null;
+    }
+    return _getServerDir(localId);
+  }
+
   Future<void> startLocalServer(ServerModel server) async {
     if (server.localId.isEmpty) {
       return;

@@ -7,6 +7,7 @@ import "package:certimate/pages/server/widgets/controls.dart";
 import "package:certimate/pages/server/widgets/shortcuts.dart";
 import "package:certimate/pages/server/widgets/statistics.dart";
 import "package:certimate/pages/workflow_runs/widgets/workflow_run.dart";
+import "package:certimate/provider/local_certimate.dart";
 import "package:certimate/router/route.dart";
 import "package:certimate/widgets/index.dart";
 import "package:flutter/foundation.dart";
@@ -41,88 +42,118 @@ class ServerPage extends HookConsumerWidget {
               return Text(displayName ?? "");
             },
           ),
-          trailing: PlatformPullDownButton(
-            options: [
-              PullDownOption(
-                label: s.certificates.capitalCase,
-                iconWidget: Icon(context.appIcons.certificate),
-                onTap: (_) =>
-                    CertificatesRoute(serverId: serverId).push(context),
-              ),
-              PullDownOption(
-                label: s.workflows.capitalCase,
-                iconWidget: Icon(context.appIcons.workflow),
-                onTap: (_) => WorkflowsRoute(serverId: serverId).push(context),
-              ),
-              PullDownOption(
-                label: s.credentials.capitalCase,
-                iconWidget: Icon(context.appIcons.credential),
-                onTap: (_) => AccessesRoute(serverId: serverId).push(context),
-              ),
-              PullDownOption(
-                label: s.presetTemplate.capitalCase,
-                iconWidget: Icon(context.appIcons.template),
-                onTap: (_) =>
-                    ServerTemplatesRoute(serverId: serverId).push(context),
-              ),
-              PullDownOption(
-                label: s.systemSettings.capitalCase,
-                iconWidget: Icon(context.appIcons.settings),
-                onTap: (_) =>
-                    ServerSettingsRoute(serverId: serverId).push(context),
-              ),
-              PullDownOption(
-                label: s.openInBrowser.capitalCase,
-                iconWidget: Icon(context.appIcons.world),
-                withDivider: true,
-                onTap: (_) {
-                  final host =
-                      ref.read(serverProvider(serverId)).value?.host ?? "";
-                  final url = Uri.tryParse(host);
-                  if (url != null) {
-                    launchUrl(url, mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-              PullDownOption(
-                label: s.edit.capitalCase,
-                iconWidget: Icon(context.appIcons.edit),
-                withDivider: true,
-                onTap: (_) async {
-                  final newServer = await ServerEditRoute(
-                    serverId: serverId,
-                  ).push(context);
-                  final realServer = newServer is Function
-                      ? newServer.call()
-                      : newServer;
-                  if (realServer is ServerModel? && realServer != null) {
-                    ref
-                        .read(serverProvider(serverId).notifier)
-                        .updateServer(realServer);
-                  }
-                },
-              ),
-              PullDownOption(
-                label: s.delete.capitalCase,
-                iconWidget: Icon(context.appIcons.delete),
-                isDestructive: true,
-                onTap: (_) async {
-                  final count = await ref
-                      .read(serverDataProvider(serverId).notifier)
-                      .delete(context);
-                  if (count > 0) {
-                    if (context.mounted) context.pop();
-                    ref
-                        .read(serverListProvider.notifier)
-                        .deleteServer(serverId);
-                  }
-                },
-              ),
-            ],
-            icon: ActionButton(
-              well: false,
-              child: AppBarIconButton(context.appIcons.ellipsis),
-            ),
+          trailing: Consumer(
+            builder: (context, ref, _) {
+              final localId = ref.watch(
+                serverProvider(
+                  serverId,
+                ).select((item) => item.value?.localId ?? ""),
+              );
+              final showOpenLocalFolder =
+                  !kIsWeb && RunPlatform.isDesktop && localId.isNotEmpty;
+              return PlatformPullDownButton(
+                options: [
+                  PullDownOption(
+                    label: s.certificates.capitalCase,
+                    iconWidget: Icon(context.appIcons.certificate),
+                    onTap: (_) =>
+                        CertificatesRoute(serverId: serverId).push(context),
+                  ),
+                  PullDownOption(
+                    label: s.workflows.capitalCase,
+                    iconWidget: Icon(context.appIcons.workflow),
+                    onTap: (_) =>
+                        WorkflowsRoute(serverId: serverId).push(context),
+                  ),
+                  PullDownOption(
+                    label: s.credentials.capitalCase,
+                    iconWidget: Icon(context.appIcons.credential),
+                    onTap: (_) =>
+                        AccessesRoute(serverId: serverId).push(context),
+                  ),
+                  PullDownOption(
+                    label: s.presetTemplate.capitalCase,
+                    iconWidget: Icon(context.appIcons.template),
+                    onTap: (_) =>
+                        ServerTemplatesRoute(serverId: serverId).push(context),
+                  ),
+                  PullDownOption(
+                    label: s.systemSettings.capitalCase,
+                    iconWidget: Icon(context.appIcons.settings),
+                    onTap: (_) =>
+                        ServerSettingsRoute(serverId: serverId).push(context),
+                  ),
+                  if (showOpenLocalFolder)
+                    PullDownOption(
+                      label: s.openLocalFolder.capitalCase,
+                      iconWidget: Icon(context.appIcons.folder),
+                      onTap: (_) async {
+                        final dir = await ref
+                            .read(localCertimateManagerProvider)
+                            .getLocalServerDir(localId);
+                        if (dir == null) {
+                          return;
+                        }
+                        await launchUrl(
+                          Uri.file(dir.path),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                    ),
+                  PullDownOption(
+                    label: s.openInBrowser.capitalCase,
+                    iconWidget: Icon(context.appIcons.world),
+                    withDivider: true,
+                    onTap: (_) {
+                      final host =
+                          ref.read(serverProvider(serverId)).value?.host ?? "";
+                      final url = Uri.tryParse(host);
+                      if (url != null) {
+                        launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                  ),
+                  PullDownOption(
+                    label: s.edit.capitalCase,
+                    iconWidget: Icon(context.appIcons.edit),
+                    withDivider: true,
+                    onTap: (_) async {
+                      final newServer = await ServerEditRoute(
+                        serverId: serverId,
+                      ).push(context);
+                      final realServer = newServer is Function
+                          ? newServer.call()
+                          : newServer;
+                      if (realServer is ServerModel? && realServer != null) {
+                        ref
+                            .read(serverProvider(serverId).notifier)
+                            .updateServer(realServer);
+                      }
+                    },
+                  ),
+                  PullDownOption(
+                    label: s.delete.capitalCase,
+                    iconWidget: Icon(context.appIcons.delete),
+                    isDestructive: true,
+                    onTap: (_) async {
+                      final count = await ref
+                          .read(serverDataProvider(serverId).notifier)
+                          .delete(context);
+                      if (count > 0) {
+                        if (context.mounted) context.pop();
+                        ref
+                            .read(serverListProvider.notifier)
+                            .deleteServer(serverId);
+                      }
+                    },
+                  ),
+                ],
+                icon: ActionButton(
+                  well: false,
+                  child: AppBarIconButton(context.appIcons.ellipsis),
+                ),
+              );
+            },
           ),
           provider: serverDataProvider(serverId),
           refreshController: refreshController,

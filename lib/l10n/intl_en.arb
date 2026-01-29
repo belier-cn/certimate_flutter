@@ -150,6 +150,7 @@
   "manual": "manual",
   "hostEndsErrorMsg": "Should not end with a \"/\"",
   "openInBrowser": "open in browser",
+  "openLocalFolder": "open local folder",
   "copyUrl": "copy url",
   "shareUrl": "share url",
   "alreadyUpToDate": "already up to date",

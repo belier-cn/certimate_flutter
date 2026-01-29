@@ -105,6 +105,9 @@ class AppIcons {
   IconData get world =>
       isMaterial(context) ? TablerIcons.world : CupertinoIcons.globe;
 
+  IconData get folder =>
+      isMaterial(context) ? TablerIcons.folder : CupertinoIcons.folder;
+
   IconData get revoke => isMaterial(context)
       ? TablerIcons.shield_cancel
       : CupertinoIcons.xmark_shield;
