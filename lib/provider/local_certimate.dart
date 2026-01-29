@@ -44,8 +44,8 @@ class LocalCertimateManager {
   }) async {
     debugPrint("start local server ($displayName): $host");
     final serverDir = await _getServerDir(localId);
-    final binaryPath = _getBinaryPath(serverDir);
     final releaseInfo = await _getReleaseInfo();
+    final binaryPath = _getBinaryPath(serverDir, releaseInfo.version);
     await _downloadBinary(releaseInfo, binaryPath);
 
     final listenHost = _getListenHost(host);
@@ -169,10 +169,10 @@ class LocalCertimateManager {
 
   Future<void> _startExistingServer(ServerModel server) async {
     final serverDir = await _getServerDir(server.localId);
-    final binaryPath = _getBinaryPath(serverDir);
     final version = server.version.trim();
-    final releaseInfo = await _getReleaseInfo(version: version);
+    final binaryPath = _getBinaryPath(serverDir, version);
     if (!await File(binaryPath).exists()) {
+      final releaseInfo = await _getReleaseInfo(version: version);
       await _downloadBinary(releaseInfo, binaryPath);
     }
     final host = server.host;
@@ -187,7 +187,7 @@ class LocalCertimateManager {
       await serversDao.updatePidAndVersionById(
         server.id,
         process.pid.toString(),
-        releaseInfo.version,
+        version,
       );
     } catch (e) {
       process.kill();
@@ -487,10 +487,10 @@ class LocalCertimateManager {
     return dir;
   }
 
-  String _getBinaryPath(Directory serverDir) {
+  String _getBinaryPath(Directory serverDir, String version) {
     return p.join(
       serverDir.path,
-      "certimate${RunPlatform.isWindows ? '.exe' : ''}",
+      "certimate_$version${RunPlatform.isWindows ? '.exe' : ''}",
     );
   }
 
