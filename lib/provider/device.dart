@@ -5,5 +5,3 @@ part "device.g.dart";
 
 @Riverpod(keepAlive: true)
 BaseDeviceInfo? deviceInfo(Ref ref) => null;
-
-
