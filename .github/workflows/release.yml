@@ -20,56 +20,61 @@ jobs:
         include:
           - type: android
             os: ubuntu-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: ios
             os: macos-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: macos
             os: macos-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: windows
             os: windows-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: linux
             os: ubuntu-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: web
             os: ubuntu-latest
-            flutter: 3.38.6
+            flutter: 3.38.9
           - type: ohos
             os: ubuntu-latest
             flutter: oh-3.35.7-dev
 
     steps:
-      - uses: actions/checkout@v4
-        name: Checkout code
-      - uses: actions/setup-java@v4
-        name: Setup Java SDK
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17 development environment
+        uses: actions/setup-java@v4
         if: ${{ matrix.type == 'android' || matrix.type == 'ohos' }}
         with:
           distribution: "zulu"
           java-version: "17"
-      - uses: actions/setup-node@v6
-        name: Setup Node SDK
+
+      - name: Setup Node.js 20 runtime
+        uses: actions/setup-node@v6
         if: ${{ matrix.type == 'macos' }}
         with:
           node-version: 20
-      - if: ${{ matrix.type != 'ohos' }}
-        name: Setup Flutter SDK
+
+      - name: Setup Flutter SDK ${{ matrix.flutter }}
+        if: ${{ matrix.type != 'ohos' }}
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.flutter }}
           channel: "stable"
-      - if: ${{ matrix.type != 'ohos' }}
-        name: Patch flutter cupertino nav_bar.dart
+
+      - name: Apply Flutter Cupertino navigation bar patch
+        if: ${{ matrix.type != 'ohos' }}
         shell: bash
         run: |
           echo "Flutter root: $FLUTTER_ROOT"
           target="$FLUTTER_ROOT/packages/flutter/lib/src/cupertino/nav_bar.dart"
           echo "Patching $target"
           curl -fsSL "https://github.com/belier-cn/certimate_flutter/releases/download/v0.0.1/cupertino_nav_bar_${{ matrix.flutter }}.dart" -o "$target"
-      - if: ${{ matrix.type == 'ohos' }}
-        name: Setup Harmony SDK
+
+      - name: Download and setup HarmonyOS command-line tools
+        if: ${{ matrix.type == 'ohos' }}
         run: |
           FILE_NAME="commandline-tools-linux-x64-6.0.1.251.zip"
           wget -c -q -P "$HOME" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.aa" || exit 1
@@ -80,8 +85,9 @@ jobs:
           export PATH="$HOME/command-line-tools/bin:$PATH"
           ohpm -v
           rm -rf "${FILE_NAME}"*
-      - if: ${{ matrix.type == 'ohos' }}
-        name: Setup Harmony Flutter SDK
+
+      - name: Setup HarmonyOS Flutter SDK
+        if: ${{ matrix.type == 'ohos' }}
         run: |
           cat pubspec_ohos_overrides.yaml >> pubspec.yaml
           rm -rf pubspec.lock
@@ -92,14 +98,16 @@ jobs:
           export PATH="$HOME/harmony_flutter/bin:$PATH"
           flutter --version
           flutter config --ohos-sdk="$HOME/command-line-tools/sdk"
-      - name: Install dependencies
+
+      - name: Install Flutter project dependencies
         run: |
           flutter pub global activate fastforge
           flutter pub get
           flutter pub run intl_utils:generate
           flutter pub run build_runner build --delete-conflicting-outputs
-      - if: ${{ matrix.type == 'android' }}
-        name: Build android
+
+      - name: Build Android APK package
+        if: ${{ matrix.type == 'android' }}
         run: |
           echo -n "$KEYSTORE_BASE64" | openssl base64 -d -A > android/app/certimate.jks
           fastforge package --platform android --targets apk --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.apk
@@ -108,34 +116,132 @@ jobs:
           KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
           KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      - if: ${{ matrix.type == 'ios' }}
-        name: Build ios
+
+      - name: Build iOS IPA package (unsigned)
+        if: ${{ matrix.type == 'ios' }}
         run: |
           wget -c -q -O fastforge "https://github.com/belier-cn/fastforge/releases/download/v0.6.7-beta.1/fastforge-v0.6.7-beta.1-macos-arm64" || exit 1
           chmod +x fastforge
           ./fastforge package --platform ios --targets ipa --flutter-build-args no-codesign --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.ipa
-      - if: ${{ matrix.type == 'macos' }}
-        name: Build macos
+
+      - name: Build macOS DMG installer
+        if: ${{ matrix.type == 'macos' }}
         run: |
           npm install -g appdmg
           fastforge package --platform macos --targets dmg --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.dmg
-      - if: ${{ matrix.type == 'windows' }}
-        name: Build windows
+
+      - name: Build Windows EXE installer
+        if: ${{ matrix.type == 'windows' }}
         run: |
           choco upgrade innosetup --no-progress
           Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
           fastforge package --platform windows --targets exe --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.exe
-      - if: ${{ matrix.type == 'linux' }}
-        name: Build linux
+
+      - name: Install basic Linux build dependencies
+        if: ${{ matrix.type == 'linux' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libfuse2 locate
+
+      - name: Restore WPE WebKit from cache
+        if: ${{ matrix.type == 'linux' }}
+        id: cache-wpe
+        uses: actions/cache@v4
+        with:
+          path: /usr/local
+          key: wpe-webkit-2.50.4-ubuntu-${{ runner.os }}-${{ runner.arch }}
+
+      # https://github.com/pichillilorenzo/flutter_inappwebview/blob/master/flutter_inappwebview_linux/WPE_BACKEND.md
+      - name: Install WPE WebKit build dependencies
+        if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
+        run: |
+          # Core build tools
+          sudo apt-get install -y \
+          build-essential cmake ninja-build meson pkg-config \
+          ruby ruby-dev python3 python3-pip \
+          gperf unifdef
+          
+          # GLib (required)
+          sudo apt-get install -y libglib2.0-dev
+
+          # GObject Introspection (required for ENABLE_INTROSPECTION)
+          sudo apt-get install -y \
+          libgirepository1.0-dev \
+          gobject-introspection
+
+          # Networking and security (required)
+          sudo apt-get install -y \
+          libsoup-3.0-dev \
+          libssl-dev libgnutls28-dev \
+          libsecret-1-dev \
+          libgcrypt20-dev libtasn1-dev
+          
+          # Graphics and rendering (required)
+          sudo apt-get install -y \
+          libepoxy-dev \
+          libegl1-mesa-dev libgles2-mesa-dev \
+          libxkbcommon-dev
+          
+          # Image and font processing (required)
+          sudo apt-get install -y \
+          libjpeg-dev libpng-dev libwebp-dev \
+          libharfbuzz-dev libharfbuzz-icu0 libfreetype6-dev libfontconfig1-dev
+          
+          # Text and internationalization (required)
+          sudo apt-get install -y \
+          libicu-dev libxml2-dev \
+          libhyphen-dev libenchant-2-dev
+          
+          # Media and audio (required for ENABLE_VIDEO and ENABLE_WEB_AUDIO)
+          sudo apt-get install -y \
+          libgstreamer1.0-dev \
+          libgstreamer-plugins-base1.0-dev \
+          libgstreamer-plugins-bad1.0-dev \
+          gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+          
+          # Database and storage (required)
+          sudo apt-get install -y libsqlite3-dev
+          
+          # WPE libraries (required)
+          sudo apt-get install -y libwpe-1.0-dev
+
+      - name: Build WPE WebKit 2.50.4 from source
+        if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
+        run: |
+          export WPE_PREFIX=/usr/local
+          cd /tmp
+
+          # Build libwpe
+          wget -q https://wpewebkit.org/releases/libwpe-1.16.3.tar.xz
+          tar xf libwpe-1.16.3.tar.xz
+          cd libwpe-1.16.3
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX
+          sudo ninja -C build install
+
+          # Build WPE WebKit
+          cd /tmp
+          wget -q https://wpewebkit.org/releases/wpewebkit-2.50.4.tar.xz
+          tar xf wpewebkit-2.50.4.tar.xz
+          cd wpewebkit-2.50.4
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX -DPORT=WPE \
+            -DENABLE_WPE_PLATFORM=ON -DENABLE_WPE_PLATFORM_HEADLESS=ON \
+            -DENABLE_DOCUMENTATION=OFF -DENABLE_MINIBROWSER=OFF \
+            -DUSE_JPEGXL=OFF -DUSE_AVIF=OFF -DENABLE_GAMEPAD=OFF
+          sudo ninja -C build install
+          sudo ldconfig
+
+      - name: Build Linux AppImage package
+        if: ${{ matrix.type == 'linux' }}
         run: |
           wget -c -q -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" || exit 1
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
-          sudo apt-get update
-          sudo apt install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libfuse2 locate
           fastforge package --platform linux --targets appimage --artifact-name certimate-${{ github.ref_name }}-${{ matrix.type }}.appimage
-      - if: ${{ matrix.type == 'ohos' }}
-        name: Build ohos
+
+      - name: Build HarmonyOS HAP package
+        if: ${{ matrix.type == 'ohos' }}
         run: |
           echo -n "$HARMONY_SIGNING_BASE64" | openssl base64 -d -A > ohos/signing-configs.json
           echo -n "$HARMONY_SIGNING_FILE_BASE64" | openssl base64 -d -A > ohos/signature.zip
@@ -144,14 +250,16 @@ jobs:
         env:
           HARMONY_SIGNING_BASE64: ${{ secrets.HARMONY_SIGNING_BASE64 }}
           HARMONY_SIGNING_FILE_BASE64: ${{ secrets.HARMONY_SIGNING_FILE_BASE64 }}
-      - if: ${{ matrix.type == 'web' }}
-        name: Build web
+
+      - name: Build web application bundle
+        if: ${{ matrix.type == 'web' }}
         run: |
           flutter build web --release --base-href /${{ github.event.repository.name }}/ --dart-define FLUTTER_BASE_HREF=/${{ github.event.repository.name }}/
           cp build/web/index.html build/web/404.html
           mkdir -p "dist/${{ github.ref_name }}"
           tar -cvf dist/${{ github.ref_name }}/certimate-${{ github.ref_name }}-web.tar -C build/web .
-      - name: Upload artifact
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.type }}
@@ -171,12 +279,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
-        name: Download artifact
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - uses: softprops/action-gh-release@v2
-        name: Create GitHub Release
+
+      - name: Create GitHub release draft
+        uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**
           draft: true

@@ -17,10 +17,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Checkout Code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Download web.tar
+      - name: Download web application bundle from release
         run: |
           mkdir -p "${{ env.COMBINED_SITE_DIR }}"
           mkdir -p temp_web
@@ -31,10 +31,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Dart SDK
+      - name: Setup Dart SDK environment
         uses: dart-lang/setup-dart@v1
 
-      - name: Generate appcast.xml
+      - name: Generate Sparkle appcast.xml feed
         working-directory: ./appcast
         run: |
           dart pub get
@@ -46,10 +46,10 @@ jobs:
           PUBLISHED_AT: ${{ github.event.release.published_at }}
           OUTPUT_PATH: "../${{ env.COMBINED_SITE_DIR }}/appcast.xml"
 
-      - name: Configure GitHub Pages
+      - name: Configure GitHub Pages settings
         uses: actions/configure-pages@v5
 
-      - name: Upload GitHub Pages Artifact
+      - name: Upload site content as Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./${{ env.COMBINED_SITE_DIR }}"

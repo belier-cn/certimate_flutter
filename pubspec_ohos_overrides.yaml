@@ -3,6 +3,8 @@
   riverpod_lint: ^3.1.0
   launch_at_startup: ^0.3.1
   flutter_form_builder: 10.1.0
+  form_builder_validators: 11.2.0
+  form_builder_cupertino_fields: 0.6.0
   drift_flutter:
     git:
       url: https://github.com/belier-cn/flutter_ohos_packages
