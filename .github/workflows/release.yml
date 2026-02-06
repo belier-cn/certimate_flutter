@@ -207,6 +207,8 @@ jobs:
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
         run: |
           export WPE_PREFIX=/usr/local
+          export CC=clang
+          export CXX=clang++
           cd /tmp
 
           # Build libwpe
@@ -214,7 +216,9 @@ jobs:
           tar xf libwpe-1.16.3.tar.xz
           cd libwpe-1.16.3
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX
+            -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++
           sudo ninja -C build install
 
           # Build WPE WebKit
@@ -224,6 +228,8 @@ jobs:
           cd wpewebkit-2.50.4
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX -DPORT=WPE \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
             -DENABLE_WPE_PLATFORM=ON -DENABLE_WPE_PLATFORM_HEADLESS=ON \
             -DENABLE_DOCUMENTATION=OFF -DENABLE_MINIBROWSER=OFF \
             -DUSE_JPEGXL=OFF -DUSE_AVIF=OFF -DENABLE_GAMEPAD=OFF
