@@ -31,7 +31,7 @@ jobs:
             os: windows-latest
             flutter: 3.38.9
           - type: linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             flutter: 3.38.9
           - type: web
             os: ubuntu-latest
