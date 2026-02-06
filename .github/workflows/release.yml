@@ -202,6 +202,9 @@ jobs:
           
           # WPE libraries (required)
           sudo apt-get install -y libwpe-1.0-dev
+          
+          # DENABLE_XSLT default ON
+          sudo apt-get install -y libxslt1-dev
 
       - name: Build WPE WebKit 2.50.4 from source
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
