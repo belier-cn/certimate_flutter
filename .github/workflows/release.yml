@@ -165,9 +165,7 @@ jobs:
           sudo apt-get install -y libglib2.0-dev
 
           # GObject Introspection (required for ENABLE_INTROSPECTION)
-          sudo apt-get install -y \
-          libgirepository1.0-dev \
-          gobject-introspection
+          sudo apt-get install gobject-introspection libunwind-dev libgirepository1.0-dev
 
           # Networking and security (required)
           sudo apt-get install -y \
