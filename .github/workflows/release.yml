@@ -226,13 +226,29 @@ jobs:
           wget -q https://wpewebkit.org/releases/wpewebkit-2.50.4.tar.xz
           tar xf wpewebkit-2.50.4.tar.xz
           cd wpewebkit-2.50.4
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX -DPORT=WPE \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DENABLE_WPE_PLATFORM=ON -DENABLE_WPE_PLATFORM_HEADLESS=ON \
-            -DENABLE_DOCUMENTATION=OFF -DENABLE_MINIBROWSER=OFF \
-            -DUSE_JPEGXL=OFF -DUSE_AVIF=OFF -DENABLE_GAMEPAD=OFF
+          cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX \
+          -DPORT=WPE \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DUSE_JPEGXL=OFF \
+          -DUSE_AVIF=OFF \
+          -DUSE_WOFF2=OFF \
+          -DUSE_LCMS=OFF \
+          -DUSE_ATK=OFF \
+          -DUSE_LIBBACKTRACE=OFF \
+          -DENABLE_SPEECH_SYNTHESIS=OFF \
+          -DENABLE_DOCUMENTATION=OFF \
+          -DENABLE_INTROSPECTION=OFF \
+          -DENABLE_JOURNALD_LOG=OFF \
+          -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+          -DENABLE_WEBDRIVER=OFF \
+          -DENABLE_GAMEPAD=OFF \
+          -DUSE_GSTREAMER_WEBRTC=OFF \
+          -DENABLE_MINIBROWSER=OFF \
+          -DENABLE_WPE_PLATFORM=ON \
+          -DENABLE_WPE_PLATFORM_HEADLESS=ON
           sudo ninja -C build install
           sudo ldconfig
 
