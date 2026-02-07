@@ -203,11 +203,12 @@ jobs:
       - name: Build WPE WebKit 2.50.4 from source
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
         run: |
+          # Create a working directory
+          mkdir -p ~/wpe-build && cd ~/wpe-build
           export WPE_PREFIX=/usr/local
           export CC=clang
           export CXX=clang++
-          cd /tmp
-
+          
           # Build libwpe
           wget -q https://wpewebkit.org/releases/libwpe-1.16.3.tar.xz
           tar xf libwpe-1.16.3.tar.xz
@@ -216,10 +217,11 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=$WPE_PREFIX \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++
+          ninja -C build -j$(nproc)
           sudo ninja -C build install
+          cd ..
 
           # Build WPE WebKit
-          cd /tmp
           wget -q https://wpewebkit.org/releases/wpewebkit-2.50.4.tar.xz
           tar xf wpewebkit-2.50.4.tar.xz
           cd wpewebkit-2.50.4
@@ -248,12 +250,16 @@ jobs:
           -DENABLE_WPE_QT_API=OFF \
           -DUSE_QT6=OFF \
           -DENABLE_WPE_1_1_API=OFF
+          ninja -C build -j$(nproc)
           sudo ninja -C build install
+          cd ..
           sudo ldconfig
 
       - name: Build Linux AppImage package
         if: ${{ matrix.type == 'linux' }}
         run: |
+          export PKG_CONFIG_PATH=$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
+          pkg-config --modversion wpe-webkit-2.0
           wget -c -q -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" || exit 1
           chmod +x appimagetool
           sudo mv appimagetool /usr/local/bin/
