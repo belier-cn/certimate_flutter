@@ -164,11 +164,8 @@ jobs:
           # GLib (required)
           sudo apt-get install -y libglib2.0-dev
 
-          # GObject Introspection (required for ENABLE_INTROSPECTION)
-          sudo apt-get install gobject-introspection libunwind-dev libgirepository1.0-dev
-          
-          # DENABLE_XSLT default ON
-          sudo apt-get install -y libxslt1-dev
+          # Features Enabled by Default
+          sudo apt-get install -y libxslt1-dev ibjxl-dev libavif-dev libwoff-dev liblcms2-dev libatk1.0-dev libatk-bridge2.0-dev libgbm-dev libdrm-dev flite1-dev gobject-introspection libgirepository1.0-dev
 
           # Networking and security (required)
           sudo apt-get install -y \
