@@ -205,6 +205,9 @@ jobs:
           
           # DENABLE_XSLT default ON
           sudo apt-get install -y libxslt1-dev
+          
+          # ENABLE_WPE_PLATFORM_DRM
+          sudo apt-get install -y libinput-dev libudev-dev libdrm-dev libgbm-dev
 
       - name: Build WPE WebKit 2.50.4 from source
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
@@ -251,7 +254,8 @@ jobs:
           -DUSE_GSTREAMER_WEBRTC=OFF \
           -DENABLE_MINIBROWSER=OFF \
           -DENABLE_WPE_PLATFORM=ON \
-          -DENABLE_WPE_PLATFORM_HEADLESS=ON
+          -DENABLE_WPE_PLATFORM_HEADLESS=ON \
+          -ENABLE_WPE_PLATFORM_DRM=ON
           sudo ninja -C build install
           sudo ldconfig
 
