@@ -255,7 +255,6 @@ jobs:
           -DENABLE_MINIBROWSER=OFF \
           -DENABLE_WPE_PLATFORM=ON \
           -DENABLE_WPE_PLATFORM_HEADLESS=ON \
-          -ENABLE_WPE_PLATFORM_DRM=ON
           sudo ninja -C build install
           sudo ldconfig
 
