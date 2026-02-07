@@ -31,7 +31,7 @@ jobs:
             os: windows-latest
             flutter: 3.38.9
           - type: linux
-            os: ubuntu-22.04
+            os: ubuntu-latest
             flutter: 3.38.9
           - type: web
             os: ubuntu-latest
@@ -234,6 +234,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++ \
           -DUSE_SPIEL=OFF \
           -DUSE_GSTREAMER_WEBRTC=OFF \
+          -DENABLE_DOCUMENTATION=OFF \
           -DENABLE_WPE_PLATFORM=OFF \
           -DENABLE_WPE_PLATFORM_HEADLESS=OFF \
           -DENABLE_ENCRYPTED_MEDIA=OFF \
