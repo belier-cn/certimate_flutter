@@ -148,8 +148,9 @@ jobs:
         id: cache-wpe
         uses: actions/cache@v4
         with:
-          path: /usr/local
+          path: ${{ github.workspace }}/wpe-install
           key: wpe-webkit-2.50.4-ubuntu-${{ runner.os }}-${{ runner.arch }}
+          save-always: true
 
       # https://github.com/pichillilorenzo/flutter_inappwebview/blob/master/flutter_inappwebview_linux/WPE_BACKEND.md
       - name: Install WPE WebKit build dependencies
@@ -204,8 +205,8 @@ jobs:
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
         run: |
           # Create a working directory
-          mkdir -p ~/wpe-build && cd ~/wpe-build
-          export WPE_PREFIX=/usr/local
+          mkdir -p ${{ github.workspace }}/wpe-build && mkdir -p ${{ github.workspace }}/wpe-install && cd ${{ github.workspace }}/wpe-build
+          export WPE_PREFIX="${{ github.workspace }}/wpe-install"
           export CC=clang
           export CXX=clang++
           
@@ -218,8 +219,11 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++
           ninja -C build -j$(nproc)
-          sudo ninja -C build install
+          ninja -C build install
           cd ..
+          
+          # wpewebkit depends on libwpe
+          export PKG_CONFIG_PATH=$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
 
           # Build WPE WebKit
           wget -q https://wpewebkit.org/releases/wpewebkit-2.50.4.tar.xz
@@ -251,14 +255,14 @@ jobs:
           -DUSE_QT6=OFF \
           -DENABLE_WPE_1_1_API=OFF
           ninja -C build -j$(nproc)
-          sudo ninja -C build install
-          cd ..
-          sudo ldconfig
+          ninja -C build install
 
       - name: Build Linux AppImage package
         if: ${{ matrix.type == 'linux' }}
         run: |
+          export WPE_PREFIX="${{ github.workspace }}/wpe-install"
           export PKG_CONFIG_PATH=$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
+          export LD_LIBRARY_PATH="$WPE_PREFIX/lib:$WPE_PREFIX/lib/$(uname -m)-linux-gnu:$LD_LIBRARY_PATH"
           pkg-config --modversion wpe-webkit-2.0
           wget -c -q -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" || exit 1
           chmod +x appimagetool
