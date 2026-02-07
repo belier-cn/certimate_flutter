@@ -166,6 +166,9 @@ jobs:
 
           # GObject Introspection (required for ENABLE_INTROSPECTION)
           sudo apt-get install gobject-introspection libunwind-dev libgirepository1.0-dev
+          
+          # DENABLE_XSLT default ON
+          sudo apt-get install -y libxslt1-dev
 
           # Networking and security (required)
           sudo apt-get install -y \
@@ -200,15 +203,6 @@ jobs:
           # Database and storage (required)
           sudo apt-get install -y libsqlite3-dev
           
-          # WPE libraries (required)
-          sudo apt-get install -y libwpe-1.0-dev
-          
-          # DENABLE_XSLT default ON
-          sudo apt-get install -y libxslt1-dev
-          
-          # ENABLE_WPE_PLATFORM_DRM
-          sudo apt-get install -y libinput-dev libudev-dev libdrm-dev libgbm-dev
-
       - name: Build WPE WebKit 2.50.4 from source
         if: ${{ matrix.type == 'linux' && steps.cache-wpe.outputs.cache-hit != 'true' }}
         run: |
@@ -238,23 +232,16 @@ jobs:
           -DPORT=WPE \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
-          -DUSE_JPEGXL=OFF \
-          -DUSE_AVIF=OFF \
-          -DUSE_WOFF2=OFF \
-          -DUSE_LCMS=OFF \
-          -DUSE_ATK=OFF \
-          -DUSE_LIBBACKTRACE=OFF \
-          -DENABLE_SPEECH_SYNTHESIS=OFF \
-          -DENABLE_DOCUMENTATION=OFF \
-          -DENABLE_INTROSPECTION=OFF \
-          -DENABLE_JOURNALD_LOG=OFF \
-          -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
-          -DENABLE_WEBDRIVER=OFF \
-          -DENABLE_GAMEPAD=OFF \
+          -DUSE_SPIEL=OFF \
           -DUSE_GSTREAMER_WEBRTC=OFF \
-          -DENABLE_MINIBROWSER=OFF \
-          -DENABLE_WPE_PLATFORM=ON \
-          -DENABLE_WPE_PLATFORM_HEADLESS=ON \
+          -DENABLE_WPE_PLATFORM=OFF \
+          -DENABLE_WPE_PLATFORM_HEADLESS=OFF \
+          -DENABLE_ENCRYPTED_MEDIA=OFF \
+          -DENABLE_WPE_PLATFORM_DRM=OFF \
+          -DENABLE_WPE_PLATFORM_WAYLAND=OFF \
+          -DENABLE_WPE_QT_API=OFF \
+          -DUSE_QT6=OFF \
+          -DENABLE_WPE_1_1_API=OFF
           sudo ninja -C build install
           sudo ldconfig
 
