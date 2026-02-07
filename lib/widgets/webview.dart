@@ -42,22 +42,6 @@ class WebviewWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (RunPlatform.isLinux) {
-      return Scaffold(
-        appBar: PlatformAppBar(
-          title: const Text("WebView"),
-          cupertino: (context, _) {
-            return CupertinoNavigationBarData(
-              border: const Border(),
-              padding: EdgeInsetsDirectional.zero,
-            );
-          },
-        ).getAppBar(context),
-        body: const Center(
-          child: EmptyWidget(msg: "WebView is not supported on Linux"),
-        ),
-      );
-    }
     final webviewController = useRef<InAppWebViewController?>(null);
     final navigationHistory = useRef<List<String>>([]);
     final progressNotifier = useValueNotifier<int?>(0);
