@@ -235,6 +235,9 @@ jobs:
           -DPORT=WPE \
           -DCMAKE_C_COMPILER=clang \
           -DCMAKE_CXX_COMPILER=clang++ \
+          -DENABLE_WPE_PLATFORM=ON \
+          -DENABLE_WPE_PLATFORM_HEADLESS=ON \
+          -DENABLE_WPE_1_1_API=ON \
           -DUSE_SPIEL=OFF \
           -DUSE_LIBBACKTRACE=OFF \
           -DENABLE_SPEECH_SYNTHESIS=OFF \
@@ -246,16 +249,15 @@ jobs:
           -DENABLE_GAMEPAD=OFF \
           -DUSE_GSTREAMER_WEBRTC=OFF \
           -DENABLE_MINIBROWSER=OFF \
-          -DENABLE_WPE_PLATFORM=OFF \
-          -DENABLE_WPE_PLATFORM_HEADLESS=OFF \
           -DENABLE_ENCRYPTED_MEDIA=OFF \
           -DENABLE_WPE_PLATFORM_DRM=OFF \
           -DENABLE_WPE_PLATFORM_WAYLAND=OFF \
           -DENABLE_WPE_QT_API=OFF \
-          -DUSE_QT6=OFF \
-          -DENABLE_WPE_1_1_API=OFF
+          -DUSE_QT6=OFF
           ninja -C build -j$(nproc)
           ninja -C build install
+          cd ..
+          sudo ldconfig $WPE_PREFIX/lib
 
       - name: Build Linux AppImage package
         if: ${{ matrix.type == 'linux' }}
