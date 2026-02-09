@@ -149,7 +149,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/wpe-install
-          key: wpe-webkit-2.50.4-ubuntu-${{ runner.os }}-${{ runner.arch }}
+          key: wpe-webkit-2.50.4-ubuntu-${{ runner.os }}-${{ runner.arch }}-v1
           save-always: true
 
       # https://github.com/pichillilorenzo/flutter_inappwebview/blob/master/flutter_inappwebview_linux/WPE_BACKEND.md
