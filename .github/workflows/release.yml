@@ -77,12 +77,12 @@ jobs:
         if: ${{ matrix.type == 'ohos' }}
         run: |
           FILE_NAME="commandline-tools-linux-x64-6.0.1.251.zip"
-          wget -c -q -P "$HOME" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.aa" || exit 1
-          wget -c -q -P "$HOME" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.ab" || exit 1
-          cat "$HOME/${FILE_NAME}.a"* > "$HOME/${FILE_NAME}"
-          unzip -q "$HOME/${FILE_NAME}" -d "$HOME"
-          echo "$HOME/command-line-tools/bin" >> $GITHUB_PATH
-          export PATH="$HOME/command-line-tools/bin:$PATH"
+          wget -c -q -P "${{ github.workspace }}" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.aa" || exit 1
+          wget -c -q -P "${{ github.workspace }}" "https://github.com/belier-cn/flutter_ohos_packages/releases/download/v0.0.1/${FILE_NAME}.ab" || exit 1
+          cat "${{ github.workspace }}/${FILE_NAME}.a"* > "${{ github.workspace }}/${FILE_NAME}"
+          unzip -q "${{ github.workspace }}/${FILE_NAME}" -d "${{ github.workspace }}"
+          echo "${{ github.workspace }}/command-line-tools/bin" >> $GITHUB_PATH
+          export PATH="${{ github.workspace }}/command-line-tools/bin:$PATH"
           ohpm -v
           rm -rf "${FILE_NAME}"*
 
@@ -92,12 +92,12 @@ jobs:
           cat pubspec_ohos_overrides.yaml >> pubspec.yaml
           rm -rf pubspec.lock
           git config --global http.postBuffer 1048576000
-          git clone --branch ${{ matrix.flutter }} https://gitcode.com/openharmony-tpc/flutter_flutter.git "$HOME/harmony_flutter"
-          echo "$HOME/harmony_flutter/bin" >> $GITHUB_PATH
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          export PATH="$HOME/harmony_flutter/bin:$PATH"
+          git clone --branch ${{ matrix.flutter }} https://gitcode.com/openharmony-tpc/flutter_flutter.git "${{ github.workspace }}/harmony_flutter"
+          echo "${{ github.workspace }}/harmony_flutter/bin" >> $GITHUB_PATH
+          echo "${{ github.workspace }}/.pub-cache/bin" >> $GITHUB_PATH
+          export PATH="${{ github.workspace }}/harmony_flutter/bin:$PATH"
           flutter --version
-          flutter config --ohos-sdk="$HOME/command-line-tools/sdk"
+          flutter config --ohos-sdk="${{ github.workspace }}/command-line-tools/sdk"
 
       - name: Install Flutter project dependencies
         run: |
@@ -223,7 +223,7 @@ jobs:
           cd ..
           
           # wpewebkit depends on libwpe
-          export PKG_CONFIG_PATH=$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
+          export PKG_CONFIG_PATH="$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
 
           # Build WPE WebKit
           wget -q https://wpewebkit.org/releases/wpewebkit-2.50.4.tar.xz
@@ -263,7 +263,7 @@ jobs:
         if: ${{ matrix.type == 'linux' }}
         run: |
           export WPE_PREFIX="${{ github.workspace }}/wpe-install"
-          export PKG_CONFIG_PATH=$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH
+          export PKG_CONFIG_PATH="$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
           export LD_LIBRARY_PATH="$WPE_PREFIX/lib:$WPE_PREFIX/lib/$(uname -m)-linux-gnu:$LD_LIBRARY_PATH"
           pkg-config --modversion wpe-webkit-2.0
           wget -c -q -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" || exit 1
