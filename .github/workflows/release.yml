@@ -263,12 +263,14 @@ jobs:
         if: ${{ matrix.type == 'linux' }}
         run: |
           export WPE_PREFIX="$HOME/wpe-install"
-          
-          # 1. 显式包含所有可能的 pkgconfig 路径
-          # 注意：必须同时包含 lib/pkgconfig 和 lib/<arch>/pkgconfig
-          export PKG_CONFIG_PATH="$WPE_PREFIX/lib/pkgconfig:$WPE_PREFIX/lib/$(uname -m)-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-          export LD_LIBRARY_PATH="$WPE_PREFIX/lib:$WPE_PREFIX/lib/$(uname -m)-linux-gnu:$LD_LIBRARY_PATH"
-          
+          # 创建系统目录（如果不存在）
+               sudo mkdir -p /usr/local/lib/pkgconfig
+               sudo mkdir -p /usr/lib/pkgconfig
+          # 暴力链接所有生成的 .pc 文件到系统路径
+               sudo find $WPE_PREFIX -name "*.pc" -exec ln -sf {} /usr/lib/pkgconfig/ \;
+               sudo find $WPE_PREFIX -name "*.pc" -exec ln -sf {} /usr/local/lib/pkgconfig/ \;
+          # 设置 LD_LIBRARY_PATH 还是需要的，因为这是运行时链接
+               export LD_LIBRARY_PATH="$WPE_PREFIX/lib:$WPE_PREFIX/lib/$(uname -m)-linux-gnu:$LD_LIBRARY_PATH"
           # 2. 诊断：在编译前确认这三个包是否都能被 pkg-config 识别
           echo "Checking WPE Packages..."
           pkg-config --exists wpe-webkit-2.0 && echo "✅ WebKit OK" || echo "❌ WebKit Missing"
